@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Products - OXI ADMIN</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: Arial; text-align: center; padding: 50px; }
+        h1 { color: #8b00ff; }
+        button { background: #8b00ff; color: white; border: none; padding: 20px 40px; font-size: 20px; border-radius: 15px; cursor: pointer; margin: 10px; }
+        button:hover { transform: scale(1.05); }
+        .done { background: #00c853; }
+        #log { text-align: left; max-width: 600px; margin: 20px auto; background: #1a1a2e; padding: 20px; border-radius: 10px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <h1>🔧 OXI TOP UP - Product Setup</h1>
+    <p>এই বাটনে ক্লিক করলে সব Products + Packages Firebase এ যোগ হবে</p>
+    
+    <button onclick="setupProducts()" id="setupBtn">🚀 Setup All Products</button>
+    
+    <div id="log"></div>
+
+    <script type="module">
+        import { database, ref, set } from './config.js';
+
+        window.setupProducts = async function() {
+            const log = document.getElementById('log');
+            const btn = document.getElementById('setupBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Setting up...';
+            log.innerHTML = '';
+
+            const products = {
+                idcode: {
+                    name: "Free Fire Id Code (BD SERVER)",
+                    image: "https://i.postimg.cc/mZY5RtSJ/id-code.jpg",
+                    stock: "in",
+                    packages: {
+                        p1: { name: "25 Diamond", price: 20, stock: "in" },
+                        p2: { name: "50 Diamond", price: 35, stock: "in" },
+                        p3: { name: "115 Diamond", price: 78, stock: "in" },
+                        p4: { name: "240 Diamond", price: 155, stock: "in" },
+                        p5: { name: "355 Diamond", price: 232, stock: "in" },
+                        p6: { name: "480 Diamond", price: 310, stock: "in" },
+                        p7: { name: "505 Diamond", price: 329, stock: "in" },
+                        p8: { name: "610 Diamond", price: 392, stock: "in" },
+                        p9: { name: "850 Diamond", price: 547, stock: "in" },
+                        p10: { name: "1090 Diamond", price: 702, stock: "in" },
+                        p11: { name: "1240 Diamond", price: 783, stock: "in" },
+                        p12: { name: "2530 Diamond", price: 1571, stock: "in" },
+                        p13: { name: "5060 Diamond", price: 3141, stock: "in" },
+                        p14: { name: "10120 Diamond", price: 6282, stock: "in" }
+                    }
+                },
+                weeklymonthly: {
+                    name: "Weekly/Monthly",
+                    image: "https://i.postimg.cc/YSNtxvz3/weekly-monthly.jpg",
+                    stock: "in",
+                    packages: {
+                        p1: { name: "Weekly", price: 156, stock: "in" },
+                        p2: { name: "Weekly 2x", price: 312, stock: "in" },
+                        p3: { name: "Weekly 3x", price: 468, stock: "in" },
+                        p4: { name: "Weekly 4x", price: 624, stock: "in" },
+                        p5: { name: "Weekly 5x", price: 780, stock: "in" },
+                        p6: { name: "Monthly", price: 773, stock: "in" },
+                        p7: { name: "Monthly 2x", price: 1546, stock: "in" }
+                    }
+                },
+                levelup: {
+                    name: "New Level Up Pass (BD Server)",
+                    image: "https://i.postimg.cc/htgtQNwv/level-up-pass.jpg",
+                    stock: "in",
+                    packages: {
+                        p1: { name: "Level 6 (120 Diamond)", price: 34, stock: "in" },
+                        p2: { name: "Level 10 (200 Diamond)", price: 60, stock: "in" },
+                        p3: { name: "Level 15 (200 Diamond)", price: 60, stock: "in" },
+                        p4: { name: "Level 20 (200 Diamond)", price: 60, stock: "in" },
+                        p5: { name: "Level 25 (200 Diamond)", price: 60, stock: "in" },
+                        p6: { name: "Level 30 (350 Diamond)", price: 85, stock: "in" },
+                        p7: { name: "Full Level Up Pass (1270 Diamond)", price: 362, stock: "in" }
+                    }
+                },
+                weeklylite: {
+                    name: "Weekly Lite",
+                    image: "https://i.postimg.cc/L8xJ8j0M/weekly-lite.jpg",
+                    stock: "in",
+                    packages: {
+                        p1: { name: "Weekly Lite", price: 39, stock: "in" },
+                        p2: { name: "2X Weekly Lite", price: 77, stock: "in" },
+                        p3: { name: "3X Weekly Lite", price: 115, stock: "in" },
+                        p4: { name: "5X Weekly Lite", price: 191, stock: "in" }
+                    }
+                },
+                fflike: {
+                    name: "Free Fire Like",
+                    image: "https://i.postimg.cc/YS8w8mLL/free-fire-like.jpg",
+                    stock: "in",
+                    packages: {
+                        p1: { name: "200 FF Like - ১ দিন", price: 15, stock: "in" },
+                        p2: { name: "400 Likes - ২ দিন", price: 30, stock: "in" },
+                        p3: { name: "600 Likes - ৩ দিন", price: 43, stock: "in" },
+                        p4: { name: "1400 Likes - ৭ দিন", price: 100, stock: "in" },
+                        p5: { name: "3000 Likes - ১৫ দিন", price: 215, stock: "in" },
+                        p6: { name: "6000 Likes - ১ মাস", price: 430, stock: "in" },
+                        p7: { name: "12000 Likes - ২ মাস", price: 850, stock: "in" },
+                        p8: { name: "18000 Likes - ৩ মাস", price: 1275, stock: "in" },
+                        p9: { name: "36000 Likes - ৬ মাস", price: 2550, stock: "in" },
+                        p10: { name: "73000 Likes - ১ বছর", price: 5170, stock: "in" }
+                    }
+                }
+            };
+
+            try {
+                log.innerHTML += '⏳ Products Setup শুরু হচ্ছে...<br>';
+                
+                await set(ref(database, 'products'), products);
+                
+                log.innerHTML += '✅ Free Fire Id Code - 14 Packages ✅<br>';
+                log.innerHTML += '✅ Weekly/Monthly - 7 Packages ✅<br>';
+                log.innerHTML += '✅ Level Up Pass - 7 Packages ✅<br>';
+                log.innerHTML += '✅ Weekly Lite - 4 Packages ✅<br>';
+                log.innerHTML += '✅ Free Fire Like - 10 Packages ✅<br>';
+                log.innerHTML += '<br>🎉 <strong style="color:#00ff88;">সব Products সফলভাবে Firebase এ যোগ হয়েছে!</strong><br>';
+                log.innerHTML += '<br>মোট: <strong>5 Products, 42 Packages</strong>';
+                
+                btn.textContent = '✅ Setup Complete!';
+                btn.classList.add('done');
+            } catch (error) {
+                log.innerHTML += '❌ Error: ' + error.message + '<br>';
+                btn.textContent = '❌ Error! Try Again';
+                btn.disabled = false;
+            }
+        };
+    </script>
+
+</body>
+</html>
