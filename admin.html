@@ -6,6 +6,191 @@
     <title>Admin Panel - OXI TOP UP</title>
     <link rel="stylesheet" href="admin-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* User Detail Modal Styles */
+        .user-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 10000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .user-modal-overlay.show { display: flex; }
+        .user-modal-box {
+            background: linear-gradient(135deg, #1a0033, #0a0a0a);
+            border: 2px solid #8b00ff;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 25px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(139, 0, 255, 0.5);
+        }
+        .user-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(139, 0, 255, 0.3);
+            margin-bottom: 20px;
+        }
+        .user-modal-header h2 {
+            color: #8b00ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+        }
+        .user-modal-close {
+            background: rgba(255, 50, 50, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 50, 50, 0.4);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+        .user-modal-close:hover {
+            background: rgba(255, 50, 50, 0.3);
+            transform: rotate(90deg);
+        }
+        .user-profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: rgba(139, 0, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        .user-profile-section img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid #8b00ff;
+            object-fit: cover;
+        }
+        .user-profile-info h3 {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .user-profile-info p {
+            color: #a0a0c0;
+            font-size: 13px;
+            margin: 2px 0;
+        }
+        .user-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .user-stat-item {
+            background: rgba(20, 20, 40, 0.85);
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px 10px;
+            text-align: center;
+        }
+        .user-stat-item .stat-value {
+            color: #8b00ff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 900;
+        }
+        .user-stat-item .stat-label {
+            color: #a0a0c0;
+            font-size: 11px;
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+        .modal-section {
+            background: rgba(20, 20, 40, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .modal-section h4 {
+            color: #8b00ff;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .modal-section h4 span {
+            background: rgba(139, 0, 255, 0.2);
+            color: #a78bfa;
+            padding: 3px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(139, 0, 255, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .modal-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(139, 0, 255, 0.15);
+        }
+        .modal-item-header strong {
+            color: white;
+            font-size: 14px;
+        }
+        .modal-status {
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .modal-item p {
+            color: #a0a0c0;
+            font-size: 12px;
+            margin: 3px 0;
+        }
+        .modal-item p strong {
+            color: white;
+        }
+        .empty-msg {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-size: 13px;
+        }
+        .clickable-user {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .clickable-user:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
+            border-color: #8b00ff !important;
+        }
+        @media (max-width: 600px) {
+            .user-modal-box { padding: 15px; }
+            .user-stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .user-modal-header h2 { font-size: 18px; }
+        }
+    </style>
 </head>
 <body class="home-body">
 
@@ -47,7 +232,6 @@
 
         <div class="dash-container">
 
-            <!-- Stats -->
             <div class="stats-grid-new">
                 <div class="stat-card-new">
                     <div class="stat-icon">👥</div>
@@ -66,7 +250,6 @@
                 </div>
             </div>
 
-            <!-- Tabs -->
             <div class="admin-tabs">
                 <button class="tab-btn active" onclick="showTab('transactions', event)">💳 Add Money</button>
                 <button class="tab-btn" onclick="showTab('orders', event)">📦 Orders</button>
@@ -74,7 +257,6 @@
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
             </div>
 
-            <!-- Transactions Tab -->
             <div id="transactionsTab" class="tab-content">
                 <div class="section-box">
                     <h3>💳 Add Money Requests</h3>
@@ -82,7 +264,6 @@
                 </div>
             </div>
 
-            <!-- Orders Tab -->
             <div id="ordersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>📦 All Orders</h3>
@@ -90,15 +271,13 @@
                 </div>
             </div>
 
-            <!-- Users Tab -->
             <div id="usersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
-                    <h3>👥 All Users</h3>
+                    <h3>👥 All Users <span style="font-size:12px;color:#a0a0c0;font-weight:400;">(Click user to view details)</span></h3>
                     <div id="usersList"></div>
                 </div>
             </div>
 
-            <!-- Products Tab -->
             <div id="productsTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>🎮 Product Management</h3>
@@ -107,6 +286,19 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="userModal" class="user-modal-overlay" onclick="if(event.target === this) closeUserModal()">
+        <div class="user-modal-box">
+            <div class="user-modal-header">
+                <h2>👤 User Details</h2>
+                <button class="user-modal-close" onclick="closeUserModal()">✕</button>
+            </div>
+            <div id="userModalContent">
+                <p style="text-align:center;color:#888;padding:30px;">Loading...</p>
+            </div>
         </div>
     </div>
 
@@ -192,6 +384,164 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         };
 
+        // ============ USER DETAIL MODAL ============
+        window.showUserDetails = async function(uid) {
+            document.getElementById('userModal').classList.add('show');
+            document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading user details...</p>';
+
+            try {
+                // Get user data
+                const userSnap = await get(ref(database, 'users/' + uid));
+                if (!userSnap.exists()) {
+                    document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ User not found!</p>';
+                    return;
+                }
+                const user = userSnap.val();
+
+                // Get all transactions
+                const trxSnap = await get(ref(database, 'transactions'));
+                const userTransactions = [];
+                if (trxSnap.exists()) {
+                    const allTrx = trxSnap.val();
+                    for (const trxId in allTrx) {
+                        if (allTrx[trxId].userId === uid) {
+                            userTransactions.push({ id: trxId, ...allTrx[trxId] });
+                        }
+                    }
+                }
+                userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // Get all orders
+                const ordSnap = await get(ref(database, 'orders'));
+                const userOrders = [];
+                if (ordSnap.exists()) {
+                    const allOrd = ordSnap.val();
+                    for (const ordId in allOrd) {
+                        if (allOrd[ordId].userId === uid) {
+                            userOrders.push({ id: ordId, ...allOrd[ordId] });
+                        }
+                    }
+                }
+                userOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+                // Calculate stats
+                const totalDeposit = userTransactions
+                    .filter(t => t.status === 'Approved')
+                    .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
+                const pendingDeposit = userTransactions
+                    .filter(t => t.status === 'Pending')
+                    .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
+
+                // Render Modal Content
+                let html = `
+                    <div class="user-profile-section">
+                        <img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=U'">
+                        <div class="user-profile-info">
+                            <h3>${user.name || 'Anonymous'}</h3>
+                            <p>📧 ${user.email || 'N/A'}</p>
+                            <p>🆔 ${uid.substring(0, 20)}...</p>
+                            ${user.createdAt ? `<p>📅 Joined: ${new Date(user.createdAt).toLocaleDateString('en-GB')}</p>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="user-stats-grid">
+                        <div class="user-stat-item">
+                            <div class="stat-value">৳ ${user.wallet || 0}</div>
+                            <div class="stat-label">💰 Wallet</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="stat-value">৳ ${user.totalSpend || 0}</div>
+                            <div class="stat-label">💵 Total Spend</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="stat-value">${userOrders.length}</div>
+                            <div class="stat-label">📦 Orders</div>
+                        </div>
+                        <div class="user-stat-item">
+                            <div class="stat-value">৳ ${totalDeposit}</div>
+                            <div class="stat-label">➕ Deposited</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                        <button class="btn-approve" style="flex:1;min-width:140px;padding:12px;" onclick="adminAddMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}')">➕ Add Money</button>
+                        <button class="btn-reject" style="flex:1;min-width:140px;padding:12px;" onclick="adminDeductMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct Money</button>
+                    </div>
+
+                    <!-- All Transactions -->
+                    <div class="modal-section">
+                        <h4>💳 All Add Money History <span>${userTransactions.length}</span></h4>
+                `;
+
+                if (userTransactions.length === 0) {
+                    html += '<p class="empty-msg">No transactions yet</p>';
+                } else {
+                    userTransactions.forEach(trx => {
+                        const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                        const date = new Date(trx.date).toLocaleString('en-GB');
+                        let methodName = 'bKash';
+                        let methodIcon = '🟣';
+                        if (trx.method === 'nagad') { methodName = 'Nagad'; methodIcon = '🟠'; }
+                        else if (trx.method === 'admin') { methodName = 'Admin Added'; methodIcon = '🎁'; }
+                        
+                        html += `
+                            <div class="modal-item">
+                                <div class="modal-item-header">
+                                    <strong>${methodIcon} ${methodName} - ৳ ${trx.amount}</strong>
+                                    <span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${trx.status}</span>
+                                </div>
+                                <p>📱 Number: <strong>${trx.senderNumber}</strong></p>
+                                <p>🔢 TrxID: <strong>${trx.trxId}</strong></p>
+                                <p style="color:#888;font-size:11px;">📅 ${date}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `
+                    </div>
+
+                    <!-- All Orders -->
+                    <div class="modal-section">
+                        <h4>📦 All Orders History <span>${userOrders.length}</span></h4>
+                `;
+
+                if (userOrders.length === 0) {
+                    html += '<p class="empty-msg">No orders yet</p>';
+                } else {
+                    userOrders.forEach(ord => {
+                        const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                        const date = new Date(ord.orderDate).toLocaleString('en-GB');
+                        html += `
+                            <div class="modal-item">
+                                <div class="modal-item-header">
+                                    <strong>🎮 ${ord.productName}</strong>
+                                    <span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${ord.status}</span>
+                                </div>
+                                <p>📦 Package: <strong>${ord.packageName}</strong></p>
+                                <p>💰 Price: <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
+                                <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
+                                <p style="color:#888;font-size:11px;">📅 ${date}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                html += `</div>`;
+
+                document.getElementById('userModalContent').innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading user details:', error);
+                document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ Failed to load: ' + error.message + '</p>';
+            }
+        };
+
+        window.closeUserModal = function() {
+            document.getElementById('userModal').classList.remove('show');
+        };
+
+        // ============ EXISTING FUNCTIONS ============
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + ' for this user?')) return;
             const userRef = ref(database, 'users/' + userId);
@@ -318,6 +668,7 @@
                     note: 'Added by Admin'
                 });
                 showToast('✅ ৳ ' + amt + ' added to ' + userName + '\'s wallet!');
+                closeUserModal();
                 loadData();
             }
         };
@@ -342,6 +693,7 @@
                 const newWallet = (userData.wallet || 0) - amt;
                 await update(userRef, { wallet: newWallet });
                 showToast('✅ ৳ ' + amt + ' deducted from ' + userName + '\'s wallet!');
+                closeUserModal();
                 loadData();
             }
         };
@@ -482,16 +834,16 @@
                 userCount = usrArray.length;
                 usrArray.forEach(([uid, user]) => {
                     userList.innerHTML += `
-                        <div class="admin-item">
+                        <div class="admin-item clickable-user" onclick="showUserDetails('${uid}')">
                             <div class="admin-item-info">
-                                <h4>${user.name}</h4>
+                                <h4>${user.name} <span style="color:#8b00ff;font-size:12px;">👆 Click to view details</span></h4>
                                 <p>📧 ${user.email}</p>
                                 <p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p>
                                 <p>📦 Orders: ${user.orders || 0} | Rank: ${user.rank || 'Bronze'}</p>
                             </div>
-                            <div class="admin-actions">
-                                <button class="btn-approve" onclick="adminAddMoney('${uid}', '${user.name}')">➕ Add Money</button>
-                                <button class="btn-reject" onclick="adminDeductMoney('${uid}', '${user.name}', ${user.wallet || 0})">➖ Deduct</button>
+                            <div class="admin-actions" onclick="event.stopPropagation();">
+                                <button class="btn-approve" onclick="adminAddMoney('${uid}', '${user.name.replace(/'/g, "\\'")}')">➕ Add Money</button>
+                                <button class="btn-reject" onclick="adminDeductMoney('${uid}', '${user.name.replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct</button>
                             </div>
                         </div>`;
                 });
