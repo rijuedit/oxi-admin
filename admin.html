@@ -152,10 +152,7 @@
             padding-bottom: 8px;
             border-bottom: 1px solid rgba(139, 0, 255, 0.15);
         }
-        .modal-item-header strong {
-            color: white;
-            font-size: 14px;
-        }
+        .modal-item-header strong { color: white; font-size: 14px; }
         .modal-status {
             padding: 3px 10px;
             border-radius: 12px;
@@ -167,9 +164,7 @@
             font-size: 12px;
             margin: 3px 0;
         }
-        .modal-item p strong {
-            color: white;
-        }
+        .modal-item p strong { color: white; }
         .empty-msg {
             text-align: center;
             color: #888;
@@ -185,10 +180,123 @@
             box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
             border-color: #8b00ff !important;
         }
+        
+        /* Sub Tabs */
+        .sub-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 5px;
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        .sub-tab-btn {
+            flex: 1;
+            min-width: 130px;
+            background: transparent;
+            border: none;
+            color: #a0a0c0;
+            padding: 10px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .sub-tab-btn:hover {
+            color: white;
+            background: rgba(139, 0, 255, 0.15);
+        }
+        .sub-tab-btn.active {
+            background: linear-gradient(135deg, #8b00ff, #6a0dad);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4);
+        }
+        .sub-badge {
+            background: #ff3d00;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 20px;
+            display: inline-block;
+        }
+        .sub-tab-btn.active .sub-badge {
+            background: white;
+            color: #8b00ff;
+        }
+
+        /* Filter Buttons */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            padding: 10px;
+            background: rgba(139, 0, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(139, 0, 255, 0.2);
+        }
+        .filter-btn {
+            background: rgba(20, 20, 40, 0.6);
+            color: #a0a0c0;
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        .filter-btn:hover {
+            background: rgba(139, 0, 255, 0.15);
+            color: white;
+        }
+        .filter-btn.active {
+            background: linear-gradient(135deg, #8b00ff, #6a0dad);
+            color: white;
+            border-color: #8b00ff;
+            box-shadow: 0 3px 10px rgba(139, 0, 255, 0.4);
+        }
+        .filter-summary {
+            background: rgba(139, 0, 255, 0.1);
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .filter-summary-info { color: white; font-size: 13px; }
+        .filter-summary-info strong { color: #8b00ff; font-size: 15px; font-family: 'Orbitron', sans-serif; }
+
+        /* Clickable Stat Cards */
+        .stat-card-new.clickable {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .stat-card-new.clickable:hover {
+            transform: translateY(-5px);
+            border-color: #8b00ff;
+            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
+        }
+        
         @media (max-width: 600px) {
             .user-modal-box { padding: 15px; }
             .user-stats-grid { grid-template-columns: repeat(2, 1fr); }
             .user-modal-header h2 { font-size: 18px; }
+            .filter-btn { padding: 7px 12px; font-size: 11px; }
         }
     </style>
 </head>
@@ -233,17 +341,17 @@
         <div class="dash-container">
 
             <div class="stats-grid-new">
-                <div class="stat-card-new">
+                <div class="stat-card-new clickable" onclick="showTab('users', {target: document.querySelector('.tab-btn:nth-child(3)')})">
                     <div class="stat-icon">👥</div>
                     <h4>Total Users</h4>
                     <p id="totalUsers">0</p>
                 </div>
-                <div class="stat-card-new">
+                <div class="stat-card-new clickable" onclick="showTab('orders', {target: document.querySelector('.tab-btn:nth-child(2)')})">
                     <div class="stat-icon">📦</div>
                     <h4>Total Orders</h4>
                     <p id="totalOrdersCount">0</p>
                 </div>
-                <div class="stat-card-new">
+                <div class="stat-card-new clickable" onclick="showTab('transactions', {target: document.querySelector('.tab-btn:nth-child(1)')})">
                     <div class="stat-icon">💰</div>
                     <h4>Pending Add Money</h4>
                     <p id="pendingCount">0</p>
@@ -260,14 +368,46 @@
             <div id="transactionsTab" class="tab-content">
                 <div class="section-box">
                     <h3>💳 Add Money Requests</h3>
-                    <div id="transactionsList"></div>
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="showSubTab('trxPending', event)">🔔 Pending <span id="trxPendingBadge" class="sub-badge">0</span></button>
+                        <button class="sub-tab-btn" onclick="showSubTab('trxHistory', event)">📜 History</button>
+                    </div>
+                    <div id="trxPending" class="sub-tab-content"></div>
+                    <div id="trxHistory" class="sub-tab-content" style="display:none;">
+                        <div class="filter-tabs">
+                            <button class="filter-btn active" onclick="filterHistory('trx', 1, event)">1 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 3, event)">3 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 7, event)">7 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 30, event)">30 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 60, event)">60 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 0, event)">Lifetime</button>
+                        </div>
+                        <div id="trxHistorySummary" class="filter-summary"></div>
+                        <div id="trxHistoryList"></div>
+                    </div>
                 </div>
             </div>
 
             <div id="ordersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>📦 All Orders</h3>
-                    <div id="ordersList"></div>
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="showSubTab('ordPending', event)">🔔 Pending <span id="ordPendingBadge" class="sub-badge">0</span></button>
+                        <button class="sub-tab-btn" onclick="showSubTab('ordHistory', event)">📜 History</button>
+                    </div>
+                    <div id="ordPending" class="sub-tab-content"></div>
+                    <div id="ordHistory" class="sub-tab-content" style="display:none;">
+                        <div class="filter-tabs">
+                            <button class="filter-btn active" onclick="filterHistory('ord', 1, event)">1 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 3, event)">3 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 7, event)">7 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 30, event)">30 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 60, event)">60 Days</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 0, event)">Lifetime</button>
+                        </div>
+                        <div id="ordHistorySummary" class="filter-summary"></div>
+                        <div id="ordHistoryList"></div>
+                    </div>
                 </div>
             </div>
 
@@ -310,6 +450,10 @@
         let currentPin = '';
         let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
         let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
+        
+        // Store all data for filtering
+        let allTransactionsHistory = [];
+        let allOrdersHistory = [];
 
         function checkLock() {
             if (Date.now() < lockUntil) {
@@ -370,11 +514,19 @@
             location.reload();
         };
 
+        window.showSubTab = function(subTab, event) {
+            const parent = event.target.closest('.section-box');
+            parent.querySelectorAll('.sub-tab-content').forEach(el => el.style.display = 'none');
+            parent.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(subTab).style.display = 'block';
+            event.target.classList.add('active');
+        };
+
         window.showTab = function(tab, event) {
             document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(tab + 'Tab').style.display = 'block';
-            if (event) event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
         };
 
         window.showToast = function(message) {
@@ -384,13 +536,113 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         };
 
+        // ============ FILTER FUNCTION ============
+        window.filterHistory = function(type, days, event) {
+            const parent = event.target.closest('.sub-tab-content');
+            parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const now = Date.now();
+            const filterMs = days * 24 * 60 * 60 * 1000;
+            
+            if (type === 'trx') {
+                let filtered = allTransactionsHistory;
+                if (days > 0) {
+                    filtered = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= filterMs);
+                }
+                renderTrxHistory(filtered, days);
+            } else if (type === 'ord') {
+                let filtered = allOrdersHistory;
+                if (days > 0) {
+                    filtered = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= filterMs);
+                }
+                renderOrdHistory(filtered, days);
+            }
+        };
+
+        function renderTrxHistory(filtered, days) {
+            const trxHistoryList = document.getElementById('trxHistoryList');
+            const summary = document.getElementById('trxHistorySummary');
+            
+            const totalAmount = filtered
+                .filter(t => t.status === 'Approved')
+                .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
+            
+            const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
+            summary.innerHTML = `
+                <div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> transactions</div>
+                <div class="filter-summary-info">💰 Total Approved: <strong>৳ ${totalAmount.toLocaleString()}</strong></div>
+            `;
+            
+            if (filtered.length === 0) {
+                trxHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions in this period</p>';
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(trx => {
+                const statusColor = trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                const date = new Date(trx.date).toLocaleString('en-GB');
+                html += `
+                    <div class="admin-item">
+                        <div class="admin-item-info">
+                            <h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4>
+                            <p>📧 ${trx.userEmail}</p>
+                            <p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p>
+                            <p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p>
+                            <p style="font-size:12px;color:#888;">${date}</p>
+                        </div>
+                    </div>`;
+            });
+            trxHistoryList.innerHTML = html;
+        }
+
+        function renderOrdHistory(filtered, days) {
+            const ordHistoryList = document.getElementById('ordHistoryList');
+            const summary = document.getElementById('ordHistorySummary');
+            
+            const totalRevenue = filtered
+                .filter(o => o.status === 'Complete')
+                .reduce((sum, o) => sum + parseInt(o.price || 0), 0);
+            
+            const completeCount = filtered.filter(o => o.status === 'Complete').length;
+            const failedCount = filtered.filter(o => o.status === 'Failed').length;
+            
+            const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
+            summary.innerHTML = `
+                <div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> orders (✅ ${completeCount} | ❌ ${failedCount})</div>
+                <div class="filter-summary-info">💰 Revenue: <strong>৳ ${totalRevenue.toLocaleString()}</strong></div>
+            `;
+            
+            if (filtered.length === 0) {
+                ordHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders in this period</p>';
+                return;
+            }
+            
+            let html = '';
+            filtered.forEach(ord => {
+                const statusColor = ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                const date = new Date(ord.orderDate).toLocaleString('en-GB');
+                html += `
+                    <div class="admin-item">
+                        <div class="admin-item-info">
+                            <h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4>
+                            <p>🎮 ${ord.productName}</p>
+                            <p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
+                            <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
+                            <p style="font-size:12px;color:#888;">${date}</p>
+                        </div>
+                    </div>`;
+            });
+            ordHistoryList.innerHTML = html;
+        }
+
         // ============ USER DETAIL MODAL ============
         window.showUserDetails = async function(uid) {
             document.getElementById('userModal').classList.add('show');
             document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading user details...</p>';
 
             try {
-                // Get user data
                 const userSnap = await get(ref(database, 'users/' + uid));
                 if (!userSnap.exists()) {
                     document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ User not found!</p>';
@@ -398,7 +650,6 @@
                 }
                 const user = userSnap.val();
 
-                // Get all transactions
                 const trxSnap = await get(ref(database, 'transactions'));
                 const userTransactions = [];
                 if (trxSnap.exists()) {
@@ -411,7 +662,6 @@
                 }
                 userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                // Get all orders
                 const ordSnap = await get(ref(database, 'orders'));
                 const userOrders = [];
                 if (ordSnap.exists()) {
@@ -424,15 +674,10 @@
                 }
                 userOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
 
-                // Calculate stats
                 const totalDeposit = userTransactions
                     .filter(t => t.status === 'Approved')
                     .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
-                const pendingDeposit = userTransactions
-                    .filter(t => t.status === 'Pending')
-                    .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
 
-                // Render Modal Content
                 let html = `
                     <div class="user-profile-section">
                         <img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=U'">
@@ -468,7 +713,6 @@
                         <button class="btn-reject" style="flex:1;min-width:140px;padding:12px;" onclick="adminDeductMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct Money</button>
                     </div>
 
-                    <!-- All Transactions -->
                     <div class="modal-section">
                         <h4>💳 All Add Money History <span>${userTransactions.length}</span></h4>
                 `;
@@ -500,8 +744,6 @@
 
                 html += `
                     </div>
-
-                    <!-- All Orders -->
                     <div class="modal-section">
                         <h4>📦 All Orders History <span>${userOrders.length}</span></h4>
                 `;
@@ -528,7 +770,6 @@
                 }
 
                 html += `</div>`;
-
                 document.getElementById('userModalContent').innerHTML = html;
 
             } catch (error) {
@@ -541,7 +782,7 @@
             document.getElementById('userModal').classList.remove('show');
         };
 
-        // ============ EXISTING FUNCTIONS ============
+        // ============ ACTIONS ============
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + ' for this user?')) return;
             const userRef = ref(database, 'users/' + userId);
@@ -599,14 +840,12 @@
         window.editProductImage = async function(productKey, currentImage, productName) {
             const newImage = prompt('📸 Change image for "' + productName + '"\n\n💡 Upload image to postimages.org\nCopy the DIRECT LINK and paste here:', currentImage);
             if (newImage === null || newImage === '') return;
-            
             if (!newImage.startsWith('http')) {
-                alert('❌ Invalid URL! Please paste a valid image URL (starting with http)');
+                alert('❌ Invalid URL!');
                 return;
             }
-
             await update(ref(database, 'products/' + productKey), { image: newImage });
-            showToast('✅ Image updated successfully!');
+            showToast('✅ Image updated!');
             loadProducts();
         };
 
@@ -642,10 +881,7 @@
             const amount = prompt('Add money to ' + userName + '\'s wallet\n\nEnter amount:', '100');
             if (amount === null || amount === '') return;
             const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) {
-                alert('❌ Invalid amount!');
-                return;
-            }
+            if (isNaN(amt) || amt < 1) { alert('❌ Invalid amount!'); return; }
             if (!confirm('Add ৳ ' + amt + ' to ' + userName + '\'s wallet?')) return;
             const userRef = ref(database, 'users/' + userId);
             const snapshot = await get(userRef);
@@ -655,44 +891,32 @@
                 await update(userRef, { wallet: newWallet });
                 const trxRef = ref(database, 'transactions');
                 await push(trxRef, {
-                    userId: userId,
-                    userName: userName,
-                    userEmail: userData.email,
-                    amount: amt,
-                    method: 'admin',
-                    senderNumber: 'ADMIN',
-                    trxId: 'ADMIN-' + Date.now(),
-                    status: 'Approved',
-                    date: new Date().toISOString(),
-                    approvedDate: new Date().toISOString(),
+                    userId: userId, userName: userName, userEmail: userData.email,
+                    amount: amt, method: 'admin', senderNumber: 'ADMIN',
+                    trxId: 'ADMIN-' + Date.now(), status: 'Approved',
+                    date: new Date().toISOString(), approvedDate: new Date().toISOString(),
                     note: 'Added by Admin'
                 });
-                showToast('✅ ৳ ' + amt + ' added to ' + userName + '\'s wallet!');
+                showToast('✅ ৳ ' + amt + ' added!');
                 closeUserModal();
                 loadData();
             }
         };
 
         window.adminDeductMoney = async function(userId, userName, currentWallet) {
-            const amount = prompt('Deduct money from ' + userName + '\'s wallet\n\nCurrent Balance: ৳ ' + currentWallet + '\n\nEnter amount:', '100');
+            const amount = prompt('Deduct money from ' + userName + '\nCurrent Balance: ৳ ' + currentWallet + '\n\nEnter amount:', '100');
             if (amount === null || amount === '') return;
             const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) {
-                alert('❌ Invalid amount!');
-                return;
-            }
-            if (amt > currentWallet) {
-                alert('❌ Amount is greater than user\'s wallet!');
-                return;
-            }
-            if (!confirm('Deduct ৳ ' + amt + ' from ' + userName + '\'s wallet?')) return;
+            if (isNaN(amt) || amt < 1) { alert('❌ Invalid amount!'); return; }
+            if (amt > currentWallet) { alert('❌ Amount is greater than wallet!'); return; }
+            if (!confirm('Deduct ৳ ' + amt + '?')) return;
             const userRef = ref(database, 'users/' + userId);
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
                 const newWallet = (userData.wallet || 0) - amt;
                 await update(userRef, { wallet: newWallet });
-                showToast('✅ ৳ ' + amt + ' deducted from ' + userName + '\'s wallet!');
+                showToast('✅ ৳ ' + amt + ' deducted!');
                 closeUserModal();
                 loadData();
             }
@@ -702,17 +926,14 @@
             const snapshot = await get(ref(database, 'products'));
             const list = document.getElementById('productsList');
             list.innerHTML = '';
-            
             if (!snapshot.exists()) {
                 list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet.</p>';
                 return;
             }
-
             const products = snapshot.val();
             for (const key in products) {
                 const p = products[key];
                 const isOut = p.stock === 'out';
-                
                 let packagesHtml = '';
                 if (p.packages) {
                     for (const pkgKey in p.packages) {
@@ -725,78 +946,83 @@
                                 <div class="pkg-actions">
                                     <button class="btn-edit" onclick="editPackageName('${key}', '${pkgKey}', \`${safeName}\`)">✏️ Name</button>
                                     <button class="btn-edit" onclick="editPrice('${key}', '${pkgKey}', ${pkg.price}, \`${safeName}\`)">💰 Price</button>
-                                    <button class="btn-toggle ${pkgOut ? 'stock-out' : 'stock-in'}" onclick="togglePackageStock('${key}', '${pkgKey}', '${pkg.stock}')">
-                                        ${pkgOut ? '❌ Out' : '✅ In'}
-                                    </button>
+                                    <button class="btn-toggle ${pkgOut ? 'stock-out' : 'stock-in'}" onclick="togglePackageStock('${key}', '${pkgKey}', '${pkg.stock}')">${pkgOut ? '❌ Out' : '✅ In'}</button>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                     }
                 }
-
                 const safeProductName = p.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
                 const safeImage = p.image.replace(/`/g, '\\`').replace(/'/g, "\\'");
-
                 list.innerHTML += `
                     <div class="product-admin-card ${isOut ? 'product-out' : ''}">
                         <div class="product-admin-header" onclick="togglePackages('${key}')" style="cursor:pointer;">
-                            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/70x70/8b00ff/ffffff?text=No+Image'">
+                            <img src="${p.image}" onerror="this.src='https://via.placeholder.com/70x70/8b00ff/ffffff?text=No+Image'">
                             <div class="product-admin-info">
-                                <h4>${p.name} <span id="arrow-${key}" style="color:#8b00ff;font-size:14px;">▶</span></h4>
+                                <h4>${p.name} <span id="arrow-${key}" style="color:#8b00ff;">▶</span></h4>
                                 <p>${Object.keys(p.packages || {}).length} Packages - Click to expand</p>
                             </div>
-                            <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">
-                                ${isOut ? '❌ Product OFF' : '✅ Product ON'}
-                            </button>
+                            <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">${isOut ? '❌ Product OFF' : '✅ Product ON'}</button>
                         </div>
                         <div class="product-edit-actions">
                             <button class="btn-edit-img" onclick="editProductImage('${key}', \`${safeImage}\`, \`${safeProductName}\`)">📸 Change Image</button>
                             <button class="btn-edit-img" onclick="editProductName('${key}', \`${safeProductName}\`)">✏️ Change Name</button>
                         </div>
-                        <div class="packages-container" id="packages-${key}" style="display:none;">
-                            ${packagesHtml}
-                        </div>
-                    </div>
-                `;
+                        <div class="packages-container" id="packages-${key}" style="display:none;">${packagesHtml}</div>
+                    </div>`;
             }
         }
 
         async function loadData() {
+            // Transactions
             const trxSnapshot = await get(ref(database, 'transactions'));
-            const trxList = document.getElementById('transactionsList');
+            const trxPending = document.getElementById('trxPending');
             let pendingCount = 0;
-            trxList.innerHTML = '';
+            let pendingHtml = '';
+            allTransactionsHistory = [];
             
             if (trxSnapshot.exists()) {
                 const transactions = trxSnapshot.val();
                 Object.entries(transactions).reverse().forEach(([id, trx]) => {
-                    if (trx.status === 'Pending') pendingCount++;
                     const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
                     const date = new Date(trx.date).toLocaleString('en-GB');
-                    trxList.innerHTML += `
-                        <div class="admin-item">
-                            <div class="admin-item-info">
-                                <h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4>
-                                <p>📧 ${trx.userEmail}</p>
-                                <p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p>
-                                <p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p>
-                                <p style="font-size:12px;color:#888;">${date}</p>
-                            </div>
-                            ${trx.status === 'Pending' ? `<div class="admin-actions">
-                                <button class="btn-approve" onclick="approveTransaction('${id}', '${trx.userId}', ${trx.amount})">✅ Approve</button>
-                                <button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button>
-                            </div>` : ''}
-                        </div>`;
+                    if (trx.status === 'Pending') {
+                        pendingCount++;
+                        pendingHtml += `
+                            <div class="admin-item">
+                                <div class="admin-item-info">
+                                    <h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4>
+                                    <p>📧 ${trx.userEmail}</p>
+                                    <p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p>
+                                    <p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p>
+                                    <p style="font-size:12px;color:#888;">${date}</p>
+                                </div>
+                                <div class="admin-actions">
+                                    <button class="btn-approve" onclick="approveTransaction('${id}', '${trx.userId}', ${trx.amount})">✅ Approve</button>
+                                    <button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button>
+                                </div>
+                            </div>`;
+                    } else {
+                        allTransactionsHistory.push({ id, ...trx });
+                    }
                 });
-            } else {
-                trxList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No transactions yet</p>';
             }
+            trxPending.innerHTML = pendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending requests!</p>';
             document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('trxPendingBadge').textContent = pendingCount;
+            
+            // Default filter: 1 Day
+            const now = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            const filteredTrx = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= oneDayMs);
+            renderTrxHistory(filteredTrx, 1);
 
+            // Orders
             const ordSnapshot = await get(ref(database, 'orders'));
-            const ordList = document.getElementById('ordersList');
             let orderCount = 0;
-            ordList.innerHTML = '';
+            let ordPendingCount = 0;
+            let ordPendingHtml = '';
+            allOrdersHistory = [];
+            
             if (ordSnapshot.exists()) {
                 const orders = ordSnapshot.val();
                 const ordArray = Object.entries(orders).reverse();
@@ -804,26 +1030,36 @@
                 ordArray.forEach(([id, ord]) => {
                     const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
                     const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                    ordList.innerHTML += `
-                        <div class="admin-item">
-                            <div class="admin-item-info">
-                                <h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4>
-                                <p>🎮 ${ord.productName}</p>
-                                <p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
-                                <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
-                                <p style="font-size:12px;color:#888;">${date}</p>
-                            </div>
-                            ${ord.status === 'Pending' ? `<div class="admin-actions">
-                                <button class="btn-approve" onclick="updateOrderStatus('${id}', 'Complete')">✅ Complete</button>
-                                <button class="btn-reject" onclick="updateOrderStatus('${id}', 'Failed')">❌ Failed</button>
-                            </div>` : ''}
-                        </div>`;
+                    if (ord.status === 'Pending') {
+                        ordPendingCount++;
+                        ordPendingHtml += `
+                            <div class="admin-item">
+                                <div class="admin-item-info">
+                                    <h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4>
+                                    <p>🎮 ${ord.productName}</p>
+                                    <p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
+                                    <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
+                                    <p style="font-size:12px;color:#888;">${date}</p>
+                                </div>
+                                <div class="admin-actions">
+                                    <button class="btn-approve" onclick="updateOrderStatus('${id}', 'Complete')">✅ Complete</button>
+                                    <button class="btn-reject" onclick="updateOrderStatus('${id}', 'Failed')">❌ Failed</button>
+                                </div>
+                            </div>`;
+                    } else {
+                        allOrdersHistory.push({ id, ...ord });
+                    }
                 });
-            } else {
-                ordList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No orders yet</p>';
             }
+            document.getElementById('ordPending').innerHTML = ordPendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending orders!</p>';
             document.getElementById('totalOrdersCount').textContent = orderCount;
+            document.getElementById('ordPendingBadge').textContent = ordPendingCount;
+            
+            // Default filter: 1 Day
+            const filteredOrd = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= oneDayMs);
+            renderOrdHistory(filteredOrd, 1);
 
+            // Users
             const userSnapshot = await get(ref(database, 'users'));
             const userList = document.getElementById('usersList');
             let userCount = 0;
