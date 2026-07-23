@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Settings - OXI TOP UP</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .api-card {
+            background: rgba(20, 20, 40, 0.85);
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+        .api-card:hover {
+            border-color: #8b00ff;
+            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.2);
+        }
+        .api-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(139, 0, 255, 0.2);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .api-card-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 18px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #444;
+            transition: .4s;
+            border-radius: 30px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background: linear-gradient(135deg, #8b00ff, #6a0dad);
+        }
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            color: #a0a0c0;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 0, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            transition: 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #8b00ff;
+            box-shadow: 0 0 15px rgba(139, 0, 255, 0.3);
+        }
+        .form-group input::placeholder {
+            color: #666;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-save-api {
+            flex: 1;
+            min-width: 140px;
+            background: linear-gradient(135deg, #8b00ff, #6a0dad);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-save-api:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(139, 0, 255, 0.5);
+        }
+        .btn-test-api {
+            flex: 1;
+            min-width: 140px;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .btn-test-api:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0, 200, 83, 0.5);
+        }
+        .status-msg {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+        }
+        .status-success {
+            background: rgba(0, 200, 83, 0.15);
+            color: #00ff88;
+            border: 1px solid rgba(0, 200, 83, 0.4);
+        }
+        .status-error {
+            background: rgba(255, 50, 50, 0.15);
+            color: #ff6b6b;
+            border: 1px solid rgba(255, 50, 50, 0.4);
+        }
+        .info-box {
+            background: rgba(139, 0, 255, 0.1);
+            border-left: 3px solid #8b00ff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #d0d0e0;
+        }
+        .back-btn {
+            background: rgba(139, 0, 255, 0.15);
+            color: white;
+            border: 1px solid #8b00ff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .back-btn:hover {
+            background: rgba(139, 0, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .page-title h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #8b00ff;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .page-title p {
+            color: #a0a0c0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="home-body">
+
+    <!-- PIN Lock -->
+    <div id="pinScreen" class="pin-screen">
+        <div class="pin-container">
+            <div class="pin-logo">🔐</div>
+            <h2>API Settings</h2>
+            <p>Enter Your PIN</p>
+            <div class="pin-display" id="pinDisplay"></div>
+            <div id="pinError" class="pin-error" style="display:none;">❌ Wrong PIN!</div>
+            <div class="pin-keypad">
+                <button onclick="addDigit('1')">1</button>
+                <button onclick="addDigit('2')">2</button>
+                <button onclick="addDigit('3')">3</button>
+                <button onclick="addDigit('4')">4</button>
+                <button onclick="addDigit('5')">5</button>
+                <button onclick="addDigit('6')">6</button>
+                <button onclick="addDigit('7')">7</button>
+                <button onclick="addDigit('8')">8</button>
+                <button onclick="addDigit('9')">9</button>
+                <button onclick="clearPin()" class="pin-clear">⌫</button>
+                <button onclick="addDigit('0')">0</button>
+                <button onclick="checkPin()" class="pin-submit">✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="apiContent" style="display:none;">
+        <nav class="home-navbar">
+            <div class="home-logo">OXI <span>ADMIN</span></div>
+            <div class="home-nav-right">
+                <a href="admin.html" class="back-btn">← Back to Admin</a>
+                <button class="btn-logout-admin" onclick="logoutAdmin()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="dash-container">
+            <div class="page-title">
+                <h1>⚙️ API Settings</h1>
+                <p>Configure your API integrations for UID Check and Auto Top-Up</p>
+            </div>
+
+            <!-- UID Check API -->
+            <div class="api-card">
+                <div class="api-card-header">
+                    <div class="api-card-title">🔍 UID to Name Check API</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="uidEnabled">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="info-box">
+                    💡 এই API দিয়ে user UID লিখলে Player এর নাম automatic দেখাবে
+                </div>
+
+                <div class="form-group">
+                    <label>API Provider</label>
+                    <select id="uidProvider">
+                        <option value="">-- Select Provider --</option>
+                        <option value="gameskinbo">Gameskinbo API</option>
+                        <option value="yokcash">Yokcash API</option>
+                        <option value="moogold">Moogold API</option>
+                        <option value="custom">Custom API</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>API URL / Endpoint</label>
+                    <input type="text" id="uidUrl" placeholder="https://api.example.com/check-uid">
+                </div>
+
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="uidKey" placeholder="Your API Key here...">
+                </div>
+
+                <div class="form-group">
+                    <label>Request Method</label>
+                    <select id="uidMethod">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                    </select>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-save-api" onclick="saveUidApi()">💾 Save Settings</button>
+                    <button class="btn-test-api" onclick="testUidApi()">🧪 Test API</button>
+                </div>
+                <div class="status-msg" id="uidStatus"></div>
+            </div>
+
+            <!-- Auto Top-Up API -->
+            <div class="api-card">
+                <div class="api-card-header">
+                    <div class="api-card-title">⚡ Auto Top-Up API</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="topupEnabled">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="info-box">
+                    💡 এই API on করলে Payment success হলে Diamond automatic delivery হবে
+                </div>
+
+                <div class="form-group">
+                    <label>API Provider</label>
+                    <select id="topupProvider">
+                        <option value="">-- Select Provider --</option>
+                        <option value="gameskinbo">Gameskinbo API</option>
+                        <option value="yokcash">Yokcash API</option>
+                        <option value="moogold">Moogold API</option>
+                        <option value="hopestore">Hopestore API</option>
+                        <option value="custom">Custom API</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>API URL / Endpoint</label>
+                    <input type="text" id="topupUrl" placeholder="https://api.example.com/topup">
+                </div>
+
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="topupKey" placeholder="Your API Key here...">
+                </div>
+
+                <div class="form-group">
+                    <label>API Secret (Optional)</label>
+                    <input type="text" id="topupSecret" placeholder="API Secret if required">
+                </div>
+
+                <div class="form-group">
+                    <label>Callback URL (Optional)</label>
+                    <input type="text" id="topupCallback" placeholder="https://yoursite.com/callback">
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn-save-api" onclick="saveTopupApi()">💾 Save Settings</button>
+                    <button class="btn-test-api" onclick="testTopupApi()">🧪 Test Connection</button>
+                </div>
+                <div class="status-msg" id="topupStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script type="module">
+        import { database, ref, get, set, ADMIN_PIN } from './config.js';
+
+        let currentPin = '';
+        let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
+        let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
+
+        function checkLock() {
+            if (Date.now() < lockUntil) {
+                const minutes = Math.ceil((lockUntil - Date.now()) / 60000);
+                document.getElementById('pinDisplay').textContent = '🔒 LOCKED';
+                document.getElementById('pinError').style.display = 'block';
+                document.getElementById('pinError').textContent = '🔒 Locked! Wait ' + minutes + ' minutes';
+                document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
+                return true;
+            }
+            return false;
+        }
+        checkLock();
+
+        window.addDigit = function(digit) {
+            if (currentPin.length < 15) { currentPin += digit; updatePinDisplay(); }
+        };
+        window.clearPin = function() {
+            currentPin = currentPin.slice(0, -1); updatePinDisplay();
+        };
+        function updatePinDisplay() {
+            document.getElementById('pinDisplay').textContent = '•'.repeat(currentPin.length);
+            document.getElementById('pinError').style.display = 'none';
+        }
+        window.checkPin = function() {
+            if (checkLock()) return;
+            if (currentPin === ADMIN_PIN) {
+                localStorage.removeItem('wrongAttempts');
+                document.getElementById('pinScreen').style.display = 'none';
+                document.getElementById('apiContent').style.display = 'block';
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                loadSettings();
+            } else {
+                wrongAttempts++;
+                localStorage.setItem('wrongAttempts', wrongAttempts);
+                if (wrongAttempts >= 3) {
+                    lockUntil = Date.now() + (5 * 60 * 1000);
+                    localStorage.setItem('lockUntil', lockUntil);
+                    localStorage.setItem('wrongAttempts', '0');
+                    document.getElementById('pinError').textContent = '🔒 Locked for 5 minutes!';
+                    document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
+                } else {
+                    document.getElementById('pinError').textContent = '❌ Wrong PIN! (' + (3 - wrongAttempts) + ' attempts left)';
+                }
+                document.getElementById('pinError').style.display = 'block';
+                currentPin = '';
+                updatePinDisplay();
+            }
+        };
+
+        window.logoutAdmin = function() {
+            sessionStorage.removeItem('adminLoggedIn');
+            location.reload();
+        };
+
+        window.showToast = function(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        };
+
+        function showStatus(id, msg, type) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.className = 'status-msg status-' + type;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
+        }
+
+        // Load settings from Firebase
+        async function loadSettings() {
+            try {
+                const snap = await get(ref(database, 'apiSettings'));
+                if (snap.exists()) {
+                    const data = snap.val();
+                    if (data.uid) {
+                        document.getElementById('uidEnabled').checked = data.uid.enabled || false;
+                        document.getElementById('uidProvider').value = data.uid.provider || '';
+                        document.getElementById('uidUrl').value = data.uid.url || '';
+                        document.getElementById('uidKey').value = data.uid.key || '';
+                        document.getElementById('uidMethod').value = data.uid.method || 'GET';
+                    }
+                    if (data.topup) {
+                        document.getElementById('topupEnabled').checked = data.topup.enabled || false;
+                        document.getElementById('topupProvider').value = data.topup.provider || '';
+                        document.getElementById('topupUrl').value = data.topup.url || '';
+                        document.getElementById('topupKey').value = data.topup.key || '';
+                        document.getElementById('topupSecret').value = data.topup.secret || '';
+                        document.getElementById('topupCallback').value = data.topup.callback || '';
+                    }
+                }
+            } catch (err) {
+                console.error('Load error:', err);
+            }
+        }
+
+        window.saveUidApi = async function() {
+            const settings = {
+                enabled: document.getElementById('uidEnabled').checked,
+                provider: document.getElementById('uidProvider').value,
+                url: document.getElementById('uidUrl').value,
+                key: document.getElementById('uidKey').value,
+                method: document.getElementById('uidMethod').value
+            };
+            try {
+                await set(ref(database, 'apiSettings/uid'), settings);
+                showStatus('uidStatus', '✅ UID API Settings saved!', 'success');
+                showToast('✅ Saved successfully!');
+            } catch (err) {
+                showStatus('uidStatus', '❌ Error: ' + err.message, 'error');
+            }
+        };
+
+        window.saveTopupApi = async function() {
+            const settings = {
+                enabled: document.getElementById('topupEnabled').checked,
+                provider: document.getElementById('topupProvider').value,
+                url: document.getElementById('topupUrl').value,
+                key: document.getElementById('topupKey').value,
+                secret: document.getElementById('topupSecret').value,
+                callback: document.getElementById('topupCallback').value
+            };
+            try {
+                await set(ref(database, 'apiSettings/topup'), settings);
+                showStatus('topupStatus', '✅ Top-Up API Settings saved!', 'success');
+                showToast('✅ Saved successfully!');
+            } catch (err) {
+                showStatus('topupStatus', '❌ Error: ' + err.message, 'error');
+            }
+        };
+
+        window.testUidApi = async function() {
+            const url = document.getElementById('uidUrl').value;
+            const key = document.getElementById('uidKey').value;
+            if (!url || !key) {
+                showStatus('uidStatus', '⚠️ Please fill URL and Key first', 'error');
+                return;
+            }
+            showStatus('uidStatus', '⏳ Testing API...', 'success');
+            try {
+                const res = await fetch(url + '?uid=2493952050', {
+                    headers: { 'Authorization': 'Bearer ' + key }
+                });
+                if (res.ok) {
+                    showStatus('uidStatus', '✅ API is working!', 'success');
+                } else {
+                    showStatus('uidStatus', '❌ API error: ' + res.status, 'error');
+                }
+            } catch (err) {
+                showStatus('uidStatus', '❌ Failed: ' + err.message, 'error');
+            }
+        };
+
+        window.testTopupApi = async function() {
+            const url = document.getElementById('topupUrl').value;
+            const key = document.getElementById('topupKey').value;
+            if (!url || !key) {
+                showStatus('topupStatus', '⚠️ Please fill URL and Key first', 'error');
+                return;
+            }
+            showStatus('topupStatus', '⏳ Testing connection...', 'success');
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Authorization': 'Bearer ' + key }
+                });
+                if (res.ok) {
+                    showStatus('topupStatus', '✅ Connection successful!', 'success');
+                } else {
+                    showStatus('topupStatus', '❌ Error: ' + res.status, 'error');
+                }
+            } catch (err) {
+                showStatus('topupStatus', '❌ Failed: ' + err.message, 'error');
+            }
+        };
+
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+            document.getElementById('pinScreen').style.display = 'none';
+            document.getElementById('apiContent').style.display = 'block';
+            loadSettings();
+        }
+    </script>
+</body>
+</html>
