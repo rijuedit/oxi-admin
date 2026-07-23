@@ -430,7 +430,6 @@
             setTimeout(() => el.style.display = 'none', 5000);
         }
 
-        // Load settings from Firebase
         async function loadSettings() {
             try {
                 const snap = await get(ref(database, 'apiSettings'));
@@ -495,19 +494,40 @@
         window.testUidApi = async function() {
             const url = document.getElementById('uidUrl').value;
             const key = document.getElementById('uidKey').value;
+            const provider = document.getElementById('uidProvider').value;
+            
             if (!url || !key) {
                 showStatus('uidStatus', '⚠️ Please fill URL and Key first', 'error');
                 return;
             }
             showStatus('uidStatus', '⏳ Testing API...', 'success');
+            
             try {
-                const res = await fetch(url + '?uid=2493952050', {
-                    headers: { 'Authorization': 'Bearer ' + key }
-                });
-                if (res.ok) {
-                    showStatus('uidStatus', '✅ API is working!', 'success');
+                const testUrl = url + (url.includes('?') ? '&' : '?') + 'uid=2493952050';
+                
+                // Set correct header based on provider
+                let headers = { 'Content-Type': 'application/json' };
+                if (provider === 'gameskinbo') {
+                    headers['x-api-key'] = key;
                 } else {
-                    showStatus('uidStatus', '❌ API error: ' + res.status, 'error');
+                    headers['Authorization'] = 'Bearer ' + key;
+                }
+                
+                const res = await fetch(testUrl, { headers: headers });
+                const data = await res.json();
+                console.log('Test Response:', data);
+                
+                if (res.ok) {
+                    const playerName = data.nickname || data.name || data.username ||
+                                       (data.data && (data.data.nickname || data.data.name)) ||
+                                       (data.basicInfo && data.basicInfo.nickname);
+                    if (playerName) {
+                        showStatus('uidStatus', '✅ API Working! Found: ' + playerName, 'success');
+                    } else {
+                        showStatus('uidStatus', '✅ API responded but check console for data format', 'success');
+                    }
+                } else {
+                    showStatus('uidStatus', '❌ API error: ' + res.status + ' - ' + (data.message || 'Check API key'), 'error');
                 }
             } catch (err) {
                 showStatus('uidStatus', '❌ Failed: ' + err.message, 'error');
@@ -517,15 +537,23 @@
         window.testTopupApi = async function() {
             const url = document.getElementById('topupUrl').value;
             const key = document.getElementById('topupKey').value;
+            const provider = document.getElementById('topupProvider').value;
+            
             if (!url || !key) {
                 showStatus('topupStatus', '⚠️ Please fill URL and Key first', 'error');
                 return;
             }
             showStatus('topupStatus', '⏳ Testing connection...', 'success');
+            
             try {
-                const res = await fetch(url, {
-                    headers: { 'Authorization': 'Bearer ' + key }
-                });
+                let headers = { 'Content-Type': 'application/json' };
+                if (provider === 'gameskinbo') {
+                    headers['x-api-key'] = key;
+                } else {
+                    headers['Authorization'] = 'Bearer ' + key;
+                }
+                
+                const res = await fetch(url, { headers: headers });
                 if (res.ok) {
                     showStatus('topupStatus', '✅ Connection successful!', 'success');
                 } else {
