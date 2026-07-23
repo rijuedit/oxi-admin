@@ -363,6 +363,7 @@
                 <button class="tab-btn" onclick="showTab('orders', event)">📦 Orders</button>
                 <button class="tab-btn" onclick="showTab('users', event)">👥 Users</button>
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
+                <a href="api-settings.html" class="tab-btn" style="text-decoration:none;display:inline-flex;align-items:center;">⚙️ API Settings</a>
             </div>
 
             <div id="transactionsTab" class="tab-content">
@@ -451,7 +452,6 @@
         let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
         let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
         
-        // Store all data for filtering
         let allTransactionsHistory = [];
         let allOrdersHistory = [];
 
@@ -536,7 +536,6 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         };
 
-        // ============ FILTER FUNCTION ============
         window.filterHistory = function(type, days, event) {
             const parent = event.target.closest('.sub-tab-content');
             parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
@@ -637,7 +636,6 @@
             ordHistoryList.innerHTML = html;
         }
 
-        // ============ USER DETAIL MODAL ============
         window.showUserDetails = async function(uid) {
             document.getElementById('userModal').classList.add('show');
             document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading user details...</p>';
@@ -782,7 +780,6 @@
             document.getElementById('userModal').classList.remove('show');
         };
 
-        // ============ ACTIONS ============
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + ' for this user?')) return;
             const userRef = ref(database, 'users/' + userId);
@@ -973,7 +970,6 @@
         }
 
         async function loadData() {
-            // Transactions
             const trxSnapshot = await get(ref(database, 'transactions'));
             const trxPending = document.getElementById('trxPending');
             let pendingCount = 0;
@@ -1010,13 +1006,11 @@
             document.getElementById('pendingCount').textContent = pendingCount;
             document.getElementById('trxPendingBadge').textContent = pendingCount;
             
-            // Default filter: 1 Day
             const now = Date.now();
             const oneDayMs = 24 * 60 * 60 * 1000;
             const filteredTrx = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= oneDayMs);
             renderTrxHistory(filteredTrx, 1);
 
-            // Orders
             const ordSnapshot = await get(ref(database, 'orders'));
             let orderCount = 0;
             let ordPendingCount = 0;
@@ -1055,11 +1049,9 @@
             document.getElementById('totalOrdersCount').textContent = orderCount;
             document.getElementById('ordPendingBadge').textContent = ordPendingCount;
             
-            // Default filter: 1 Day
             const filteredOrd = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= oneDayMs);
             renderOrdHistory(filteredOrd, 1);
 
-            // Users
             const userSnapshot = await get(ref(database, 'users'));
             const userList = document.getElementById('usersList');
             let userCount = 0;
