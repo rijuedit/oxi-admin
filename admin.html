@@ -6,290 +6,77 @@
     <title>Admin Panel - OXI TOP UP</title>
     <link rel="stylesheet" href="admin-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
         /* User Detail Modal Styles */
-        .user-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: flex-start;
-            justify-content: center;
-            z-index: 10000;
-            padding: 20px;
-            overflow-y: auto;
-        }
+        .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
         .user-modal-overlay.show { display: flex; }
-        .user-modal-box {
-            background: linear-gradient(135deg, #1a0033, #0a0a0a);
-            border: 2px solid #8b00ff;
-            border-radius: 20px;
-            max-width: 800px;
-            width: 100%;
-            margin: 20px auto;
-            padding: 25px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(139, 0, 255, 0.5);
-        }
-        .user-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(139, 0, 255, 0.3);
-            margin-bottom: 20px;
-        }
-        .user-modal-header h2 {
-            color: #8b00ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 22px;
-        }
-        .user-modal-close {
-            background: rgba(255, 50, 50, 0.15);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 50, 50, 0.4);
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 700;
-            transition: 0.3s;
-        }
-        .user-modal-close:hover {
-            background: rgba(255, 50, 50, 0.3);
-            transform: rotate(90deg);
-        }
-        .user-profile-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 20px;
-            background: rgba(139, 0, 255, 0.1);
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .user-profile-section img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            border: 3px solid #8b00ff;
-            object-fit: cover;
-        }
-        .user-profile-info h3 {
-            color: white;
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .user-profile-info p {
-            color: #a0a0c0;
-            font-size: 13px;
-            margin: 2px 0;
-        }
-        .user-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .user-stat-item {
-            background: rgba(20, 20, 40, 0.85);
-            border: 1px solid rgba(139, 0, 255, 0.3);
-            border-radius: 12px;
-            padding: 15px 10px;
-            text-align: center;
-        }
-        .user-stat-item .stat-value {
-            color: #8b00ff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
-            font-weight: 900;
-        }
-        .user-stat-item .stat-label {
-            color: #a0a0c0;
-            font-size: 11px;
-            margin-top: 5px;
-            text-transform: uppercase;
-        }
-        .modal-section {
-            background: rgba(20, 20, 40, 0.6);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-        }
-        .modal-section h4 {
-            color: #8b00ff;
-            font-size: 16px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Orbitron', sans-serif;
-        }
-        .modal-section h4 span {
-            background: rgba(139, 0, 255, 0.2);
-            color: #a78bfa;
-            padding: 3px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-family: 'Poppins', sans-serif;
-        }
-        .modal-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(139, 0, 255, 0.2);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
-        .modal-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(139, 0, 255, 0.15);
-        }
+        .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(139, 0, 255, 0.5); }
+        .user-modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid rgba(139, 0, 255, 0.3); margin-bottom: 20px; }
+        .user-modal-header h2 { color: #8b00ff; font-family: 'Orbitron', sans-serif; font-size: 22px; }
+        .user-modal-close { background: rgba(255, 50, 50, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 50, 50, 0.4); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.3s; }
+        .user-modal-close:hover { background: rgba(255, 50, 50, 0.3); transform: rotate(90deg); }
+        .user-profile-section { display: flex; align-items: center; gap: 15px; padding: 20px; background: rgba(139, 0, 255, 0.1); border-radius: 15px; margin-bottom: 20px; }
+        .user-profile-section img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #8b00ff; object-fit: cover; }
+        .user-profile-info h3 { color: white; font-size: 20px; margin-bottom: 5px; }
+        .user-profile-info p { color: #a0a0c0; font-size: 13px; margin: 2px 0; }
+        .user-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .user-stat-item { background: rgba(20, 20, 40, 0.85); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 12px; padding: 15px 10px; text-align: center; }
+        .user-stat-item .stat-value { color: #8b00ff; font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900; }
+        .user-stat-item .stat-label { color: #a0a0c0; font-size: 11px; margin-top: 5px; text-transform: uppercase; }
+        .modal-section { background: rgba(20, 20, 40, 0.6); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .modal-section h4 { color: #8b00ff; font-size: 16px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-family: 'Orbitron', sans-serif; }
+        .modal-section h4 span { background: rgba(139, 0, 255, 0.2); color: #a78bfa; padding: 3px 12px; border-radius: 15px; font-size: 12px; font-family: 'Poppins', sans-serif; }
+        .modal-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(139, 0, 255, 0.2); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
+        .modal-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(139, 0, 255, 0.15); }
         .modal-item-header strong { color: white; font-size: 14px; }
-        .modal-status {
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-        }
-        .modal-item p {
-            color: #a0a0c0;
-            font-size: 12px;
-            margin: 3px 0;
-        }
+        .modal-status { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+        .modal-item p { color: #a0a0c0; font-size: 12px; margin: 3px 0; }
         .modal-item p strong { color: white; }
-        .empty-msg {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-            font-size: 13px;
-        }
-        .clickable-user {
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .clickable-user:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
-            border-color: #8b00ff !important;
-        }
-        
-        /* Sub Tabs */
-        .sub-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            padding: 5px;
-            background: rgba(20, 20, 40, 0.5);
-            border-radius: 12px;
-            flex-wrap: wrap;
-        }
-        .sub-tab-btn {
-            flex: 1;
-            min-width: 130px;
-            background: transparent;
-            border: none;
-            color: #a0a0c0;
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: 'Poppins', sans-serif;
-        }
-        .sub-tab-btn:hover {
-            color: white;
-            background: rgba(139, 0, 255, 0.15);
-        }
-        .sub-tab-btn.active {
-            background: linear-gradient(135deg, #8b00ff, #6a0dad);
-            color: white;
-            box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4);
-        }
-        .sub-badge {
-            background: #ff3d00;
-            color: white;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 700;
-            min-width: 20px;
-            display: inline-block;
-        }
-        .sub-tab-btn.active .sub-badge {
-            background: white;
-            color: #8b00ff;
-        }
-
-        /* Filter Buttons */
-        .filter-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            padding: 10px;
-            background: rgba(139, 0, 255, 0.05);
-            border-radius: 12px;
-            border: 1px solid rgba(139, 0, 255, 0.2);
-        }
-        .filter-btn {
-            background: rgba(20, 20, 40, 0.6);
-            color: #a0a0c0;
-            border: 1px solid rgba(139, 0, 255, 0.3);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: 0.3s;
-            font-family: 'Poppins', sans-serif;
-        }
-        .filter-btn:hover {
-            background: rgba(139, 0, 255, 0.15);
-            color: white;
-        }
-        .filter-btn.active {
-            background: linear-gradient(135deg, #8b00ff, #6a0dad);
-            color: white;
-            border-color: #8b00ff;
-            box-shadow: 0 3px 10px rgba(139, 0, 255, 0.4);
-        }
-        .filter-summary {
-            background: rgba(139, 0, 255, 0.1);
-            border: 1px solid rgba(139, 0, 255, 0.3);
-            border-radius: 10px;
-            padding: 12px 15px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
+        .empty-msg { text-align: center; color: #888; padding: 20px; font-size: 13px; }
+        .clickable-user { cursor: pointer; transition: 0.3s; }
+        .clickable-user:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3); border-color: #8b00ff !important; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; padding: 5px; background: rgba(20, 20, 40, 0.5); border-radius: 12px; flex-wrap: wrap; }
+        .sub-tab-btn { flex: 1; min-width: 130px; background: transparent; border: none; color: #a0a0c0; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Poppins', sans-serif; }
+        .sub-tab-btn:hover { color: white; background: rgba(139, 0, 255, 0.15); }
+        .sub-tab-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4); }
+        .sub-badge { background: #ff3d00; color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; min-width: 20px; display: inline-block; }
+        .sub-tab-btn.active .sub-badge { background: white; color: #8b00ff; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; padding: 10px; background: rgba(139, 0, 255, 0.05); border-radius: 12px; border: 1px solid rgba(139, 0, 255, 0.2); }
+        .filter-btn { background: rgba(20, 20, 40, 0.6); color: #a0a0c0; border: 1px solid rgba(139, 0, 255, 0.3); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; font-family: 'Poppins', sans-serif; }
+        .filter-btn:hover { background: rgba(139, 0, 255, 0.15); color: white; }
+        .filter-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; border-color: #8b00ff; box-shadow: 0 3px 10px rgba(139, 0, 255, 0.4); }
+        .filter-summary { background: rgba(139, 0, 255, 0.1); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .filter-summary-info { color: white; font-size: 13px; }
         .filter-summary-info strong { color: #8b00ff; font-size: 15px; font-family: 'Orbitron', sans-serif; }
-
-        /* Clickable Stat Cards */
-        .stat-card-new.clickable {
-            cursor: pointer;
-            transition: 0.3s;
+        .stat-card-new.clickable { cursor: pointer; transition: 0.3s; }
+        .stat-card-new.clickable:hover { transform: translateY(-5px); border-color: #8b00ff; box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3); }
+        
+        /* Drag & Drop Styles */
+        .drag-handle {
+            cursor: grab;
+            color: #8b00ff;
+            font-size: 20px;
+            padding: 5px 10px;
+            user-select: none;
         }
-        .stat-card-new.clickable:hover {
-            transform: translateY(-5px);
-            border-color: #8b00ff;
-            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3);
+        .drag-handle:active { cursor: grabbing; }
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(139, 0, 255, 0.2) !important;
+        }
+        .sortable-drag {
+            opacity: 0.9;
+            transform: rotate(2deg);
+        }
+        .reorder-info {
+            background: rgba(139, 0, 255, 0.1);
+            border-left: 3px solid #8b00ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #d0d0e0;
         }
         
         @media (max-width: 600px) {
@@ -302,7 +89,6 @@
 </head>
 <body class="home-body">
 
-    <!-- PIN Lock -->
     <div id="pinScreen" class="pin-screen">
         <div class="pin-container">
             <div class="pin-logo">🔐</div>
@@ -327,9 +113,7 @@
         </div>
     </div>
 
-    <!-- Admin Dashboard -->
     <div id="adminDashboard" style="display:none;">
-        
         <nav class="home-navbar">
             <div class="home-logo">OXI <span>ADMIN</span></div>
             <div class="home-nav-right">
@@ -339,7 +123,6 @@
         </nav>
 
         <div class="dash-container">
-
             <div class="stats-grid-new">
                 <div class="stat-card-new clickable" onclick="showTab('users', {target: document.querySelector('.tab-btn:nth-child(3)')})">
                     <div class="stat-icon">👥</div>
@@ -422,15 +205,16 @@
             <div id="productsTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>🎮 Product Management</h3>
-                    <p style="color:#a0a0c0;margin-bottom:15px;font-size:13px;">💡 Click on any product to see packages | Upload image to <a href="https://postimages.org" target="_blank" style="color:#8b00ff;">postimages.org</a> and paste DIRECT LINK</p>
+                    <div class="reorder-info">
+                        💡 <strong>Drag & Drop:</strong> Product এবং Package গুলো ⋮⋮ icon ধরে টেনে reorder করতে পারবেন। User site এ automatic update হবে।
+                    </div>
+                    <p style="color:#a0a0c0;margin-bottom:15px;font-size:13px;">Click on any product to see packages | Upload image to <a href="https://postimages.org" target="_blank" style="color:#8b00ff;">postimages.org</a></p>
                     <div id="productsList"></div>
                 </div>
             </div>
-
         </div>
     </div>
 
-    <!-- User Detail Modal -->
     <div id="userModal" class="user-modal-overlay" onclick="if(event.target === this) closeUserModal()">
         <div class="user-modal-box">
             <div class="user-modal-header">
@@ -451,7 +235,6 @@
         let currentPin = '';
         let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
         let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
-        
         let allTransactionsHistory = [];
         let allOrdersHistory = [];
 
@@ -468,19 +251,12 @@
         }
         checkLock();
 
-        window.addDigit = function(digit) {
-            if (currentPin.length < 15) { currentPin += digit; updatePinDisplay(); }
-        };
-
-        window.clearPin = function() {
-            currentPin = currentPin.slice(0, -1); updatePinDisplay();
-        };
-
+        window.addDigit = function(digit) { if (currentPin.length < 15) { currentPin += digit; updatePinDisplay(); } };
+        window.clearPin = function() { currentPin = currentPin.slice(0, -1); updatePinDisplay(); };
         function updatePinDisplay() {
             document.getElementById('pinDisplay').textContent = '•'.repeat(currentPin.length);
             document.getElementById('pinError').style.display = 'none';
         }
-
         window.checkPin = function() {
             if (checkLock()) return;
             if (currentPin === ADMIN_PIN) {
@@ -509,10 +285,7 @@
             }
         };
 
-        window.logoutAdmin = function() {
-            sessionStorage.removeItem('adminLoggedIn');
-            location.reload();
-        };
+        window.logoutAdmin = function() { sessionStorage.removeItem('adminLoggedIn'); location.reload(); };
 
         window.showSubTab = function(subTab, event) {
             const parent = event.target.closest('.section-box');
@@ -540,21 +313,15 @@
             const parent = event.target.closest('.sub-tab-content');
             parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
-            
             const now = Date.now();
             const filterMs = days * 24 * 60 * 60 * 1000;
-            
             if (type === 'trx') {
                 let filtered = allTransactionsHistory;
-                if (days > 0) {
-                    filtered = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= filterMs);
-                }
+                if (days > 0) filtered = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= filterMs);
                 renderTrxHistory(filtered, days);
             } else if (type === 'ord') {
                 let filtered = allOrdersHistory;
-                if (days > 0) {
-                    filtered = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= filterMs);
-                }
+                if (days > 0) filtered = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= filterMs);
                 renderOrdHistory(filtered, days);
             }
         };
@@ -562,36 +329,15 @@
         function renderTrxHistory(filtered, days) {
             const trxHistoryList = document.getElementById('trxHistoryList');
             const summary = document.getElementById('trxHistorySummary');
-            
-            const totalAmount = filtered
-                .filter(t => t.status === 'Approved')
-                .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
-            
+            const totalAmount = filtered.filter(t => t.status === 'Approved').reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
             const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
-            summary.innerHTML = `
-                <div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> transactions</div>
-                <div class="filter-summary-info">💰 Total Approved: <strong>৳ ${totalAmount.toLocaleString()}</strong></div>
-            `;
-            
-            if (filtered.length === 0) {
-                trxHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions in this period</p>';
-                return;
-            }
-            
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> transactions</div><div class="filter-summary-info">💰 Total Approved: <strong>৳ ${totalAmount.toLocaleString()}</strong></div>`;
+            if (filtered.length === 0) { trxHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions in this period</p>'; return; }
             let html = '';
             filtered.forEach(trx => {
                 const statusColor = trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
                 const date = new Date(trx.date).toLocaleString('en-GB');
-                html += `
-                    <div class="admin-item">
-                        <div class="admin-item-info">
-                            <h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4>
-                            <p>📧 ${trx.userEmail}</p>
-                            <p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p>
-                            <p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p>
-                            <p style="font-size:12px;color:#888;">${date}</p>
-                        </div>
-                    </div>`;
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4><p>📧 ${trx.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p><p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div></div>`;
             });
             trxHistoryList.innerHTML = html;
         }
@@ -599,186 +345,68 @@
         function renderOrdHistory(filtered, days) {
             const ordHistoryList = document.getElementById('ordHistoryList');
             const summary = document.getElementById('ordHistorySummary');
-            
-            const totalRevenue = filtered
-                .filter(o => o.status === 'Complete')
-                .reduce((sum, o) => sum + parseInt(o.price || 0), 0);
-            
+            const totalRevenue = filtered.filter(o => o.status === 'Complete').reduce((sum, o) => sum + parseInt(o.price || 0), 0);
             const completeCount = filtered.filter(o => o.status === 'Complete').length;
             const failedCount = filtered.filter(o => o.status === 'Failed').length;
-            
             const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
-            summary.innerHTML = `
-                <div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> orders (✅ ${completeCount} | ❌ ${failedCount})</div>
-                <div class="filter-summary-info">💰 Revenue: <strong>৳ ${totalRevenue.toLocaleString()}</strong></div>
-            `;
-            
-            if (filtered.length === 0) {
-                ordHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders in this period</p>';
-                return;
-            }
-            
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> orders (✅ ${completeCount} | ❌ ${failedCount})</div><div class="filter-summary-info">💰 Revenue: <strong>৳ ${totalRevenue.toLocaleString()}</strong></div>`;
+            if (filtered.length === 0) { ordHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders in this period</p>'; return; }
             let html = '';
             filtered.forEach(ord => {
                 const statusColor = ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
                 const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                html += `
-                    <div class="admin-item">
-                        <div class="admin-item-info">
-                            <h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4>
-                            <p>🎮 ${ord.productName}</p>
-                            <p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
-                            <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
-                            <p style="font-size:12px;color:#888;">${date}</p>
-                        </div>
-                    </div>`;
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4><p>🎮 ${ord.productName}</p><p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div></div>`;
             });
             ordHistoryList.innerHTML = html;
         }
 
         window.showUserDetails = async function(uid) {
             document.getElementById('userModal').classList.add('show');
-            document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading user details...</p>';
-
+            document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading...</p>';
             try {
                 const userSnap = await get(ref(database, 'users/' + uid));
-                if (!userSnap.exists()) {
-                    document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ User not found!</p>';
-                    return;
-                }
+                if (!userSnap.exists()) { document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ User not found!</p>'; return; }
                 const user = userSnap.val();
-
                 const trxSnap = await get(ref(database, 'transactions'));
                 const userTransactions = [];
                 if (trxSnap.exists()) {
                     const allTrx = trxSnap.val();
-                    for (const trxId in allTrx) {
-                        if (allTrx[trxId].userId === uid) {
-                            userTransactions.push({ id: trxId, ...allTrx[trxId] });
-                        }
-                    }
+                    for (const trxId in allTrx) if (allTrx[trxId].userId === uid) userTransactions.push({ id: trxId, ...allTrx[trxId] });
                 }
                 userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-
                 const ordSnap = await get(ref(database, 'orders'));
                 const userOrders = [];
                 if (ordSnap.exists()) {
                     const allOrd = ordSnap.val();
-                    for (const ordId in allOrd) {
-                        if (allOrd[ordId].userId === uid) {
-                            userOrders.push({ id: ordId, ...allOrd[ordId] });
-                        }
-                    }
+                    for (const ordId in allOrd) if (allOrd[ordId].userId === uid) userOrders.push({ id: ordId, ...allOrd[ordId] });
                 }
                 userOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-
-                const totalDeposit = userTransactions
-                    .filter(t => t.status === 'Approved')
-                    .reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
-
-                let html = `
-                    <div class="user-profile-section">
-                        <img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=U'">
-                        <div class="user-profile-info">
-                            <h3>${user.name || 'Anonymous'}</h3>
-                            <p>📧 ${user.email || 'N/A'}</p>
-                            <p>🆔 ${uid.substring(0, 20)}...</p>
-                            ${user.createdAt ? `<p>📅 Joined: ${new Date(user.createdAt).toLocaleDateString('en-GB')}</p>` : ''}
-                        </div>
-                    </div>
-
-                    <div class="user-stats-grid">
-                        <div class="user-stat-item">
-                            <div class="stat-value">৳ ${user.wallet || 0}</div>
-                            <div class="stat-label">💰 Wallet</div>
-                        </div>
-                        <div class="user-stat-item">
-                            <div class="stat-value">৳ ${user.totalSpend || 0}</div>
-                            <div class="stat-label">💵 Total Spend</div>
-                        </div>
-                        <div class="user-stat-item">
-                            <div class="stat-value">${userOrders.length}</div>
-                            <div class="stat-label">📦 Orders</div>
-                        </div>
-                        <div class="user-stat-item">
-                            <div class="stat-value">৳ ${totalDeposit}</div>
-                            <div class="stat-label">➕ Deposited</div>
-                        </div>
-                    </div>
-
-                    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
-                        <button class="btn-approve" style="flex:1;min-width:140px;padding:12px;" onclick="adminAddMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}')">➕ Add Money</button>
-                        <button class="btn-reject" style="flex:1;min-width:140px;padding:12px;" onclick="adminDeductMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct Money</button>
-                    </div>
-
-                    <div class="modal-section">
-                        <h4>💳 All Add Money History <span>${userTransactions.length}</span></h4>
-                `;
-
-                if (userTransactions.length === 0) {
-                    html += '<p class="empty-msg">No transactions yet</p>';
-                } else {
-                    userTransactions.forEach(trx => {
-                        const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
-                        const date = new Date(trx.date).toLocaleString('en-GB');
-                        let methodName = 'bKash';
-                        let methodIcon = '🟣';
-                        if (trx.method === 'nagad') { methodName = 'Nagad'; methodIcon = '🟠'; }
-                        else if (trx.method === 'admin') { methodName = 'Admin Added'; methodIcon = '🎁'; }
-                        
-                        html += `
-                            <div class="modal-item">
-                                <div class="modal-item-header">
-                                    <strong>${methodIcon} ${methodName} - ৳ ${trx.amount}</strong>
-                                    <span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${trx.status}</span>
-                                </div>
-                                <p>📱 Number: <strong>${trx.senderNumber}</strong></p>
-                                <p>🔢 TrxID: <strong>${trx.trxId}</strong></p>
-                                <p style="color:#888;font-size:11px;">📅 ${date}</p>
-                            </div>
-                        `;
-                    });
-                }
-
-                html += `
-                    </div>
-                    <div class="modal-section">
-                        <h4>📦 All Orders History <span>${userOrders.length}</span></h4>
-                `;
-
-                if (userOrders.length === 0) {
-                    html += '<p class="empty-msg">No orders yet</p>';
-                } else {
-                    userOrders.forEach(ord => {
-                        const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
-                        const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                        html += `
-                            <div class="modal-item">
-                                <div class="modal-item-header">
-                                    <strong>🎮 ${ord.productName}</strong>
-                                    <span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${ord.status}</span>
-                                </div>
-                                <p>📦 Package: <strong>${ord.packageName}</strong></p>
-                                <p>💰 Price: <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
-                                <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
-                                <p style="color:#888;font-size:11px;">📅 ${date}</p>
-                            </div>
-                        `;
-                    });
-                }
-
+                const totalDeposit = userTransactions.filter(t => t.status === 'Approved').reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
+                let html = `<div class="user-profile-section"><img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=U'"><div class="user-profile-info"><h3>${user.name || 'Anonymous'}</h3><p>📧 ${user.email || 'N/A'}</p><p>🆔 ${uid.substring(0, 20)}...</p>${user.createdAt ? `<p>📅 Joined: ${new Date(user.createdAt).toLocaleDateString('en-GB')}</p>` : ''}</div></div><div class="user-stats-grid"><div class="user-stat-item"><div class="stat-value">৳ ${user.wallet || 0}</div><div class="stat-label">💰 Wallet</div></div><div class="user-stat-item"><div class="stat-value">৳ ${user.totalSpend || 0}</div><div class="stat-label">💵 Total Spend</div></div><div class="user-stat-item"><div class="stat-value">${userOrders.length}</div><div class="stat-label">📦 Orders</div></div><div class="user-stat-item"><div class="stat-value">৳ ${totalDeposit}</div><div class="stat-label">➕ Deposited</div></div></div><div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:140px;padding:12px;" onclick="adminAddMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:140px;padding:12px;" onclick="adminDeductMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct Money</button></div><div class="modal-section"><h4>💳 All Add Money History <span>${userTransactions.length}</span></h4>`;
+                if (userTransactions.length === 0) html += '<p class="empty-msg">No transactions yet</p>';
+                else userTransactions.forEach(trx => {
+                    const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                    const date = new Date(trx.date).toLocaleString('en-GB');
+                    let methodName = 'bKash', methodIcon = '🟣';
+                    if (trx.method === 'nagad') { methodName = 'Nagad'; methodIcon = '🟠'; }
+                    else if (trx.method === 'admin') { methodName = 'Admin Added'; methodIcon = '🎁'; }
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${methodIcon} ${methodName} - ৳ ${trx.amount}</strong><span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${trx.status}</span></div><p>📱 Number: <strong>${trx.senderNumber}</strong></p><p>🔢 TrxID: <strong>${trx.trxId}</strong></p><p style="color:#888;font-size:11px;">📅 ${date}</p></div>`;
+                });
+                html += `</div><div class="modal-section"><h4>📦 All Orders History <span>${userOrders.length}</span></h4>`;
+                if (userOrders.length === 0) html += '<p class="empty-msg">No orders yet</p>';
+                else userOrders.forEach(ord => {
+                    const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                    const date = new Date(ord.orderDate).toLocaleString('en-GB');
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>🎮 ${ord.productName}</strong><span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${ord.status}</span></div><p>📦 Package: <strong>${ord.packageName}</strong></p><p>💰 Price: <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="color:#888;font-size:11px;">📅 ${date}</p></div>`;
+                });
                 html += `</div>`;
                 document.getElementById('userModalContent').innerHTML = html;
-
             } catch (error) {
-                console.error('Error loading user details:', error);
                 document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ Failed to load: ' + error.message + '</p>';
             }
         };
 
-        window.closeUserModal = function() {
-            document.getElementById('userModal').classList.remove('show');
-        };
+        window.closeUserModal = function() { document.getElementById('userModal').classList.remove('show'); };
 
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + ' for this user?')) return;
@@ -789,15 +417,15 @@
                 const newWallet = (userData.wallet || 0) + parseInt(amount);
                 await update(userRef, { wallet: newWallet });
                 await update(ref(database, 'transactions/' + trxId), { status: 'Approved', approvedDate: new Date().toISOString() });
-                showToast('✅ Approved! ৳ ' + amount + ' added');
+                showToast('✅ Approved!');
                 loadData();
             }
         };
 
         window.rejectTransaction = async function(trxId) {
-            if (!confirm('Reject this payment request?')) return;
+            if (!confirm('Reject this payment?')) return;
             await update(ref(database, 'transactions/' + trxId), { status: 'Rejected', rejectedDate: new Date().toISOString() });
-            showToast('❌ Payment Rejected');
+            showToast('❌ Rejected');
             loadData();
         };
 
@@ -810,14 +438,14 @@
         window.toggleProductStock = async function(productKey, currentStock) {
             const newStock = currentStock === 'in' ? 'out' : 'in';
             await update(ref(database, 'products/' + productKey), { stock: newStock });
-            showToast('✅ Product ' + (newStock === 'in' ? 'Stock In' : 'Stock Out'));
+            showToast('✅ Product ' + (newStock === 'in' ? 'ON' : 'OFF'));
             loadProducts();
         };
 
         window.togglePackageStock = async function(productKey, pkgKey, currentStock) {
             const newStock = currentStock === 'in' ? 'out' : 'in';
             await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { stock: newStock });
-            showToast('✅ Package ' + (newStock === 'in' ? 'Stock In' : 'Stock Out'));
+            showToast('✅ Package ' + (newStock === 'in' ? 'ON' : 'OFF'));
             loadProducts();
         };
 
@@ -825,40 +453,34 @@
             const newPrice = prompt('Edit price for "' + pkgName + '"\nCurrent: ৳ ' + currentPrice, currentPrice);
             if (newPrice === null || newPrice === '') return;
             const price = parseInt(newPrice);
-            if (isNaN(price) || price < 1) {
-                alert('Invalid price!');
-                return;
-            }
+            if (isNaN(price) || price < 1) { alert('Invalid price!'); return; }
             await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { price: price });
-            showToast('✅ Price updated to ৳ ' + price);
+            showToast('✅ Price updated');
             loadProducts();
         };
 
         window.editProductImage = async function(productKey, currentImage, productName) {
-            const newImage = prompt('📸 Change image for "' + productName + '"\n\n💡 Upload image to postimages.org\nCopy the DIRECT LINK and paste here:', currentImage);
+            const newImage = prompt('Change image URL:', currentImage);
             if (newImage === null || newImage === '') return;
-            if (!newImage.startsWith('http')) {
-                alert('❌ Invalid URL!');
-                return;
-            }
+            if (!newImage.startsWith('http')) { alert('Invalid URL!'); return; }
             await update(ref(database, 'products/' + productKey), { image: newImage });
-            showToast('✅ Image updated!');
+            showToast('✅ Image updated');
             loadProducts();
         };
 
         window.editProductName = async function(productKey, currentName) {
-            const newName = prompt('✏️ Change product name\n\nCurrent name:', currentName);
+            const newName = prompt('Change product name:', currentName);
             if (newName === null || newName === '' || newName === currentName) return;
             await update(ref(database, 'products/' + productKey), { name: newName });
-            showToast('✅ Product name updated!');
+            showToast('✅ Name updated');
             loadProducts();
         };
 
         window.editPackageName = async function(productKey, pkgKey, currentName) {
-            const newName = prompt('✏️ Change package name\n\nCurrent:', currentName);
+            const newName = prompt('Change package name:', currentName);
             if (newName === null || newName === '' || newName === currentName) return;
             await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { name: newName });
-            showToast('✅ Package name updated!');
+            showToast('✅ Name updated');
             loadProducts();
         };
 
@@ -875,11 +497,11 @@
         };
 
         window.adminAddMoney = async function(userId, userName) {
-            const amount = prompt('Add money to ' + userName + '\'s wallet\n\nEnter amount:', '100');
+            const amount = prompt('Add money to ' + userName + '\n\nAmount:', '100');
             if (amount === null || amount === '') return;
             const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) { alert('❌ Invalid amount!'); return; }
-            if (!confirm('Add ৳ ' + amt + ' to ' + userName + '\'s wallet?')) return;
+            if (isNaN(amt) || amt < 1) { alert('Invalid!'); return; }
+            if (!confirm('Add ৳ ' + amt + '?')) return;
             const userRef = ref(database, 'users/' + userId);
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
@@ -887,58 +509,83 @@
                 const newWallet = (userData.wallet || 0) + amt;
                 await update(userRef, { wallet: newWallet });
                 const trxRef = ref(database, 'transactions');
-                await push(trxRef, {
-                    userId: userId, userName: userName, userEmail: userData.email,
-                    amount: amt, method: 'admin', senderNumber: 'ADMIN',
-                    trxId: 'ADMIN-' + Date.now(), status: 'Approved',
-                    date: new Date().toISOString(), approvedDate: new Date().toISOString(),
-                    note: 'Added by Admin'
-                });
-                showToast('✅ ৳ ' + amt + ' added!');
+                await push(trxRef, { userId, userName, userEmail: userData.email, amount: amt, method: 'admin', senderNumber: 'ADMIN', trxId: 'ADMIN-' + Date.now(), status: 'Approved', date: new Date().toISOString(), approvedDate: new Date().toISOString(), note: 'Added by Admin' });
+                showToast('✅ Added!');
                 closeUserModal();
                 loadData();
             }
         };
 
         window.adminDeductMoney = async function(userId, userName, currentWallet) {
-            const amount = prompt('Deduct money from ' + userName + '\nCurrent Balance: ৳ ' + currentWallet + '\n\nEnter amount:', '100');
+            const amount = prompt('Deduct from ' + userName + '\nBalance: ৳ ' + currentWallet + '\n\nAmount:', '100');
             if (amount === null || amount === '') return;
             const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) { alert('❌ Invalid amount!'); return; }
-            if (amt > currentWallet) { alert('❌ Amount is greater than wallet!'); return; }
+            if (isNaN(amt) || amt < 1) { alert('Invalid!'); return; }
+            if (amt > currentWallet) { alert('Not enough balance!'); return; }
             if (!confirm('Deduct ৳ ' + amt + '?')) return;
             const userRef = ref(database, 'users/' + userId);
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                const newWallet = (userData.wallet || 0) - amt;
-                await update(userRef, { wallet: newWallet });
-                showToast('✅ ৳ ' + amt + ' deducted!');
+                await update(userRef, { wallet: (userData.wallet || 0) - amt });
+                showToast('✅ Deducted!');
                 closeUserModal();
                 loadData();
             }
         };
 
+        // Save Product Order to Firebase
+        async function saveProductOrder() {
+            const cards = document.querySelectorAll('#productsList .product-admin-card');
+            const updates = {};
+            cards.forEach((card, index) => {
+                const productKey = card.getAttribute('data-product-key');
+                updates[`products/${productKey}/order`] = index;
+            });
+            await update(ref(database), updates);
+            showToast('✅ Product order saved!');
+        }
+
+        // Save Package Order to Firebase
+        async function savePackageOrder(productKey) {
+            const rows = document.querySelectorAll(`#packages-${productKey} .pkg-row`);
+            const updates = {};
+            rows.forEach((row, index) => {
+                const pkgKey = row.getAttribute('data-pkg-key');
+                updates[`products/${productKey}/packages/${pkgKey}/order`] = index;
+            });
+            await update(ref(database), updates);
+            showToast('✅ Package order saved!');
+        }
+
         async function loadProducts() {
             const snapshot = await get(ref(database, 'products'));
             const list = document.getElementById('productsList');
             list.innerHTML = '';
-            if (!snapshot.exists()) {
-                list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet.</p>';
-                return;
-            }
+            if (!snapshot.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet.</p>'; return; }
             const products = snapshot.val();
-            for (const key in products) {
-                const p = products[key];
+            
+            // Convert to array and sort by order
+            const productsArray = Object.entries(products).map(([key, val]) => ({ key, ...val }));
+            productsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+            
+            for (const product of productsArray) {
+                const key = product.key;
+                const p = product;
                 const isOut = p.stock === 'out';
                 let packagesHtml = '';
                 if (p.packages) {
-                    for (const pkgKey in p.packages) {
-                        const pkg = p.packages[pkgKey];
+                    // Sort packages by order
+                    const packagesArray = Object.entries(p.packages).map(([pkgKey, pkgVal]) => ({ pkgKey, ...pkgVal }));
+                    packagesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+                    
+                    for (const pkg of packagesArray) {
+                        const pkgKey = pkg.pkgKey;
                         const pkgOut = pkg.stock === 'out';
                         const safeName = pkg.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
                         packagesHtml += `
-                            <div class="pkg-row ${pkgOut ? 'pkg-out' : ''}">
+                            <div class="pkg-row ${pkgOut ? 'pkg-out' : ''}" data-pkg-key="${pkgKey}">
+                                <span class="drag-handle pkg-drag">⋮⋮</span>
                                 <span class="pkg-info">${pkg.name} - <strong style="color:#8b00ff;">৳ ${pkg.price}</strong></span>
                                 <div class="pkg-actions">
                                     <button class="btn-edit" onclick="editPackageName('${key}', '${pkgKey}', \`${safeName}\`)">✏️ Name</button>
@@ -951,12 +598,15 @@
                 const safeProductName = p.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
                 const safeImage = p.image.replace(/`/g, '\\`').replace(/'/g, "\\'");
                 list.innerHTML += `
-                    <div class="product-admin-card ${isOut ? 'product-out' : ''}">
-                        <div class="product-admin-header" onclick="togglePackages('${key}')" style="cursor:pointer;">
-                            <img src="${p.image}" onerror="this.src='https://via.placeholder.com/70x70/8b00ff/ffffff?text=No+Image'">
-                            <div class="product-admin-info">
-                                <h4>${p.name} <span id="arrow-${key}" style="color:#8b00ff;">▶</span></h4>
-                                <p>${Object.keys(p.packages || {}).length} Packages - Click to expand</p>
+                    <div class="product-admin-card ${isOut ? 'product-out' : ''}" data-product-key="${key}">
+                        <div class="product-admin-header">
+                            <span class="drag-handle product-drag">⋮⋮</span>
+                            <div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="togglePackages('${key}')">
+                                <img src="${p.image}" onerror="this.src='https://via.placeholder.com/70x70/8b00ff/ffffff?text=No+Image'">
+                                <div class="product-admin-info">
+                                    <h4>${p.name} <span id="arrow-${key}" style="color:#8b00ff;">▶</span></h4>
+                                    <p>${Object.keys(p.packages || {}).length} Packages - Click to expand</p>
+                                </div>
                             </div>
                             <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">${isOut ? '❌ Product OFF' : '✅ Product ON'}</button>
                         </div>
@@ -967,15 +617,38 @@
                         <div class="packages-container" id="packages-${key}" style="display:none;">${packagesHtml}</div>
                     </div>`;
             }
+            
+            // Initialize Sortable for Products
+            new Sortable(list, {
+                handle: '.product-drag',
+                animation: 200,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function() {
+                    saveProductOrder();
+                }
+            });
+            
+            // Initialize Sortable for each Package container
+            document.querySelectorAll('.packages-container').forEach(container => {
+                const productKey = container.id.replace('packages-', '');
+                new Sortable(container, {
+                    handle: '.pkg-drag',
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    dragClass: 'sortable-drag',
+                    onEnd: function() {
+                        savePackageOrder(productKey);
+                    }
+                });
+            });
         }
 
         async function loadData() {
             const trxSnapshot = await get(ref(database, 'transactions'));
             const trxPending = document.getElementById('trxPending');
-            let pendingCount = 0;
-            let pendingHtml = '';
+            let pendingCount = 0, pendingHtml = '';
             allTransactionsHistory = [];
-            
             if (trxSnapshot.exists()) {
                 const transactions = trxSnapshot.val();
                 Object.entries(transactions).reverse().forEach(([id, trx]) => {
@@ -983,40 +656,20 @@
                     const date = new Date(trx.date).toLocaleString('en-GB');
                     if (trx.status === 'Pending') {
                         pendingCount++;
-                        pendingHtml += `
-                            <div class="admin-item">
-                                <div class="admin-item-info">
-                                    <h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4>
-                                    <p>📧 ${trx.userEmail}</p>
-                                    <p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p>
-                                    <p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p>
-                                    <p style="font-size:12px;color:#888;">${date}</p>
-                                </div>
-                                <div class="admin-actions">
-                                    <button class="btn-approve" onclick="approveTransaction('${id}', '${trx.userId}', ${trx.amount})">✅ Approve</button>
-                                    <button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button>
-                                </div>
-                            </div>`;
-                    } else {
-                        allTransactionsHistory.push({ id, ...trx });
-                    }
+                        pendingHtml += `<div class="admin-item"><div class="admin-item-info"><h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4><p>📧 ${trx.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p><p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div><div class="admin-actions"><button class="btn-approve" onclick="approveTransaction('${id}', '${trx.userId}', ${trx.amount})">✅ Approve</button><button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button></div></div>`;
+                    } else allTransactionsHistory.push({ id, ...trx });
                 });
             }
-            trxPending.innerHTML = pendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending requests!</p>';
+            trxPending.innerHTML = pendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending!</p>';
             document.getElementById('pendingCount').textContent = pendingCount;
             document.getElementById('trxPendingBadge').textContent = pendingCount;
-            
             const now = Date.now();
             const oneDayMs = 24 * 60 * 60 * 1000;
-            const filteredTrx = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= oneDayMs);
-            renderTrxHistory(filteredTrx, 1);
+            renderTrxHistory(allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= oneDayMs), 1);
 
             const ordSnapshot = await get(ref(database, 'orders'));
-            let orderCount = 0;
-            let ordPendingCount = 0;
-            let ordPendingHtml = '';
+            let orderCount = 0, ordPendingCount = 0, ordPendingHtml = '';
             allOrdersHistory = [];
-            
             if (ordSnapshot.exists()) {
                 const orders = ordSnapshot.val();
                 const ordArray = Object.entries(orders).reverse();
@@ -1026,31 +679,14 @@
                     const date = new Date(ord.orderDate).toLocaleString('en-GB');
                     if (ord.status === 'Pending') {
                         ordPendingCount++;
-                        ordPendingHtml += `
-                            <div class="admin-item">
-                                <div class="admin-item-info">
-                                    <h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4>
-                                    <p>🎮 ${ord.productName}</p>
-                                    <p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p>
-                                    <p>🆔 Player ID: <strong>${ord.playerId}</strong></p>
-                                    <p style="font-size:12px;color:#888;">${date}</p>
-                                </div>
-                                <div class="admin-actions">
-                                    <button class="btn-approve" onclick="updateOrderStatus('${id}', 'Complete')">✅ Complete</button>
-                                    <button class="btn-reject" onclick="updateOrderStatus('${id}', 'Failed')">❌ Failed</button>
-                                </div>
-                            </div>`;
-                    } else {
-                        allOrdersHistory.push({ id, ...ord });
-                    }
+                        ordPendingHtml += `<div class="admin-item"><div class="admin-item-info"><h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4><p>🎮 ${ord.productName}</p><p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div><div class="admin-actions"><button class="btn-approve" onclick="updateOrderStatus('${id}', 'Complete')">✅ Complete</button><button class="btn-reject" onclick="updateOrderStatus('${id}', 'Failed')">❌ Failed</button></div></div>`;
+                    } else allOrdersHistory.push({ id, ...ord });
                 });
             }
-            document.getElementById('ordPending').innerHTML = ordPendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending orders!</p>';
+            document.getElementById('ordPending').innerHTML = ordPendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending!</p>';
             document.getElementById('totalOrdersCount').textContent = orderCount;
             document.getElementById('ordPendingBadge').textContent = ordPendingCount;
-            
-            const filteredOrd = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= oneDayMs);
-            renderOrdHistory(filteredOrd, 1);
+            renderOrdHistory(allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= oneDayMs), 1);
 
             const userSnapshot = await get(ref(database, 'users'));
             const userList = document.getElementById('usersList');
@@ -1061,25 +697,10 @@
                 const usrArray = Object.entries(users);
                 userCount = usrArray.length;
                 usrArray.forEach(([uid, user]) => {
-                    userList.innerHTML += `
-                        <div class="admin-item clickable-user" onclick="showUserDetails('${uid}')">
-                            <div class="admin-item-info">
-                                <h4>${user.name} <span style="color:#8b00ff;font-size:12px;">👆 Click to view details</span></h4>
-                                <p>📧 ${user.email}</p>
-                                <p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p>
-                                <p>📦 Orders: ${user.orders || 0} | Rank: ${user.rank || 'Bronze'}</p>
-                            </div>
-                            <div class="admin-actions" onclick="event.stopPropagation();">
-                                <button class="btn-approve" onclick="adminAddMoney('${uid}', '${user.name.replace(/'/g, "\\'")}')">➕ Add Money</button>
-                                <button class="btn-reject" onclick="adminDeductMoney('${uid}', '${user.name.replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct</button>
-                            </div>
-                        </div>`;
+                    userList.innerHTML += `<div class="admin-item clickable-user" onclick="showUserDetails('${uid}')"><div class="admin-item-info"><h4>${user.name} <span style="color:#8b00ff;font-size:12px;">👆 Click to view</span></h4><p>📧 ${user.email}</p><p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p><p>📦 Orders: ${user.orders || 0} | Rank: ${user.rank || 'Bronze'}</p></div><div class="admin-actions" onclick="event.stopPropagation();"><button class="btn-approve" onclick="adminAddMoney('${uid}', '${user.name.replace(/'/g, "\\'")}')">➕ Add</button><button class="btn-reject" onclick="adminDeductMoney('${uid}', '${user.name.replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct</button></div></div>`;
                 });
-            } else {
-                userList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No users yet</p>';
-            }
+            } else userList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No users yet</p>';
             document.getElementById('totalUsers').textContent = userCount;
-
             loadProducts();
         }
 
@@ -1089,6 +710,5 @@
             loadData();
         }
     </script>
-
 </body>
 </html>
