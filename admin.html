@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        /* User Detail Modal Styles */
         .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
         .user-modal-overlay.show { display: flex; }
         .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(139, 0, 255, 0.5); }
@@ -52,32 +51,13 @@
         .stat-card-new.clickable { cursor: pointer; transition: 0.3s; }
         .stat-card-new.clickable:hover { transform: translateY(-5px); border-color: #8b00ff; box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3); }
         
-        /* Drag & Drop Styles */
-        .drag-handle {
-            cursor: grab;
-            color: #8b00ff;
-            font-size: 20px;
-            padding: 5px 10px;
-            user-select: none;
-        }
+        .drag-handle { cursor: grab; color: #8b00ff; font-size: 20px; padding: 5px 10px; user-select: none; }
         .drag-handle:active { cursor: grabbing; }
-        .sortable-ghost {
-            opacity: 0.4;
-            background: rgba(139, 0, 255, 0.2) !important;
-        }
-        .sortable-drag {
-            opacity: 0.9;
-            transform: rotate(2deg);
-        }
-        .reorder-info {
-            background: rgba(139, 0, 255, 0.1);
-            border-left: 3px solid #8b00ff;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #d0d0e0;
-        }
+        .sortable-ghost { opacity: 0.4; background: rgba(139, 0, 255, 0.2) !important; }
+        .sortable-drag { opacity: 0.9; transform: rotate(2deg); }
+        .reorder-info { background: rgba(139, 0, 255, 0.1); border-left: 3px solid #8b00ff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #d0d0e0; }
+        .add-product-btn { width: 100%; background: linear-gradient(135deg, #00c853, #00e676); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0, 200, 83, 0.3); transition: 0.3s; }
+        .add-product-btn:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0, 200, 83, 0.5); }
         
         @media (max-width: 600px) {
             .user-modal-box { padding: 15px; }
@@ -205,10 +185,10 @@
             <div id="productsTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>🎮 Product Management</h3>
+                    <button class="add-product-btn" onclick="addNewProduct()">➕ Add New Product</button>
                     <div class="reorder-info">
-                        💡 <strong>Drag & Drop:</strong> Product এবং Package গুলো ⋮⋮ icon ধরে টেনে reorder করতে পারবেন। User site এ automatic update হবে।
+                        💡 <strong>Drag & Drop:</strong> ⋮⋮ icon ধরে Product এবং Package গুলো reorder করুন। User site এ automatic update হবে।
                     </div>
-                    <p style="color:#a0a0c0;margin-bottom:15px;font-size:13px;">Click on any product to see packages | Upload image to <a href="https://postimages.org" target="_blank" style="color:#8b00ff;">postimages.org</a></p>
                     <div id="productsList"></div>
                 </div>
             </div>
@@ -409,13 +389,12 @@
         window.closeUserModal = function() { document.getElementById('userModal').classList.remove('show'); };
 
         window.approveTransaction = async function(trxId, userId, amount) {
-            if (!confirm('Approve ৳ ' + amount + ' for this user?')) return;
+            if (!confirm('Approve ৳ ' + amount + '?')) return;
             const userRef = ref(database, 'users/' + userId);
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                const newWallet = (userData.wallet || 0) + parseInt(amount);
-                await update(userRef, { wallet: newWallet });
+                await update(userRef, { wallet: (userData.wallet || 0) + parseInt(amount) });
                 await update(ref(database, 'transactions/' + trxId), { status: 'Approved', approvedDate: new Date().toISOString() });
                 showToast('✅ Approved!');
                 loadData();
@@ -506,8 +485,7 @@
             const snapshot = await get(userRef);
             if (snapshot.exists()) {
                 const userData = snapshot.val();
-                const newWallet = (userData.wallet || 0) + amt;
-                await update(userRef, { wallet: newWallet });
+                await update(userRef, { wallet: (userData.wallet || 0) + amt });
                 const trxRef = ref(database, 'transactions');
                 await push(trxRef, { userId, userName, userEmail: userData.email, amount: amt, method: 'admin', senderNumber: 'ADMIN', trxId: 'ADMIN-' + Date.now(), status: 'Approved', date: new Date().toISOString(), approvedDate: new Date().toISOString(), note: 'Added by Admin' });
                 showToast('✅ Added!');
@@ -534,7 +512,72 @@
             }
         };
 
-        // Save Product Order to Firebase
+        // ============ ADD NEW PRODUCT ============
+        window.addNewProduct = async function() {
+            const productKey = prompt('🔑 Product ID লিখুন (ছোট হাতের অক্ষরে, space ছাড়া):\n\nউদাহরণ: pubg, mlbb, codm', '');
+            if (!productKey || productKey.trim() === '') return;
+            const cleanKey = productKey.trim().toLowerCase().replace(/\s+/g, '');
+            const checkSnap = await get(ref(database, 'products/' + cleanKey));
+            if (checkSnap.exists()) { alert('❌ এই ID এর Product already আছে!'); return; }
+            const productName = prompt('📝 Product এর নাম লিখুন:\n\nউদাহরণ: PUBG Mobile UC', '');
+            if (!productName || productName.trim() === '') return;
+            const productImage = prompt('📸 Product এর Image URL দিন:\n\n💡 postimages.org এ upload করে DIRECT LINK দিন', 'https://via.placeholder.com/300x240/1a0033/8b00ff?text=New+Product');
+            if (!productImage || !productImage.startsWith('http')) { alert('❌ Invalid Image URL!'); return; }
+            const pkgName = prompt('📦 প্রথম Package এর নাম:\n\nউদাহরণ: 60 UC', '');
+            if (!pkgName) return;
+            const pkgPrice = prompt('💰 Package এর দাম (টাকায়):', '100');
+            if (!pkgPrice || isNaN(parseInt(pkgPrice))) { alert('❌ Invalid price!'); return; }
+            const productsSnap = await get(ref(database, 'products'));
+            const productsCount = productsSnap.exists() ? Object.keys(productsSnap.val()).length : 0;
+            const newProduct = {
+                name: productName.trim(),
+                image: productImage.trim(),
+                stock: 'in',
+                order: productsCount,
+                packages: { p1: { name: pkgName.trim(), price: parseInt(pkgPrice), stock: 'in', order: 0 } }
+            };
+            await set(ref(database, 'products/' + cleanKey), newProduct);
+            showToast('✅ Product added!');
+            loadProducts();
+        };
+
+        // ============ ADD NEW PACKAGE ============
+        window.addNewPackage = async function(productKey) {
+            const pkgName = prompt('📦 নতুন Package এর নাম:\n\nউদাহরণ: 500 Diamond', '');
+            if (!pkgName || pkgName.trim() === '') return;
+            const pkgPrice = prompt('💰 Package এর দাম (টাকায়):', '100');
+            if (!pkgPrice || isNaN(parseInt(pkgPrice))) { alert('❌ Invalid price!'); return; }
+            const productSnap = await get(ref(database, 'products/' + productKey));
+            if (!productSnap.exists()) return;
+            const packages = productSnap.val().packages || {};
+            const pkgCount = Object.keys(packages).length;
+            let finalKey = 'p' + (pkgCount + 1);
+            let counter = pkgCount + 1;
+            while (packages[finalKey]) { counter++; finalKey = 'p' + counter; }
+            const newPackage = { name: pkgName.trim(), price: parseInt(pkgPrice), stock: 'in', order: pkgCount };
+            await set(ref(database, 'products/' + productKey + '/packages/' + finalKey), newPackage);
+            showToast('✅ Package added!');
+            loadProducts();
+        };
+
+        // ============ DELETE PRODUCT ============
+        window.deleteProduct = async function(productKey, productName) {
+            if (!confirm('⚠️ সাবধান!\n\n"' + productName + '" product এবং এর সব package delete হবে।\n\nContinue?')) return;
+            if (!confirm('❌ শেষ Confirmation!\n\nDelete করতে চান?')) return;
+            await set(ref(database, 'products/' + productKey), null);
+            showToast('✅ Product deleted!');
+            loadProducts();
+        };
+
+        // ============ DELETE PACKAGE ============
+        window.deletePackage = async function(productKey, pkgKey, pkgName) {
+            if (!confirm('⚠️ "' + pkgName + '" package delete করবেন?')) return;
+            await set(ref(database, 'products/' + productKey + '/packages/' + pkgKey), null);
+            showToast('✅ Package deleted!');
+            loadProducts();
+        };
+
+        // ============ SAVE ORDER ============
         async function saveProductOrder() {
             const cards = document.querySelectorAll('#productsList .product-admin-card');
             const updates = {};
@@ -546,7 +589,6 @@
             showToast('✅ Product order saved!');
         }
 
-        // Save Package Order to Firebase
         async function savePackageOrder(productKey) {
             const rows = document.querySelectorAll(`#packages-${productKey} .pkg-row`);
             const updates = {};
@@ -562,10 +604,8 @@
             const snapshot = await get(ref(database, 'products'));
             const list = document.getElementById('productsList');
             list.innerHTML = '';
-            if (!snapshot.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet.</p>'; return; }
+            if (!snapshot.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet. Click "Add New Product" to create one.</p>'; return; }
             const products = snapshot.val();
-            
-            // Convert to array and sort by order
             const productsArray = Object.entries(products).map(([key, val]) => ({ key, ...val }));
             productsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
             
@@ -575,10 +615,8 @@
                 const isOut = p.stock === 'out';
                 let packagesHtml = '';
                 if (p.packages) {
-                    // Sort packages by order
                     const packagesArray = Object.entries(p.packages).map(([pkgKey, pkgVal]) => ({ pkgKey, ...pkgVal }));
                     packagesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
-                    
                     for (const pkg of packagesArray) {
                         const pkgKey = pkg.pkgKey;
                         const pkgOut = pkg.stock === 'out';
@@ -588,15 +626,16 @@
                                 <span class="drag-handle pkg-drag">⋮⋮</span>
                                 <span class="pkg-info">${pkg.name} - <strong style="color:#8b00ff;">৳ ${pkg.price}</strong></span>
                                 <div class="pkg-actions">
-                                    <button class="btn-edit" onclick="editPackageName('${key}', '${pkgKey}', \`${safeName}\`)">✏️ Name</button>
-                                    <button class="btn-edit" onclick="editPrice('${key}', '${pkgKey}', ${pkg.price}, \`${safeName}\`)">💰 Price</button>
-                                    <button class="btn-toggle ${pkgOut ? 'stock-out' : 'stock-in'}" onclick="togglePackageStock('${key}', '${pkgKey}', '${pkg.stock}')">${pkgOut ? '❌ Out' : '✅ In'}</button>
+                                    <button class="btn-edit" onclick="editPackageName('${key}', '${pkgKey}', \`${safeName}\`)">✏️</button>
+                                    <button class="btn-edit" onclick="editPrice('${key}', '${pkgKey}', ${pkg.price}, \`${safeName}\`)">💰</button>
+                                    <button class="btn-toggle ${pkgOut ? 'stock-out' : 'stock-in'}" onclick="togglePackageStock('${key}', '${pkgKey}', '${pkg.stock}')">${pkgOut ? '❌' : '✅'}</button>
+                                    <button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;border-color:rgba(255,50,50,0.4);" onclick="deletePackage('${key}', '${pkgKey}', \`${safeName}\`)">🗑️</button>
                                 </div>
                             </div>`;
                     }
                 }
                 const safeProductName = p.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
-                const safeImage = p.image.replace(/`/g, '\\`').replace(/'/g, "\\'");
+                const safeImage = (p.image || '').replace(/`/g, '\\`').replace(/'/g, "\\'");
                 list.innerHTML += `
                     <div class="product-admin-card ${isOut ? 'product-out' : ''}" data-product-key="${key}">
                         <div class="product-admin-header">
@@ -608,28 +647,26 @@
                                     <p>${Object.keys(p.packages || {}).length} Packages - Click to expand</p>
                                 </div>
                             </div>
-                            <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">${isOut ? '❌ Product OFF' : '✅ Product ON'}</button>
+                            <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">${isOut ? '❌ OFF' : '✅ ON'}</button>
                         </div>
                         <div class="product-edit-actions">
-                            <button class="btn-edit-img" onclick="editProductImage('${key}', \`${safeImage}\`, \`${safeProductName}\`)">📸 Change Image</button>
-                            <button class="btn-edit-img" onclick="editProductName('${key}', \`${safeProductName}\`)">✏️ Change Name</button>
+                            <button class="btn-edit-img" onclick="editProductImage('${key}', \`${safeImage}\`, \`${safeProductName}\`)">📸 Image</button>
+                            <button class="btn-edit-img" onclick="editProductName('${key}', \`${safeProductName}\`)">✏️ Name</button>
+                            <button class="btn-edit-img" style="background:linear-gradient(135deg,#00c853,#00e676);" onclick="addNewPackage('${key}')">➕ Package</button>
+                            <button class="btn-edit-img" style="background:linear-gradient(135deg,#ff3d00,#ff0000);" onclick="deleteProduct('${key}', \`${safeProductName}\`)">🗑️ Delete</button>
                         </div>
                         <div class="packages-container" id="packages-${key}" style="display:none;">${packagesHtml}</div>
                     </div>`;
             }
             
-            // Initialize Sortable for Products
             new Sortable(list, {
                 handle: '.product-drag',
                 animation: 200,
                 ghostClass: 'sortable-ghost',
                 dragClass: 'sortable-drag',
-                onEnd: function() {
-                    saveProductOrder();
-                }
+                onEnd: function() { saveProductOrder(); }
             });
             
-            // Initialize Sortable for each Package container
             document.querySelectorAll('.packages-container').forEach(container => {
                 const productKey = container.id.replace('packages-', '');
                 new Sortable(container, {
@@ -637,9 +674,7 @@
                     animation: 200,
                     ghostClass: 'sortable-ghost',
                     dragClass: 'sortable-drag',
-                    onEnd: function() {
-                        savePackageOrder(productKey);
-                    }
+                    onEnd: function() { savePackageOrder(productKey); }
                 });
             });
         }
