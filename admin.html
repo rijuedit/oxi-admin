@@ -8,88 +8,105 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
-        .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
+        .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #000, #1a0033, #000); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        .login-box { background: rgba(20, 20, 40, 0.95); border: 2px solid #8b00ff; border-radius: 25px; padding: 40px 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 50px rgba(139, 0, 255, 0.5); }
+        .login-box h2 { font-family: 'Orbitron', sans-serif; color: white; font-size: 26px; margin: 15px 0 8px; }
+        .login-box > p { color: #a0a0c0; font-size: 14px; margin-bottom: 25px; }
+        .btn-google-admin { width: 100%; padding: 14px; background: white; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; }
+        .btn-google-admin:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(139, 0, 255, 0.4); }
+        .btn-google-admin img { width: 22px; height: 22px; }
+        .login-error { background: rgba(255, 50, 50, 0.15); border: 1px solid rgba(255, 50, 50, 0.4); color: #ff6b6b; padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; }
+        .admin-role-badge { background: linear-gradient(135deg, #ff4500, #ff0000); padding: 6px 14px; border-radius: 15px; font-weight: 700; color: white; font-size: 12px; margin-right: 10px; }
+        .admin-role-badge.super { background: linear-gradient(135deg, #ffaa00, #ff6600); }
+        .admin-role-badge.permanent { background: linear-gradient(135deg, #ffd700, #ff8c00); }
+        .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
         .user-modal-overlay.show { display: flex; }
-        .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(139, 0, 255, 0.5); }
-        .user-modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid rgba(139, 0, 255, 0.3); margin-bottom: 20px; }
+        .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; }
+        .user-modal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 2px solid rgba(139,0,255,0.3); margin-bottom: 20px; }
         .user-modal-header h2 { color: #8b00ff; font-family: 'Orbitron', sans-serif; font-size: 22px; }
-        .user-modal-close { background: rgba(255, 50, 50, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 50, 50, 0.4); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 700; transition: 0.3s; }
-        .user-modal-close:hover { background: rgba(255, 50, 50, 0.3); transform: rotate(90deg); }
-        .user-profile-section { display: flex; align-items: center; gap: 15px; padding: 20px; background: rgba(139, 0, 255, 0.1); border-radius: 15px; margin-bottom: 20px; }
-        .user-profile-section img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #8b00ff; object-fit: cover; }
+        .user-modal-close { background: rgba(255,50,50,0.15); color: #ff6b6b; border: 1px solid rgba(255,50,50,0.4); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: 700; }
+        .user-modal-close:hover { background: rgba(255,50,50,0.3); transform: rotate(90deg); }
+        .user-profile-section { display: flex; align-items: center; gap: 15px; padding: 20px; background: rgba(139,0,255,0.1); border-radius: 15px; margin-bottom: 20px; }
+        .user-profile-section img { width: 70px; height: 70px; border-radius: 50%; border: 3px solid #8b00ff; }
         .user-profile-info h3 { color: white; font-size: 20px; margin-bottom: 5px; }
         .user-profile-info p { color: #a0a0c0; font-size: 13px; margin: 2px 0; }
         .user-stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-        .user-stat-item { background: rgba(20, 20, 40, 0.85); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 12px; padding: 15px 10px; text-align: center; }
-        .user-stat-item .stat-value { color: #8b00ff; font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 900; }
+        .user-stat-item { background: rgba(20,20,40,0.85); border: 1px solid rgba(139,0,255,0.3); border-radius: 12px; padding: 15px 10px; text-align: center; }
+        .user-stat-item .stat-value { color: #8b00ff; font-family: 'Orbitron',sans-serif; font-size: 20px; font-weight: 900; }
         .user-stat-item .stat-label { color: #a0a0c0; font-size: 11px; margin-top: 5px; text-transform: uppercase; }
-        .modal-section { background: rgba(20, 20, 40, 0.6); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
-        .modal-section h4 { color: #8b00ff; font-size: 16px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-family: 'Orbitron', sans-serif; }
-        .modal-section h4 span { background: rgba(139, 0, 255, 0.2); color: #a78bfa; padding: 3px 12px; border-radius: 15px; font-size: 12px; font-family: 'Poppins', sans-serif; }
-        .modal-item { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(139, 0, 255, 0.2); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
-        .modal-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(139, 0, 255, 0.15); }
+        .modal-section { background: rgba(20,20,40,0.6); border-radius: 15px; padding: 20px; margin-bottom: 15px; }
+        .modal-section h4 { color: #8b00ff; font-size: 16px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; font-family: 'Orbitron',sans-serif; }
+        .modal-section h4 span { background: rgba(139,0,255,0.2); color: #a78bfa; padding: 3px 12px; border-radius: 15px; font-size: 12px; font-family: 'Poppins',sans-serif; }
+        .modal-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(139,0,255,0.2); border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
+        .modal-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(139,0,255,0.15); }
         .modal-item-header strong { color: white; font-size: 14px; }
         .modal-status { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
         .modal-item p { color: #a0a0c0; font-size: 12px; margin: 3px 0; }
         .modal-item p strong { color: white; }
         .empty-msg { text-align: center; color: #888; padding: 20px; font-size: 13px; }
-        .clickable-user { cursor: pointer; transition: 0.3s; }
-        .clickable-user:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3); border-color: #8b00ff !important; }
-        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; padding: 5px; background: rgba(20, 20, 40, 0.5); border-radius: 12px; flex-wrap: wrap; }
-        .sub-tab-btn { flex: 1; min-width: 130px; background: transparent; border: none; color: #a0a0c0; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Poppins', sans-serif; }
-        .sub-tab-btn:hover { color: white; background: rgba(139, 0, 255, 0.15); }
-        .sub-tab-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; box-shadow: 0 4px 15px rgba(139, 0, 255, 0.4); }
+        .clickable-user { cursor: pointer; transition: 0.3s; user-select: none; -webkit-user-select: none; }
+        .clickable-user:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(139,0,255,0.3); border-color: #8b00ff !important; }
+        .sub-tabs { display: flex; gap: 8px; margin-bottom: 20px; padding: 5px; background: rgba(20,20,40,0.5); border-radius: 12px; flex-wrap: wrap; }
+        .sub-tab-btn { flex: 1; min-width: 130px; background: transparent; border: none; color: #a0a0c0; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Poppins',sans-serif; }
+        .sub-tab-btn:hover { color: white; background: rgba(139,0,255,0.15); }
+        .sub-tab-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; }
         .sub-badge { background: #ff3d00; color: white; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 700; min-width: 20px; display: inline-block; }
         .sub-tab-btn.active .sub-badge { background: white; color: #8b00ff; }
-        .filter-tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; padding: 10px; background: rgba(139, 0, 255, 0.05); border-radius: 12px; border: 1px solid rgba(139, 0, 255, 0.2); }
-        .filter-btn { background: rgba(20, 20, 40, 0.6); color: #a0a0c0; border: 1px solid rgba(139, 0, 255, 0.3); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; transition: 0.3s; font-family: 'Poppins', sans-serif; }
-        .filter-btn:hover { background: rgba(139, 0, 255, 0.15); color: white; }
-        .filter-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; border-color: #8b00ff; box-shadow: 0 3px 10px rgba(139, 0, 255, 0.4); }
-        .filter-summary { background: rgba(139, 0, 255, 0.1); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; padding: 10px; background: rgba(139,0,255,0.05); border-radius: 12px; border: 1px solid rgba(139,0,255,0.2); }
+        .filter-btn { background: rgba(20,20,40,0.6); color: #a0a0c0; border: 1px solid rgba(139,0,255,0.3); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: 'Poppins',sans-serif; }
+        .filter-btn:hover { background: rgba(139,0,255,0.15); color: white; }
+        .filter-btn.active { background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; border-color: #8b00ff; }
+        .filter-summary { background: rgba(139,0,255,0.1); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; padding: 12px 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .filter-summary-info { color: white; font-size: 13px; }
-        .filter-summary-info strong { color: #8b00ff; font-size: 15px; font-family: 'Orbitron', sans-serif; }
-        .stat-card-new.clickable { cursor: pointer; transition: 0.3s; }
-        .stat-card-new.clickable:hover { transform: translateY(-5px); border-color: #8b00ff; box-shadow: 0 10px 30px rgba(139, 0, 255, 0.3); }
-        
+        .filter-summary-info strong { color: #8b00ff; font-size: 15px; font-family: 'Orbitron',sans-serif; }
+        .stat-card-new.clickable { cursor: pointer; }
+        .stat-card-new.clickable:hover { transform: translateY(-5px); border-color: #8b00ff; box-shadow: 0 10px 30px rgba(139,0,255,0.3); }
         .drag-handle { cursor: grab; color: #8b00ff; font-size: 20px; padding: 5px 10px; user-select: none; }
-        .drag-handle:active { cursor: grabbing; }
-        .sortable-ghost { opacity: 0.4; background: rgba(139, 0, 255, 0.2) !important; }
-        .sortable-drag { opacity: 0.9; transform: rotate(2deg); }
-        .reorder-info { background: rgba(139, 0, 255, 0.1); border-left: 3px solid #8b00ff; padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #d0d0e0; }
-        .add-product-btn { width: 100%; background: linear-gradient(135deg, #00c853, #00e676); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; margin-bottom: 15px; box-shadow: 0 5px 20px rgba(0, 200, 83, 0.3); transition: 0.3s; }
-        .add-product-btn:hover { transform: scale(1.02); box-shadow: 0 8px 25px rgba(0, 200, 83, 0.5); }
-        
-        @media (max-width: 600px) {
-            .user-modal-box { padding: 15px; }
-            .user-stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .user-modal-header h2 { font-size: 18px; }
-            .filter-btn { padding: 7px 12px; font-size: 11px; }
-        }
+        .sortable-ghost { opacity: 0.4; background: rgba(139,0,255,0.2) !important; }
+        .add-product-btn { width: 100%; background: linear-gradient(135deg, #00c853, #00e676); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 15px; margin-bottom: 15px; }
+        .add-product-btn:hover { transform: scale(1.02); }
+        .search-box { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; color: white; font-size: 14px; margin-bottom: 15px; font-family: 'Poppins',sans-serif; }
+        .search-box:focus { outline: none; border-color: #8b00ff; box-shadow: 0 0 15px rgba(139,0,255,0.3); }
+        .stats-grid-new { grid-template-columns: repeat(4, 1fr); }
+        .banned-badge { background: rgba(255,50,50,0.2); color: #ff6b6b; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,50,50,0.4); margin-left: 8px; }
+        .ban-popup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 20px; }
+        .ban-popup.show { display: flex; }
+        .ban-popup-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #ff3d00; border-radius: 20px; padding: 30px; max-width: 400px; width: 100%; text-align: center; }
+        .ban-popup-box h3 { color: #ff6b6b; font-size: 22px; margin-bottom: 15px; font-family: 'Orbitron',sans-serif; }
+        .ban-popup-box p { color: #a0a0c0; margin-bottom: 20px; }
+        .ban-popup-btns { display: flex; gap: 10px; }
+        .ban-popup-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .btn-ban-confirm { background: linear-gradient(135deg, #ff3d00, #ff0000); color: white; }
+        .btn-ban-cancel { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .reject-popup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 20px; }
+        .reject-popup.show { display: flex; }
+        .reject-popup-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #ff3d00; border-radius: 20px; padding: 30px; max-width: 450px; width: 100%; }
+        .reject-popup-box h3 { color: #ff6b6b; font-size: 20px; margin-bottom: 15px; font-family: 'Orbitron',sans-serif; text-align: center; }
+        .reject-popup-box textarea { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,50,50,0.4); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins',sans-serif; min-height: 100px; resize: vertical; margin-bottom: 15px; }
+        .reject-popup-box textarea:focus { outline: none; border-color: #ff3d00; }
+        .banner-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(139,0,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .banner-card img { width: 100px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #8b00ff; }
+        .banner-card .banner-info { flex: 1; min-width: 200px; color: white; font-size: 13px; }
+        .banner-card .banner-actions { display: flex; gap: 8px; }
+        .admin-mgmt-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(139,0,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .admin-mgmt-item .admin-info { color: white; font-size: 14px; flex: 1; min-width: 200px; }
+        .admin-mgmt-item .admin-info small { color: #a0a0c0; font-size: 11px; display: block; margin-top: 3px; }
+        @media (max-width: 768px) { .stats-grid-new { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .user-modal-box { padding: 15px; } .user-stats-grid { grid-template-columns: repeat(2, 1fr); } .filter-btn { padding: 7px 12px; font-size: 11px; } }
     </style>
 </head>
 <body class="home-body">
 
-    <div id="pinScreen" class="pin-screen">
-        <div class="pin-container">
-            <div class="pin-logo">🔐</div>
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <div style="font-size: 60px;">🔐</div>
             <h2>Admin Panel</h2>
-            <p>Enter Your PIN</p>
-            <div class="pin-display" id="pinDisplay"></div>
-            <div id="pinError" class="pin-error" style="display:none;">❌ Wrong PIN!</div>
-            <div class="pin-keypad">
-                <button onclick="addDigit('1')">1</button>
-                <button onclick="addDigit('2')">2</button>
-                <button onclick="addDigit('3')">3</button>
-                <button onclick="addDigit('4')">4</button>
-                <button onclick="addDigit('5')">5</button>
-                <button onclick="addDigit('6')">6</button>
-                <button onclick="addDigit('7')">7</button>
-                <button onclick="addDigit('8')">8</button>
-                <button onclick="addDigit('9')">9</button>
-                <button onclick="clearPin()" class="pin-clear">⌫</button>
-                <button onclick="addDigit('0')">0</button>
-                <button onclick="checkPin()" class="pin-submit">✓</button>
-            </div>
+            <p>Sign in with your admin Google account</p>
+            <button id="googleLoginBtn" class="btn-google-admin">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+            <div id="loginError" class="login-error"></div>
         </div>
     </div>
 
@@ -97,27 +114,33 @@
         <nav class="home-navbar">
             <div class="home-logo">OXI <span>ADMIN</span></div>
             <div class="home-nav-right">
-                <span class="admin-badge">🔐 Admin Mode</span>
+                <span id="adminRoleBadge" class="admin-role-badge">Admin</span>
+                <span id="adminEmail" style="color:#a0a0c0;font-size:13px;"></span>
                 <button class="btn-logout-admin" onclick="logoutAdmin()">Logout</button>
             </div>
         </nav>
 
         <div class="dash-container">
             <div class="stats-grid-new">
-                <div class="stat-card-new clickable" onclick="showTab('users', {target: document.querySelector('.tab-btn:nth-child(3)')})">
+                <div class="stat-card-new clickable" onclick="showTab('users', event)">
                     <div class="stat-icon">👥</div>
                     <h4>Total Users</h4>
                     <p id="totalUsers">0</p>
                 </div>
-                <div class="stat-card-new clickable" onclick="showTab('orders', {target: document.querySelector('.tab-btn:nth-child(2)')})">
+                <div class="stat-card-new clickable" onclick="showTab('orders', event)">
                     <div class="stat-icon">📦</div>
                     <h4>Total Orders</h4>
                     <p id="totalOrdersCount">0</p>
                 </div>
-                <div class="stat-card-new clickable" onclick="showTab('transactions', {target: document.querySelector('.tab-btn:nth-child(1)')})">
+                <div class="stat-card-new clickable" onclick="showTab('transactions', event)">
                     <div class="stat-icon">💰</div>
                     <h4>Pending Add Money</h4>
                     <p id="pendingCount">0</p>
+                </div>
+                <div class="stat-card-new clickable" onclick="showTab('banned', event)">
+                    <div class="stat-icon">🚫</div>
+                    <h4>Banned Users</h4>
+                    <p id="bannedCount">0</p>
                 </div>
             </div>
 
@@ -125,8 +148,12 @@
                 <button class="tab-btn active" onclick="showTab('transactions', event)">💳 Add Money</button>
                 <button class="tab-btn" onclick="showTab('orders', event)">📦 Orders</button>
                 <button class="tab-btn" onclick="showTab('users', event)">👥 Users</button>
+                <button class="tab-btn" onclick="showTab('banned', event)">🚫 Ban List</button>
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
-                <a href="api-settings.html" class="tab-btn" style="text-decoration:none;display:inline-flex;align-items:center;">⚙️ API Settings</a>
+                <button class="tab-btn" onclick="showTab('banners', event)">🖼️ Banners</button>
+                <button class="tab-btn" onclick="showTab('payment', event)">💵 Payment</button>
+                <button class="tab-btn" onclick="showTab('adminMgmt', event)" id="adminMgmtTab" style="display:none;">👑 Admins</button>
+                <a href="api-settings.html" class="tab-btn" style="text-decoration:none;">⚙️ API</a>
             </div>
 
             <div id="transactionsTab" class="tab-content">
@@ -139,11 +166,13 @@
                     <div id="trxPending" class="sub-tab-content"></div>
                     <div id="trxHistory" class="sub-tab-content" style="display:none;">
                         <div class="filter-tabs">
-                            <button class="filter-btn active" onclick="filterHistory('trx', 1, event)">1 Day</button>
-                            <button class="filter-btn" onclick="filterHistory('trx', 3, event)">3 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('trx', 7, event)">7 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('trx', 30, event)">30 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('trx', 60, event)">60 Days</button>
+                            <button class="filter-btn active" onclick="filterHistory('trx', 1, event)">Today</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 3, event)">3 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 7, event)">7 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 15, event)">15 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 30, event)">30 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 60, event)">60 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('trx', 365, event)">1 Year</button>
                             <button class="filter-btn" onclick="filterHistory('trx', 0, event)">Lifetime</button>
                         </div>
                         <div id="trxHistorySummary" class="filter-summary"></div>
@@ -162,11 +191,13 @@
                     <div id="ordPending" class="sub-tab-content"></div>
                     <div id="ordHistory" class="sub-tab-content" style="display:none;">
                         <div class="filter-tabs">
-                            <button class="filter-btn active" onclick="filterHistory('ord', 1, event)">1 Day</button>
-                            <button class="filter-btn" onclick="filterHistory('ord', 3, event)">3 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('ord', 7, event)">7 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('ord', 30, event)">30 Days</button>
-                            <button class="filter-btn" onclick="filterHistory('ord', 60, event)">60 Days</button>
+                            <button class="filter-btn active" onclick="filterHistory('ord', 1, event)">Today</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 3, event)">3 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 7, event)">7 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 15, event)">15 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 30, event)">30 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 60, event)">60 Day</button>
+                            <button class="filter-btn" onclick="filterHistory('ord', 365, event)">1 Year</button>
                             <button class="filter-btn" onclick="filterHistory('ord', 0, event)">Lifetime</button>
                         </div>
                         <div id="ordHistorySummary" class="filter-summary"></div>
@@ -177,8 +208,16 @@
 
             <div id="usersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
-                    <h3>👥 All Users <span style="font-size:12px;color:#a0a0c0;font-weight:400;">(Click user to view details)</span></h3>
+                    <h3>👥 All Users <span style="font-size:12px;color:#a0a0c0;font-weight:400;">(Click to view, Long press to Ban)</span></h3>
+                    <input type="text" id="userSearch" class="search-box" placeholder="🔍 Search by Name, Email or User ID..." oninput="filterUsers()">
                     <div id="usersList"></div>
+                </div>
+            </div>
+
+            <div id="bannedTab" class="tab-content" style="display:none;">
+                <div class="section-box">
+                    <h3>🚫 Banned Users List</h3>
+                    <div id="bannedList"></div>
                 </div>
             </div>
 
@@ -186,10 +225,51 @@
                 <div class="section-box">
                     <h3>🎮 Product Management</h3>
                     <button class="add-product-btn" onclick="addNewProduct()">➕ Add New Product</button>
-                    <div class="reorder-info">
-                        💡 <strong>Drag & Drop:</strong> ⋮⋮ icon ধরে Product এবং Package গুলো reorder করুন। User site এ automatic update হবে।
-                    </div>
                     <div id="productsList"></div>
+                </div>
+            </div>
+
+            <div id="bannersTab" class="tab-content" style="display:none;">
+                <div class="section-box">
+                    <h3>🖼️ Home Page Banners</h3>
+                    <button class="add-product-btn" onclick="addNewBanner()">➕ Add New Banner</button>
+                    <div id="bannersList"></div>
+                </div>
+            </div>
+
+            <div id="paymentTab" class="tab-content" style="display:none;">
+                <div class="section-box">
+                    <h3>💵 Payment Numbers</h3>
+                    <div style="background:rgba(139,0,255,0.1);border-left:3px solid #8b00ff;padding:12px 15px;border-radius:8px;margin-bottom:20px;color:#d0d0e0;font-size:13px;">
+                        💡 এই number গুলোতে user টাকা পাঠাবে
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;color:#a0a0c0;margin-bottom:8px;font-size:13px;">🟣 bKash Number</label>
+                        <input type="text" id="bkashInput" class="search-box" placeholder="01XXXXXXXXX">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;color:#a0a0c0;margin-bottom:8px;font-size:13px;">🟠 Nagad Number</label>
+                        <input type="text" id="nagadInput" class="search-box" placeholder="01XXXXXXXXX">
+                    </div>
+                    <button class="add-product-btn" onclick="savePaymentNumbers()">💾 Save Numbers</button>
+                </div>
+            </div>
+
+            <div id="adminMgmtTab_content" class="tab-content" style="display:none;">
+                <div class="section-box">
+                    <h3>👑 Admin Management</h3>
+                    <div style="background:rgba(139,0,255,0.1);border-left:3px solid #8b00ff;padding:12px 15px;border-radius:8px;margin-bottom:20px;color:#d0d0e0;font-size:13px;">
+                        💡 Super Admin: সব কাজ + Admin manage করতে পারবে<br>
+                        💡 Admin: শুধু order/payment/product manage করতে পারবে
+                    </div>
+                    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                        <button class="add-product-btn" style="flex:1;min-width:200px;" onclick="addAdmin('super')">➕ Add Super Admin</button>
+                        <button class="add-product-btn" style="flex:1;min-width:200px;background:linear-gradient(135deg,#4a90e2,#1e5799);" onclick="addAdmin('admin')">➕ Add Normal Admin</button>
+                    </div>
+                    <h4 style="color:#ffd700;margin-bottom:10px;">👑 Super Admins</h4>
+                    <div id="superAdminsList" style="margin-bottom:20px;"></div>
+                    <h4 style="color:#4a90e2;margin-bottom:10px;">🔧 Normal Admins</h4>
+                    <div id="normalAdminsList"></div>
                 </div>
             </div>
         </div>
@@ -201,71 +281,105 @@
                 <h2>👤 User Details</h2>
                 <button class="user-modal-close" onclick="closeUserModal()">✕</button>
             </div>
-            <div id="userModalContent">
-                <p style="text-align:center;color:#888;padding:30px;">Loading...</p>
+            <div id="userModalContent"></div>
+        </div>
+    </div>
+
+    <div id="banPopup" class="ban-popup">
+        <div class="ban-popup-box">
+            <div style="font-size:50px;margin-bottom:10px;">🚫</div>
+            <h3 id="banPopupTitle">Ban User?</h3>
+            <p id="banPopupText">Are you sure you want to ban this user?</p>
+            <div class="ban-popup-btns">
+                <button class="btn-ban-cancel" onclick="closeBanPopup()">Cancel</button>
+                <button class="btn-ban-confirm" id="banConfirmBtn">Ban User</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="rejectPopup" class="reject-popup">
+        <div class="reject-popup-box">
+            <div style="font-size:50px;text-align:center;margin-bottom:10px;">❌</div>
+            <h3>Reject Order?</h3>
+            <p style="color:#a0a0c0;margin-bottom:15px;font-size:13px;">Reason (Optional - user will see this):</p>
+            <textarea id="rejectReason" placeholder="Example: Wrong player ID, Server issue, etc..."></textarea>
+            <div class="ban-popup-btns">
+                <button class="btn-ban-cancel" onclick="closeRejectPopup()">Cancel</button>
+                <button class="btn-ban-confirm" id="rejectConfirmBtn">Reject Order</button>
             </div>
         </div>
     </div>
 
     <div id="toast" class="toast"></div>
+        <script type="module">
+        import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, set, get, push, update, remove, runTransaction, emailToKey, checkAdminLevel } from './config.js';
 
-    <script type="module">
-        import { database, ref, get, set, push, onValue, update, ADMIN_PIN } from './config.js';
-
-        let currentPin = '';
-        let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
-        let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
+        let currentUser = null;
+        let currentAdminLevel = 'none';
+        let allUsers = {};
         let allTransactionsHistory = [];
         let allOrdersHistory = [];
+        let currentRejectOrderId = null;
+        let longPressTimer = null;
 
-        function checkLock() {
-            if (Date.now() < lockUntil) {
-                const minutes = Math.ceil((lockUntil - Date.now()) / 60000);
-                document.getElementById('pinDisplay').textContent = '🔒 LOCKED';
-                document.getElementById('pinError').style.display = 'block';
-                document.getElementById('pinError').textContent = '🔒 Locked! Wait ' + minutes + ' minutes';
-                document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
-                return true;
-            }
-            return false;
-        }
-        checkLock();
-
-        window.addDigit = function(digit) { if (currentPin.length < 15) { currentPin += digit; updatePinDisplay(); } };
-        window.clearPin = function() { currentPin = currentPin.slice(0, -1); updatePinDisplay(); };
-        function updatePinDisplay() {
-            document.getElementById('pinDisplay').textContent = '•'.repeat(currentPin.length);
-            document.getElementById('pinError').style.display = 'none';
-        }
-        window.checkPin = function() {
-            if (checkLock()) return;
-            if (currentPin === ADMIN_PIN) {
-                localStorage.removeItem('wrongAttempts');
-                localStorage.removeItem('lockUntil');
-                document.getElementById('pinScreen').style.display = 'none';
-                document.getElementById('adminDashboard').style.display = 'block';
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                loadData();
-            } else {
-                wrongAttempts++;
-                localStorage.setItem('wrongAttempts', wrongAttempts);
-                if (wrongAttempts >= 3) {
-                    lockUntil = Date.now() + (5 * 60 * 1000);
-                    localStorage.setItem('lockUntil', lockUntil);
-                    localStorage.setItem('wrongAttempts', '0');
-                    wrongAttempts = 0;
-                    document.getElementById('pinError').textContent = '🔒 Locked for 5 minutes!';
-                    document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
-                } else {
-                    document.getElementById('pinError').textContent = '❌ Wrong PIN! (' + (3 - wrongAttempts) + ' attempts left)';
+        // ============ LOGIN ============
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+            try {
+                document.getElementById('loginError').style.display = 'none';
+                const result = await signInWithPopup(auth, googleProvider);
+                const level = await checkAdminLevel(result.user.email);
+                if (level === 'none') {
+                    await signOut(auth);
+                    document.getElementById('loginError').textContent = '❌ You are not authorized. Only admins can login.';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
                 }
-                document.getElementById('pinError').style.display = 'block';
-                currentPin = '';
-                updatePinDisplay();
+            } catch (err) {
+                document.getElementById('loginError').textContent = '❌ ' + err.message;
+                document.getElementById('loginError').style.display = 'block';
             }
-        };
+        });
 
-        window.logoutAdmin = function() { sessionStorage.removeItem('adminLoggedIn'); location.reload(); };
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('adminDashboard').style.display = 'none';
+                return;
+            }
+            const level = await checkAdminLevel(user.email);
+            if (level === 'none') {
+                await signOut(auth);
+                return;
+            }
+            currentUser = user;
+            currentAdminLevel = level;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            document.getElementById('adminEmail').textContent = user.email;
+            const badge = document.getElementById('adminRoleBadge');
+            if (level === 'permanent') { badge.textContent = '👑 Permanent Super'; badge.className = 'admin-role-badge permanent'; }
+            else if (level === 'super') { badge.textContent = '👑 Super Admin'; badge.className = 'admin-role-badge super'; }
+            else { badge.textContent = '🔧 Admin'; badge.className = 'admin-role-badge'; }
+            if (level === 'permanent' || level === 'super') {
+                document.getElementById('adminMgmtTab').style.display = 'inline-block';
+            }
+            loadData();
+        });
+
+        window.logoutAdmin = async function() { await signOut(auth); location.reload(); };
+
+        window.showTab = function(tab, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            const tabId = tab === 'adminMgmt' ? 'adminMgmtTab_content' : tab + 'Tab';
+            const el = document.getElementById(tabId);
+            if (el) el.style.display = 'block';
+            if (event && event.target) event.target.classList.add('active');
+            if (tab === 'banners') loadBanners();
+            if (tab === 'payment') loadPaymentNumbers();
+            if (tab === 'adminMgmt') loadAdmins();
+            if (tab === 'banned') loadBanned();
+        };
 
         window.showSubTab = function(subTab, event) {
             const parent = event.target.closest('.section-box');
@@ -275,474 +389,509 @@
             event.target.classList.add('active');
         };
 
-        window.showTab = function(tab, event) {
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tab + 'Tab').style.display = 'block';
-            if (event && event.target) event.target.classList.add('active');
+        window.showToast = function(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         };
 
-        window.showToast = function(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        };
-
+        // ============ FILTERS ============
         window.filterHistory = function(type, days, event) {
             const parent = event.target.closest('.sub-tab-content');
             parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
             event.target.classList.add('active');
             const now = Date.now();
-            const filterMs = days * 24 * 60 * 60 * 1000;
+            const ms = days * 24 * 60 * 60 * 1000;
             if (type === 'trx') {
-                let filtered = allTransactionsHistory;
-                if (days > 0) filtered = allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= filterMs);
-                renderTrxHistory(filtered, days);
-            } else if (type === 'ord') {
-                let filtered = allOrdersHistory;
-                if (days > 0) filtered = allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= filterMs);
-                renderOrdHistory(filtered, days);
+                let f = days > 0 ? allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= ms) : allTransactionsHistory;
+                renderTrxHistory(f, days);
+            } else {
+                let f = days > 0 ? allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= ms) : allOrdersHistory;
+                renderOrdHistory(f, days);
             }
         };
 
+        function labelDays(d) {
+            if (d === 0) return 'Lifetime';
+            if (d === 1) return 'Today';
+            if (d === 365) return '1 Year';
+            return `Last ${d} Days`;
+        }
+
         function renderTrxHistory(filtered, days) {
-            const trxHistoryList = document.getElementById('trxHistoryList');
+            const list = document.getElementById('trxHistoryList');
             const summary = document.getElementById('trxHistorySummary');
-            const totalAmount = filtered.filter(t => t.status === 'Approved').reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
-            const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
-            summary.innerHTML = `<div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> transactions</div><div class="filter-summary-info">💰 Total Approved: <strong>৳ ${totalAmount.toLocaleString()}</strong></div>`;
-            if (filtered.length === 0) { trxHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions in this period</p>'; return; }
+            const total = filtered.filter(t => t.status === 'Approved').reduce((s, t) => s + parseInt(t.amount || 0), 0);
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${labelDays(days)}: <strong>${filtered.length}</strong> trx</div><div class="filter-summary-info">💰 Approved: <strong>৳ ${total.toLocaleString()}</strong></div>`;
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions</p>'; return; }
             let html = '';
-            filtered.forEach(trx => {
-                const statusColor = trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
-                const date = new Date(trx.date).toLocaleString('en-GB');
-                html += `<div class="admin-item"><div class="admin-item-info"><h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4><p>📧 ${trx.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p><p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div></div>`;
+            filtered.forEach(t => {
+                const c = t.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                const d = new Date(t.date).toLocaleString('en-GB');
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${t.userName} <span style="color:${c};">● ${t.status}</span></h4><p>📧 ${t.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${t.amount}</strong> | ${(t.method||'').toUpperCase()}</p><p>📱 ${t.senderNumber} | TrxID: <strong>${t.trxId}</strong></p><p style="font-size:12px;color:#888;">${d}</p></div></div>`;
             });
-            trxHistoryList.innerHTML = html;
+            list.innerHTML = html;
         }
 
         function renderOrdHistory(filtered, days) {
-            const ordHistoryList = document.getElementById('ordHistoryList');
+            const list = document.getElementById('ordHistoryList');
             const summary = document.getElementById('ordHistorySummary');
-            const totalRevenue = filtered.filter(o => o.status === 'Complete').reduce((sum, o) => sum + parseInt(o.price || 0), 0);
-            const completeCount = filtered.filter(o => o.status === 'Complete').length;
-            const failedCount = filtered.filter(o => o.status === 'Failed').length;
-            const label = days === 0 ? 'Lifetime' : `Last ${days} Day${days > 1 ? 's' : ''}`;
-            summary.innerHTML = `<div class="filter-summary-info">📊 ${label}: <strong>${filtered.length}</strong> orders (✅ ${completeCount} | ❌ ${failedCount})</div><div class="filter-summary-info">💰 Revenue: <strong>৳ ${totalRevenue.toLocaleString()}</strong></div>`;
-            if (filtered.length === 0) { ordHistoryList.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders in this period</p>'; return; }
+            const rev = filtered.filter(o => o.status === 'Complete').reduce((s, o) => s + parseInt(o.price || 0), 0);
+            const cc = filtered.filter(o => o.status === 'Complete').length;
+            const fc = filtered.filter(o => o.status === 'Rejected' || o.status === 'Failed').length;
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${labelDays(days)}: <strong>${filtered.length}</strong> (✅${cc} ❌${fc})</div><div class="filter-summary-info">💰 Revenue: <strong>৳ ${rev.toLocaleString()}</strong></div>`;
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders</p>'; return; }
             let html = '';
-            filtered.forEach(ord => {
-                const statusColor = ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
-                const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                html += `<div class="admin-item"><div class="admin-item-info"><h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4><p>🎮 ${ord.productName}</p><p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div></div>`;
+            filtered.forEach(o => {
+                const c = o.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                const d = new Date(o.orderDate).toLocaleString('en-GB');
+                const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : o.id.substring(0, 10);
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${oid} - ${o.userName} <span style="color:${c};">● ${o.status}</span></h4><p>🎮 ${o.productName}</p><p>📦 ${o.packageName} | <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 Player: <strong>${o.playerId}</strong></p>${o.rejectReason ? `<p style="color:#ff6b6b;">❌ Reason: ${o.rejectReason}</p>` : ''}<p style="font-size:12px;color:#888;">${d}</p></div></div>`;
             });
-            ordHistoryList.innerHTML = html;
+            list.innerHTML = html;
         }
 
+        // ============ USER SEARCH ============
+        window.filterUsers = function() {
+            const q = document.getElementById('userSearch').value.toLowerCase().trim();
+            const list = document.getElementById('usersList');
+            list.innerHTML = '';
+            const filtered = Object.entries(allUsers).filter(([uid, u]) => {
+                if (!q) return true;
+                const num = u.numericId || '';
+                return (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || uid.toLowerCase().includes(q) || num.includes(q);
+            });
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No users found</p>'; return; }
+            filtered.forEach(([uid, u]) => renderUserItem(uid, u, list));
+        };
+
+        function renderUserItem(uid, user, container) {
+            const isBanned = user.banned === true;
+            const div = document.createElement('div');
+            div.className = 'admin-item clickable-user';
+            div.dataset.uid = uid;
+            div.innerHTML = `
+                <div class="admin-item-info">
+                    <h4>${user.name || 'Anonymous'} ${isBanned ? '<span class="banned-badge">🚫 BANNED</span>' : '<span style="color:#8b00ff;font-size:12px;">👆 Tap | Long press to Ban</span>'}</h4>
+                    <p>📧 ${user.email || 'N/A'}</p>
+                    <p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p>
+                    <p>📦 Orders: ${user.orders || 0} | 🆔 ${user.numericId || uid.substring(0,10)}</p>
+                </div>
+                <div class="admin-actions" onclick="event.stopPropagation();">
+                    <button class="btn-approve" onclick="adminAddMoney('${uid}')">➕ Add</button>
+                    <button class="btn-reject" onclick="adminDeductMoney('${uid}')">➖ Deduct</button>
+                </div>`;
+            // Click to view
+            div.addEventListener('click', () => showUserDetails(uid));
+            // Long press for ban
+            const startPress = (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                longPressTimer = setTimeout(() => {
+                    showBanPopup(uid, user.name || 'User', isBanned);
+                }, 600);
+            };
+            const cancelPress = () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } };
+            div.addEventListener('mousedown', startPress);
+            div.addEventListener('touchstart', startPress);
+            div.addEventListener('mouseup', cancelPress);
+            div.addEventListener('mouseleave', cancelPress);
+            div.addEventListener('touchend', cancelPress);
+            div.addEventListener('touchmove', cancelPress);
+            container.appendChild(div);
+        }
+
+        // ============ BAN SYSTEM ============
+        function showBanPopup(uid, name, isBanned) {
+            document.getElementById('banPopup').classList.add('show');
+            document.getElementById('banPopupTitle').textContent = isBanned ? 'Unban User?' : 'Ban User?';
+            document.getElementById('banPopupText').textContent = isBanned ? `Unban ${name}?` : `Ban ${name}? They cannot login/order.`;
+            const btn = document.getElementById('banConfirmBtn');
+            btn.textContent = isBanned ? 'Unban User' : 'Ban User';
+            btn.onclick = async () => {
+                if (isBanned) {
+                    await remove(ref(database, 'bannedUsers/' + uid));
+                    await update(ref(database, 'users/' + uid), { banned: false });
+                    showToast('✅ User unbanned');
+                } else {
+                    await set(ref(database, 'bannedUsers/' + uid), true);
+                    await update(ref(database, 'users/' + uid), { banned: true });
+                    showToast('🚫 User banned');
+                }
+                closeBanPopup();
+                loadData();
+            };
+        }
+        window.closeBanPopup = function() { document.getElementById('banPopup').classList.remove('show'); };
+
+        function loadBanned() {
+            const list = document.getElementById('bannedList');
+            list.innerHTML = '';
+            const banned = Object.entries(allUsers).filter(([uid, u]) => u.banned === true);
+            if (!banned.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">🎉 No banned users</p>'; return; }
+            banned.forEach(([uid, u]) => {
+                list.innerHTML += `<div class="admin-item"><div class="admin-item-info"><h4>${u.name} <span class="banned-badge">🚫 BANNED</span></h4><p>📧 ${u.email}</p><p>🆔 ${u.numericId || uid.substring(0,10)}</p></div><div class="admin-actions"><button class="btn-approve" onclick="unbanUser('${uid}')">✅ Unban</button></div></div>`;
+            });
+        }
+        window.unbanUser = async function(uid) {
+            await remove(ref(database, 'bannedUsers/' + uid));
+            await update(ref(database, 'users/' + uid), { banned: false });
+            showToast('✅ User unbanned');
+            loadData();
+        };
+
+        // ============ USER DETAILS MODAL ============
         window.showUserDetails = async function(uid) {
             document.getElementById('userModal').classList.add('show');
             document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading...</p>';
             try {
-                const userSnap = await get(ref(database, 'users/' + uid));
-                if (!userSnap.exists()) { document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ User not found!</p>'; return; }
-                const user = userSnap.val();
-                const trxSnap = await get(ref(database, 'transactions'));
-                const userTransactions = [];
-                if (trxSnap.exists()) {
-                    const allTrx = trxSnap.val();
-                    for (const trxId in allTrx) if (allTrx[trxId].userId === uid) userTransactions.push({ id: trxId, ...allTrx[trxId] });
-                }
-                userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-                const ordSnap = await get(ref(database, 'orders'));
-                const userOrders = [];
-                if (ordSnap.exists()) {
-                    const allOrd = ordSnap.val();
-                    for (const ordId in allOrd) if (allOrd[ordId].userId === uid) userOrders.push({ id: ordId, ...allOrd[ordId] });
-                }
-                userOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-                const totalDeposit = userTransactions.filter(t => t.status === 'Approved').reduce((sum, t) => sum + parseInt(t.amount || 0), 0);
-                let html = `<div class="user-profile-section"><img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=U'"><div class="user-profile-info"><h3>${user.name || 'Anonymous'}</h3><p>📧 ${user.email || 'N/A'}</p><p>🆔 ${uid.substring(0, 20)}...</p>${user.createdAt ? `<p>📅 Joined: ${new Date(user.createdAt).toLocaleDateString('en-GB')}</p>` : ''}</div></div><div class="user-stats-grid"><div class="user-stat-item"><div class="stat-value">৳ ${user.wallet || 0}</div><div class="stat-label">💰 Wallet</div></div><div class="user-stat-item"><div class="stat-value">৳ ${user.totalSpend || 0}</div><div class="stat-label">💵 Total Spend</div></div><div class="user-stat-item"><div class="stat-value">${userOrders.length}</div><div class="stat-label">📦 Orders</div></div><div class="user-stat-item"><div class="stat-value">৳ ${totalDeposit}</div><div class="stat-label">➕ Deposited</div></div></div><div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:140px;padding:12px;" onclick="adminAddMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:140px;padding:12px;" onclick="adminDeductMoney('${uid}', '${(user.name || 'User').replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct Money</button></div><div class="modal-section"><h4>💳 All Add Money History <span>${userTransactions.length}</span></h4>`;
-                if (userTransactions.length === 0) html += '<p class="empty-msg">No transactions yet</p>';
-                else userTransactions.forEach(trx => {
-                    const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
-                    const date = new Date(trx.date).toLocaleString('en-GB');
-                    let methodName = 'bKash', methodIcon = '🟣';
-                    if (trx.method === 'nagad') { methodName = 'Nagad'; methodIcon = '🟠'; }
-                    else if (trx.method === 'admin') { methodName = 'Admin Added'; methodIcon = '🎁'; }
-                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${methodIcon} ${methodName} - ৳ ${trx.amount}</strong><span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${trx.status}</span></div><p>📱 Number: <strong>${trx.senderNumber}</strong></p><p>🔢 TrxID: <strong>${trx.trxId}</strong></p><p style="color:#888;font-size:11px;">📅 ${date}</p></div>`;
+                const uSnap = await get(ref(database, 'users/' + uid));
+                if (!uSnap.exists()) { document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ Not found</p>'; return; }
+                const user = uSnap.val();
+                const tSnap = await get(ref(database, 'transactions'));
+                const oSnap = await get(ref(database, 'orders'));
+                const uTrx = [], uOrd = [];
+                if (tSnap.exists()) Object.entries(tSnap.val()).forEach(([id, t]) => { if (t.userId === uid) uTrx.push({id, ...t}); });
+                if (oSnap.exists()) Object.entries(oSnap.val()).forEach(([id, o]) => { if (o.userId === uid) uOrd.push({id, ...o}); });
+                uTrx.sort((a,b) => new Date(b.date) - new Date(a.date));
+                uOrd.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
+                const totDep = uTrx.filter(t => t.status === 'Approved').reduce((s,t) => s + parseInt(t.amount||0), 0);
+                let html = `<div class="user-profile-section"><img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}"><div class="user-profile-info"><h3>${user.name} ${user.banned ? '<span class="banned-badge">🚫 BANNED</span>' : ''}</h3><p>📧 ${user.email}</p><p>🆔 ${user.numericId || uid.substring(0,15)}</p></div></div>
+                <div class="user-stats-grid"><div class="user-stat-item"><div class="stat-value">৳ ${user.wallet||0}</div><div class="stat-label">Wallet</div></div><div class="user-stat-item"><div class="stat-value">৳ ${user.totalSpend||0}</div><div class="stat-label">Spend</div></div><div class="user-stat-item"><div class="stat-value">${uOrd.length}</div><div class="stat-label">Orders</div></div><div class="user-stat-item"><div class="stat-value">৳ ${totDep}</div><div class="stat-label">Deposit</div></div></div>
+                <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:130px;padding:12px;" onclick="adminAddMoney('${uid}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:130px;padding:12px;" onclick="adminDeductMoney('${uid}')">➖ Deduct</button></div>
+                <div class="modal-section"><h4>💳 Transactions <span>${uTrx.length}</span></h4>`;
+                if (!uTrx.length) html += '<p class="empty-msg">No transactions</p>';
+                else uTrx.forEach(t => {
+                    const c = t.status === 'Pending' ? '#ffaa00' : t.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${(t.method||'').toUpperCase()} - ৳ ${t.amount}</strong><span class="modal-status" style="background:${c}20;color:${c};">● ${t.status}</span></div><p>📱 ${t.senderNumber}</p><p>🔢 ${t.trxId}</p><p style="color:#888;font-size:11px;">${new Date(t.date).toLocaleString('en-GB')}</p></div>`;
                 });
-                html += `</div><div class="modal-section"><h4>📦 All Orders History <span>${userOrders.length}</span></h4>`;
-                if (userOrders.length === 0) html += '<p class="empty-msg">No orders yet</p>';
-                else userOrders.forEach(ord => {
-                    const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
-                    const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                    html += `<div class="modal-item"><div class="modal-item-header"><strong>🎮 ${ord.productName}</strong><span class="modal-status" style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor};">● ${ord.status}</span></div><p>📦 Package: <strong>${ord.packageName}</strong></p><p>💰 Price: <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="color:#888;font-size:11px;">📅 ${date}</p></div>`;
+                html += `</div><div class="modal-section"><h4>📦 Orders <span>${uOrd.length}</span></h4>`;
+                if (!uOrd.length) html += '<p class="empty-msg">No orders</p>';
+                else uOrd.forEach(o => {
+                    const c = o.status === 'Pending' ? '#ffaa00' : o.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                    const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : o.id.substring(0,10);
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${oid} 🎮 ${o.productName}</strong><span class="modal-status" style="background:${c}20;color:${c};">● ${o.status}</span></div><p>📦 ${o.packageName}</p><p>💰 <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 ${o.playerId}</p>${o.rejectReason ? `<p style="color:#ff6b6b;">❌ ${o.rejectReason}</p>` : ''}<p style="color:#888;font-size:11px;">${new Date(o.orderDate).toLocaleString('en-GB')}</p></div>`;
                 });
-                html += `</div>`;
+                html += '</div>';
                 document.getElementById('userModalContent').innerHTML = html;
-            } catch (error) {
-                document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ Failed to load: ' + error.message + '</p>';
+            } catch (err) {
+                document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ ' + err.message + '</p>';
             }
         };
-
         window.closeUserModal = function() { document.getElementById('userModal').classList.remove('show'); };
 
+        // ============ TRANSACTIONS ============
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + '?')) return;
-            const userRef = ref(database, 'users/' + userId);
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                await update(userRef, { wallet: (userData.wallet || 0) + parseInt(amount) });
+            const uRef = ref(database, 'users/' + userId);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                await update(uRef, { wallet: (snap.val().wallet||0) + parseInt(amount) });
                 await update(ref(database, 'transactions/' + trxId), { status: 'Approved', approvedDate: new Date().toISOString() });
                 showToast('✅ Approved!');
                 loadData();
             }
         };
-
         window.rejectTransaction = async function(trxId) {
-            if (!confirm('Reject this payment?')) return;
+            if (!confirm('Reject payment?')) return;
             await update(ref(database, 'transactions/' + trxId), { status: 'Rejected', rejectedDate: new Date().toISOString() });
             showToast('❌ Rejected');
             loadData();
         };
 
-        window.updateOrderStatus = async function(orderId, status) {
-            await update(ref(database, 'orders/' + orderId), { status: status, updatedDate: new Date().toISOString() });
-            showToast('✅ Order ' + status);
+        // ============ ORDER APPROVE/REJECT ============
+        window.completeOrder = async function(orderId) {
+            await update(ref(database, 'orders/' + orderId), { status: 'Complete', updatedDate: new Date().toISOString() });
+            showToast('✅ Order Complete');
             loadData();
         };
-
-        window.toggleProductStock = async function(productKey, currentStock) {
-            const newStock = currentStock === 'in' ? 'out' : 'in';
-            await update(ref(database, 'products/' + productKey), { stock: newStock });
-            showToast('✅ Product ' + (newStock === 'in' ? 'ON' : 'OFF'));
-            loadProducts();
+        window.showRejectPopup = function(orderId) {
+            currentRejectOrderId = orderId;
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('rejectPopup').classList.add('show');
         };
+        window.closeRejectPopup = function() { document.getElementById('rejectPopup').classList.remove('show'); };
+        document.getElementById('rejectConfirmBtn').addEventListener('click', async () => {
+            const reason = document.getElementById('rejectReason').value.trim();
+            const orderId = currentRejectOrderId;
+            const oSnap = await get(ref(database, 'orders/' + orderId));
+            if (oSnap.exists()) {
+                const ord = oSnap.val();
+                // Refund
+                const uRef = ref(database, 'users/' + ord.userId);
+                const uSnap = await get(uRef);
+                if (uSnap.exists()) {
+                    const u = uSnap.val();
+                    await update(uRef, { 
+                        wallet: (u.wallet||0) + parseInt(ord.price||0),
+                        totalSpend: Math.max(0, (u.totalSpend||0) - parseInt(ord.price||0)),
+                        orders: Math.max(0, (u.orders||1) - 1)
+                    });
+                }
+                await update(ref(database, 'orders/' + orderId), { 
+                    status: 'Rejected', 
+                    rejectReason: reason || 'No reason provided',
+                    updatedDate: new Date().toISOString() 
+                });
+            }
+            closeRejectPopup();
+            showToast('❌ Order Rejected & Refunded');
+            loadData();
+        });
 
-        window.togglePackageStock = async function(productKey, pkgKey, currentStock) {
-            const newStock = currentStock === 'in' ? 'out' : 'in';
-            await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { stock: newStock });
-            showToast('✅ Package ' + (newStock === 'in' ? 'ON' : 'OFF'));
-            loadProducts();
-        };
-
-        window.editPrice = async function(productKey, pkgKey, currentPrice, pkgName) {
-            const newPrice = prompt('Edit price for "' + pkgName + '"\nCurrent: ৳ ' + currentPrice, currentPrice);
-            if (newPrice === null || newPrice === '') return;
-            const price = parseInt(newPrice);
-            if (isNaN(price) || price < 1) { alert('Invalid price!'); return; }
-            await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { price: price });
-            showToast('✅ Price updated');
-            loadProducts();
-        };
-
-        window.editProductImage = async function(productKey, currentImage, productName) {
-            const newImage = prompt('Change image URL:', currentImage);
-            if (newImage === null || newImage === '') return;
-            if (!newImage.startsWith('http')) { alert('Invalid URL!'); return; }
-            await update(ref(database, 'products/' + productKey), { image: newImage });
-            showToast('✅ Image updated');
-            loadProducts();
-        };
-
-        window.editProductName = async function(productKey, currentName) {
-            const newName = prompt('Change product name:', currentName);
-            if (newName === null || newName === '' || newName === currentName) return;
-            await update(ref(database, 'products/' + productKey), { name: newName });
-            showToast('✅ Name updated');
-            loadProducts();
-        };
-
-        window.editPackageName = async function(productKey, pkgKey, currentName) {
-            const newName = prompt('Change package name:', currentName);
-            if (newName === null || newName === '' || newName === currentName) return;
-            await update(ref(database, 'products/' + productKey + '/packages/' + pkgKey), { name: newName });
-            showToast('✅ Name updated');
-            loadProducts();
-        };
-
-        window.togglePackages = function(key) {
-            const container = document.getElementById('packages-' + key);
-            const arrow = document.getElementById('arrow-' + key);
-            if (container.style.display === 'none' || container.style.display === '') {
-                container.style.display = 'flex';
-                arrow.textContent = '▼';
-            } else {
-                container.style.display = 'none';
-                arrow.textContent = '▶';
+        // ============ ADMIN ADD/DEDUCT MONEY ============
+        window.adminAddMoney = async function(uid) {
+            const user = allUsers[uid];
+            const amt = prompt('Add money to ' + (user?.name||'user') + '\n\nAmount:', '100');
+            if (!amt) return;
+            const a = parseInt(amt);
+            if (isNaN(a) || a < 1) { alert('Invalid'); return; }
+            if (!confirm('Add ৳ ' + a + '?')) return;
+            const uRef = ref(database, 'users/' + uid);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                const u = snap.val();
+                await update(uRef, { wallet: (u.wallet||0) + a });
+                await push(ref(database, 'transactions'), {
+                    userId: uid, userName: u.name, userEmail: u.email, amount: a,
+                    method: 'admin', senderNumber: 'ADMIN', trxId: 'ADMIN-' + Date.now(),
+                    status: 'Approved', date: new Date().toISOString(), approvedDate: new Date().toISOString(),
+                    note: 'Added by ' + currentUser.email
+                });
+                showToast('✅ Added');
+                closeUserModal();
+                loadData();
             }
         };
-
-        window.adminAddMoney = async function(userId, userName) {
-            const amount = prompt('Add money to ' + userName + '\n\nAmount:', '100');
-            if (amount === null || amount === '') return;
-            const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) { alert('Invalid!'); return; }
-            if (!confirm('Add ৳ ' + amt + '?')) return;
-            const userRef = ref(database, 'users/' + userId);
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                await update(userRef, { wallet: (userData.wallet || 0) + amt });
-                const trxRef = ref(database, 'transactions');
-                await push(trxRef, { userId, userName, userEmail: userData.email, amount: amt, method: 'admin', senderNumber: 'ADMIN', trxId: 'ADMIN-' + Date.now(), status: 'Approved', date: new Date().toISOString(), approvedDate: new Date().toISOString(), note: 'Added by Admin' });
-                showToast('✅ Added!');
+        window.adminDeductMoney = async function(uid) {
+            const user = allUsers[uid];
+            const amt = prompt('Deduct from ' + (user?.name||'user') + '\nBalance: ৳ ' + (user?.wallet||0), '100');
+            if (!amt) return;
+            const a = parseInt(amt);
+            if (isNaN(a) || a < 1) { alert('Invalid'); return; }
+            if (a > (user?.wallet||0)) { alert('Insufficient'); return; }
+            if (!confirm('Deduct ৳ ' + a + '?')) return;
+            const uRef = ref(database, 'users/' + uid);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                await update(uRef, { wallet: (snap.val().wallet||0) - a });
+                showToast('✅ Deducted');
                 closeUserModal();
                 loadData();
             }
         };
 
-        window.adminDeductMoney = async function(userId, userName, currentWallet) {
-            const amount = prompt('Deduct from ' + userName + '\nBalance: ৳ ' + currentWallet + '\n\nAmount:', '100');
-            if (amount === null || amount === '') return;
-            const amt = parseInt(amount);
-            if (isNaN(amt) || amt < 1) { alert('Invalid!'); return; }
-            if (amt > currentWallet) { alert('Not enough balance!'); return; }
-            if (!confirm('Deduct ৳ ' + amt + '?')) return;
-            const userRef = ref(database, 'users/' + userId);
-            const snapshot = await get(userRef);
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                await update(userRef, { wallet: (userData.wallet || 0) - amt });
-                showToast('✅ Deducted!');
-                closeUserModal();
-                loadData();
-            }
-        };
-
-        // ============ ADD NEW PRODUCT ============
+        // ============ PRODUCTS ============
+        window.toggleProductStock = async function(k, s) { await update(ref(database, 'products/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
+        window.togglePackageStock = async function(pk, k, s) { await update(ref(database, 'products/' + pk + '/packages/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
+        window.editPrice = async function(pk, k, cp, n) { const np = prompt('Edit price for "' + n + '"', cp); if (!np) return; const p = parseInt(np); if (isNaN(p)) return alert('Invalid'); await update(ref(database, 'products/' + pk + '/packages/' + k), { price: p }); showToast('✅ Updated'); loadProducts(); };
+        window.editProductImage = async function(k, ci) { const ni = prompt('Image URL:', ci); if (!ni || !ni.startsWith('http')) return; await update(ref(database, 'products/' + k), { image: ni }); showToast('✅ Updated'); loadProducts(); };
+        window.editProductName = async function(k, cn) { const nn = prompt('Product name:', cn); if (!nn || nn === cn) return; await update(ref(database, 'products/' + k), { name: nn }); showToast('✅ Updated'); loadProducts(); };
+        window.editPackageName = async function(pk, k, cn) { const nn = prompt('Package name:', cn); if (!nn || nn === cn) return; await update(ref(database, 'products/' + pk + '/packages/' + k), { name: nn }); showToast('✅ Updated'); loadProducts(); };
+        window.togglePackages = function(k) { const c = document.getElementById('packages-'+k); const a = document.getElementById('arrow-'+k); if (c.style.display === 'none' || !c.style.display) { c.style.display = 'flex'; a.textContent = '▼'; } else { c.style.display = 'none'; a.textContent = '▶'; } };
         window.addNewProduct = async function() {
-            const productKey = prompt('🔑 Product ID লিখুন (ছোট হাতের অক্ষরে, space ছাড়া):\n\nউদাহরণ: pubg, mlbb, codm', '');
-            if (!productKey || productKey.trim() === '') return;
-            const cleanKey = productKey.trim().toLowerCase().replace(/\s+/g, '');
-            const checkSnap = await get(ref(database, 'products/' + cleanKey));
-            if (checkSnap.exists()) { alert('❌ এই ID এর Product already আছে!'); return; }
-            const productName = prompt('📝 Product এর নাম লিখুন:\n\nউদাহরণ: PUBG Mobile UC', '');
-            if (!productName || productName.trim() === '') return;
-            const productImage = prompt('📸 Product এর Image URL দিন:\n\n💡 postimages.org এ upload করে DIRECT LINK দিন', 'https://via.placeholder.com/300x240/1a0033/8b00ff?text=New+Product');
-            if (!productImage || !productImage.startsWith('http')) { alert('❌ Invalid Image URL!'); return; }
-            const pkgName = prompt('📦 প্রথম Package এর নাম:\n\nউদাহরণ: 60 UC', '');
-            if (!pkgName) return;
-            const pkgPrice = prompt('💰 Package এর দাম (টাকায়):', '100');
-            if (!pkgPrice || isNaN(parseInt(pkgPrice))) { alert('❌ Invalid price!'); return; }
-            const productsSnap = await get(ref(database, 'products'));
-            const productsCount = productsSnap.exists() ? Object.keys(productsSnap.val()).length : 0;
-            const newProduct = {
-                name: productName.trim(),
-                image: productImage.trim(),
-                stock: 'in',
-                order: productsCount,
-                packages: { p1: { name: pkgName.trim(), price: parseInt(pkgPrice), stock: 'in', order: 0 } }
-            };
-            await set(ref(database, 'products/' + cleanKey), newProduct);
-            showToast('✅ Product added!');
-            loadProducts();
+            const k = prompt('Product ID (no space, lowercase):'); if (!k) return;
+            const ck = k.trim().toLowerCase().replace(/\s+/g, '');
+            const chk = await get(ref(database, 'products/' + ck)); if (chk.exists()) return alert('❌ ID exists');
+            const n = prompt('Product name:'); if (!n) return;
+            const i = prompt('Image URL:', 'https://via.placeholder.com/300x240/1a0033/8b00ff?text=Product'); if (!i || !i.startsWith('http')) return alert('❌ Invalid URL');
+            const pn = prompt('First package name:', '100 Diamond'); if (!pn) return;
+            const pp = prompt('Package price:', '100'); if (!pp || isNaN(parseInt(pp))) return alert('❌ Invalid');
+            const ps = await get(ref(database, 'products'));
+            const oc = ps.exists() ? Object.keys(ps.val()).length : 0;
+            await set(ref(database, 'products/' + ck), { name: n, image: i, stock: 'in', order: oc, packages: { p1: { name: pn, price: parseInt(pp), stock: 'in', order: 0 } } });
+            showToast('✅ Added'); loadProducts();
         };
-
-        // ============ ADD NEW PACKAGE ============
-        window.addNewPackage = async function(productKey) {
-            const pkgName = prompt('📦 নতুন Package এর নাম:\n\nউদাহরণ: 500 Diamond', '');
-            if (!pkgName || pkgName.trim() === '') return;
-            const pkgPrice = prompt('💰 Package এর দাম (টাকায়):', '100');
-            if (!pkgPrice || isNaN(parseInt(pkgPrice))) { alert('❌ Invalid price!'); return; }
-            const productSnap = await get(ref(database, 'products/' + productKey));
-            if (!productSnap.exists()) return;
-            const packages = productSnap.val().packages || {};
-            const pkgCount = Object.keys(packages).length;
-            let finalKey = 'p' + (pkgCount + 1);
-            let counter = pkgCount + 1;
-            while (packages[finalKey]) { counter++; finalKey = 'p' + counter; }
-            const newPackage = { name: pkgName.trim(), price: parseInt(pkgPrice), stock: 'in', order: pkgCount };
-            await set(ref(database, 'products/' + productKey + '/packages/' + finalKey), newPackage);
-            showToast('✅ Package added!');
-            loadProducts();
+        window.addNewPackage = async function(pk) {
+            const n = prompt('Package name:'); if (!n) return;
+            const p = prompt('Price:', '100'); if (!p || isNaN(parseInt(p))) return alert('❌ Invalid');
+            const ps = await get(ref(database, 'products/' + pk));
+            if (!ps.exists()) return;
+            const pkgs = ps.val().packages || {};
+            const cnt = Object.keys(pkgs).length;
+            let fk = 'p' + (cnt+1), c = cnt+1;
+            while (pkgs[fk]) { c++; fk = 'p' + c; }
+            await set(ref(database, 'products/' + pk + '/packages/' + fk), { name: n, price: parseInt(p), stock: 'in', order: cnt });
+            showToast('✅ Added'); loadProducts();
         };
+        window.deleteProduct = async function(k, n) { if (!confirm('Delete "'+n+'"?')) return; if (!confirm('Confirm delete?')) return; await remove(ref(database, 'products/'+k)); showToast('✅ Deleted'); loadProducts(); };
+        window.deletePackage = async function(pk, k, n) { if (!confirm('Delete "'+n+'"?')) return; await remove(ref(database, 'products/'+pk+'/packages/'+k)); showToast('✅ Deleted'); loadProducts(); };
 
-        // ============ DELETE PRODUCT ============
-        window.deleteProduct = async function(productKey, productName) {
-            if (!confirm('⚠️ সাবধান!\n\n"' + productName + '" product এবং এর সব package delete হবে।\n\nContinue?')) return;
-            if (!confirm('❌ শেষ Confirmation!\n\nDelete করতে চান?')) return;
-            await set(ref(database, 'products/' + productKey), null);
-            showToast('✅ Product deleted!');
-            loadProducts();
-        };
-
-        // ============ DELETE PACKAGE ============
-        window.deletePackage = async function(productKey, pkgKey, pkgName) {
-            if (!confirm('⚠️ "' + pkgName + '" package delete করবেন?')) return;
-            await set(ref(database, 'products/' + productKey + '/packages/' + pkgKey), null);
-            showToast('✅ Package deleted!');
-            loadProducts();
-        };
-
-        // ============ SAVE ORDER ============
         async function saveProductOrder() {
             const cards = document.querySelectorAll('#productsList .product-admin-card');
-            const updates = {};
-            cards.forEach((card, index) => {
-                const productKey = card.getAttribute('data-product-key');
-                updates[`products/${productKey}/order`] = index;
-            });
-            await update(ref(database), updates);
-            showToast('✅ Product order saved!');
+            const upd = {};
+            cards.forEach((c, i) => { upd[`products/${c.dataset.productKey}/order`] = i; });
+            await update(ref(database), upd); showToast('✅ Order saved');
         }
-
-        async function savePackageOrder(productKey) {
-            const rows = document.querySelectorAll(`#packages-${productKey} .pkg-row`);
-            const updates = {};
-            rows.forEach((row, index) => {
-                const pkgKey = row.getAttribute('data-pkg-key');
-                updates[`products/${productKey}/packages/${pkgKey}/order`] = index;
-            });
-            await update(ref(database), updates);
-            showToast('✅ Package order saved!');
+        async function savePackageOrder(pk) {
+            const rows = document.querySelectorAll(`#packages-${pk} .pkg-row`);
+            const upd = {};
+            rows.forEach((r, i) => { upd[`products/${pk}/packages/${r.dataset.pkgKey}/order`] = i; });
+            await update(ref(database), upd); showToast('✅ Order saved');
         }
 
         async function loadProducts() {
-            const snapshot = await get(ref(database, 'products'));
+            const snap = await get(ref(database, 'products'));
             const list = document.getElementById('productsList');
             list.innerHTML = '';
-            if (!snapshot.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products yet. Click "Add New Product" to create one.</p>'; return; }
-            const products = snapshot.val();
-            const productsArray = Object.entries(products).map(([key, val]) => ({ key, ...val }));
-            productsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
-            
-            for (const product of productsArray) {
-                const key = product.key;
-                const p = product;
+            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products</p>'; return; }
+            const arr = Object.entries(snap.val()).map(([k,v]) => ({k,...v})).sort((a,b) => (a.order||0)-(b.order||0));
+            for (const p of arr) {
                 const isOut = p.stock === 'out';
-                let packagesHtml = '';
+                let ph = '';
                 if (p.packages) {
-                    const packagesArray = Object.entries(p.packages).map(([pkgKey, pkgVal]) => ({ pkgKey, ...pkgVal }));
-                    packagesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
-                    for (const pkg of packagesArray) {
-                        const pkgKey = pkg.pkgKey;
-                        const pkgOut = pkg.stock === 'out';
-                        const safeName = pkg.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
-                        packagesHtml += `
-                            <div class="pkg-row ${pkgOut ? 'pkg-out' : ''}" data-pkg-key="${pkgKey}">
-                                <span class="drag-handle pkg-drag">⋮⋮</span>
-                                <span class="pkg-info">${pkg.name} - <strong style="color:#8b00ff;">৳ ${pkg.price}</strong></span>
-                                <div class="pkg-actions">
-                                    <button class="btn-edit" onclick="editPackageName('${key}', '${pkgKey}', \`${safeName}\`)">✏️</button>
-                                    <button class="btn-edit" onclick="editPrice('${key}', '${pkgKey}', ${pkg.price}, \`${safeName}\`)">💰</button>
-                                    <button class="btn-toggle ${pkgOut ? 'stock-out' : 'stock-in'}" onclick="togglePackageStock('${key}', '${pkgKey}', '${pkg.stock}')">${pkgOut ? '❌' : '✅'}</button>
-                                    <button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;border-color:rgba(255,50,50,0.4);" onclick="deletePackage('${key}', '${pkgKey}', \`${safeName}\`)">🗑️</button>
-                                </div>
-                            </div>`;
+                    const pa = Object.entries(p.packages).map(([pk,pv]) => ({pk,...pv})).sort((a,b) => (a.order||0)-(b.order||0));
+                    for (const pkg of pa) {
+                        const po = pkg.stock === 'out';
+                        const sn = pkg.name.replace(/`/g,'\\`').replace(/'/g,"\\'");
+                        ph += `<div class="pkg-row ${po?'pkg-out':''}" data-pkg-key="${pkg.pk}"><span class="drag-handle pkg-drag">⋮⋮</span><span class="pkg-info">${pkg.name} - <strong style="color:#8b00ff;">৳ ${pkg.price}</strong></span><div class="pkg-actions"><button class="btn-edit" onclick="editPackageName('${p.k}','${pkg.pk}',\`${sn}\`)">✏️</button><button class="btn-edit" onclick="editPrice('${p.k}','${pkg.pk}',${pkg.price},\`${sn}\`)">💰</button><button class="btn-toggle ${po?'stock-out':'stock-in'}" onclick="togglePackageStock('${p.k}','${pkg.pk}','${pkg.stock}')">${po?'❌':'✅'}</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deletePackage('${p.k}','${pkg.pk}',\`${sn}\`)">🗑️</button></div></div>`;
                     }
                 }
-                const safeProductName = p.name.replace(/`/g, '\\`').replace(/'/g, "\\'");
-                const safeImage = (p.image || '').replace(/`/g, '\\`').replace(/'/g, "\\'");
-                list.innerHTML += `
-                    <div class="product-admin-card ${isOut ? 'product-out' : ''}" data-product-key="${key}">
-                        <div class="product-admin-header">
-                            <span class="drag-handle product-drag">⋮⋮</span>
-                            <div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="togglePackages('${key}')">
-                                <img src="${p.image}" onerror="this.src='https://via.placeholder.com/70x70/8b00ff/ffffff?text=No+Image'">
-                                <div class="product-admin-info">
-                                    <h4>${p.name} <span id="arrow-${key}" style="color:#8b00ff;">▶</span></h4>
-                                    <p>${Object.keys(p.packages || {}).length} Packages - Click to expand</p>
-                                </div>
-                            </div>
-                            <button class="btn-toggle ${isOut ? 'stock-out' : 'stock-in'}" onclick="event.stopPropagation(); toggleProductStock('${key}', '${p.stock}')">${isOut ? '❌ OFF' : '✅ ON'}</button>
-                        </div>
-                        <div class="product-edit-actions">
-                            <button class="btn-edit-img" onclick="editProductImage('${key}', \`${safeImage}\`, \`${safeProductName}\`)">📸 Image</button>
-                            <button class="btn-edit-img" onclick="editProductName('${key}', \`${safeProductName}\`)">✏️ Name</button>
-                            <button class="btn-edit-img" style="background:linear-gradient(135deg,#00c853,#00e676);" onclick="addNewPackage('${key}')">➕ Package</button>
-                            <button class="btn-edit-img" style="background:linear-gradient(135deg,#ff3d00,#ff0000);" onclick="deleteProduct('${key}', \`${safeProductName}\`)">🗑️ Delete</button>
-                        </div>
-                        <div class="packages-container" id="packages-${key}" style="display:none;">${packagesHtml}</div>
-                    </div>`;
+                const spn = p.name.replace(/`/g,'\\`').replace(/'/g,"\\'");
+                const si = (p.image||'').replace(/`/g,'\\`').replace(/'/g,"\\'");
+                list.innerHTML += `<div class="product-admin-card ${isOut?'product-out':''}" data-product-key="${p.k}"><div class="product-admin-header"><span class="drag-handle product-drag">⋮⋮</span><div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="togglePackages('${p.k}')"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=?'"><div class="product-admin-info"><h4>${p.name} <span id="arrow-${p.k}" style="color:#8b00ff;">▶</span></h4><p>${Object.keys(p.packages||{}).length} Packages</p></div></div><button class="btn-toggle ${isOut?'stock-out':'stock-in'}" onclick="event.stopPropagation();toggleProductStock('${p.k}','${p.stock}')">${isOut?'❌ OFF':'✅ ON'}</button></div><div class="product-edit-actions"><button class="btn-edit-img" onclick="editProductImage('${p.k}',\`${si}\`)">📸 Image</button><button class="btn-edit-img" onclick="editProductName('${p.k}',\`${spn}\`)">✏️ Name</button><button class="btn-edit-img" style="background:linear-gradient(135deg,#00c853,#00e676);" onclick="addNewPackage('${p.k}')">➕ Package</button><button class="btn-edit-img" style="background:linear-gradient(135deg,#ff3d00,#ff0000);" onclick="deleteProduct('${p.k}',\`${spn}\`)">🗑️ Delete</button></div><div class="packages-container" id="packages-${p.k}" style="display:none;">${ph}</div></div>`;
             }
-            
-            new Sortable(list, {
-                handle: '.product-drag',
-                animation: 200,
-                ghostClass: 'sortable-ghost',
-                dragClass: 'sortable-drag',
-                onEnd: function() { saveProductOrder(); }
-            });
-            
-            document.querySelectorAll('.packages-container').forEach(container => {
-                const productKey = container.id.replace('packages-', '');
-                new Sortable(container, {
-                    handle: '.pkg-drag',
-                    animation: 200,
-                    ghostClass: 'sortable-ghost',
-                    dragClass: 'sortable-drag',
-                    onEnd: function() { savePackageOrder(productKey); }
-                });
+            new Sortable(list, { handle: '.product-drag', animation: 200, ghostClass: 'sortable-ghost', onEnd: saveProductOrder });
+            document.querySelectorAll('.packages-container').forEach(c => {
+                const pk = c.id.replace('packages-','');
+                new Sortable(c, { handle: '.pkg-drag', animation: 200, ghostClass: 'sortable-ghost', onEnd: () => savePackageOrder(pk) });
             });
         }
 
+        // ============ BANNERS ============
+        async function loadBanners() {
+            const snap = await get(ref(database, 'banners'));
+            const list = document.getElementById('bannersList');
+            list.innerHTML = '';
+            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No banners</p>'; return; }
+            const arr = Object.entries(snap.val()).map(([k,v]) => ({k,...v})).sort((a,b) => (a.order||0)-(b.order||0));
+            arr.forEach(b => {
+                list.innerHTML += `<div class="banner-card"><span class="drag-handle">⋮⋮</span><img src="${b.image}" onerror="this.src='https://via.placeholder.com/100x60/8b00ff/fff?text=?'"><div class="banner-info"><strong>Banner</strong><br><small style="color:#888;word-break:break-all;">${b.image.substring(0,50)}...</small></div><div class="banner-actions"><button class="btn-edit" onclick="editBanner('${b.k}','${b.image.replace(/'/g,"\\'")}')">✏️</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deleteBanner('${b.k}')">🗑️</button></div></div>`;
+            });
+        }
+        window.addNewBanner = async function() {
+            const img = prompt('Banner Image URL:'); if (!img || !img.startsWith('http')) return alert('Invalid URL');
+            const snap = await get(ref(database, 'banners'));
+            const cnt = snap.exists() ? Object.keys(snap.val()).length : 0;
+            await push(ref(database, 'banners'), { image: img, order: cnt });
+            showToast('✅ Added'); loadBanners();
+        };
+        window.editBanner = async function(k, cur) {
+            const img = prompt('New URL:', cur); if (!img || !img.startsWith('http')) return;
+            await update(ref(database, 'banners/'+k), { image: img });
+            showToast('✅ Updated'); loadBanners();
+        };
+        window.deleteBanner = async function(k) {
+            if (!confirm('Delete banner?')) return;
+            await remove(ref(database, 'banners/'+k));
+            showToast('✅ Deleted'); loadBanners();
+        };
+
+        // ============ PAYMENT NUMBERS ============
+        async function loadPaymentNumbers() {
+            const snap = await get(ref(database, 'paymentSettings'));
+            if (snap.exists()) {
+                const d = snap.val();
+                document.getElementById('bkashInput').value = d.bkash || '';
+                document.getElementById('nagadInput').value = d.nagad || '';
+            }
+        }
+        window.savePaymentNumbers = async function() {
+            const b = document.getElementById('bkashInput').value.trim();
+            const n = document.getElementById('nagadInput').value.trim();
+            if (!b || !n) return alert('Fill both numbers');
+            await set(ref(database, 'paymentSettings'), { bkash: b, nagad: n });
+            showToast('✅ Payment numbers saved');
+        };
+
+        // ============ ADMIN MANAGEMENT ============
+        async function loadAdmins() {
+            const sSnap = await get(ref(database, 'superAdmins'));
+            const aSnap = await get(ref(database, 'admins'));
+            const permSnap = await get(ref(database, 'permanentSuperAdmin'));
+            const permEmail = permSnap.exists() ? permSnap.val() : '';
+            const sList = document.getElementById('superAdminsList');
+            const aList = document.getElementById('normalAdminsList');
+            sList.innerHTML = `<div class="admin-mgmt-item" style="border-color:#ffd700;"><div class="admin-info"><strong style="color:#ffd700;">👑 ${permEmail}</strong><small>Permanent Super Admin (Cannot be removed)</small></div></div>`;
+            if (sSnap.exists()) {
+                Object.keys(sSnap.val()).forEach(k => {
+                    const email = k.replace(/,/g, '.');
+                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>👑 ${email}</strong><small>Super Admin</small></div><button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button></div>`;
+                });
+            }
+            aList.innerHTML = '';
+            if (aSnap.exists()) {
+                Object.keys(aSnap.val()).forEach(k => {
+                    const email = k.replace(/,/g, '.');
+                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin</small></div><button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button></div>`;
+                });
+            } else aList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No normal admins</p>';
+        }
+        window.addAdmin = async function(type) {
+            const email = prompt((type === 'super' ? 'Super' : 'Normal') + ' Admin Email:'); 
+            if (!email || !email.includes('@')) return alert('Invalid email');
+            const key = emailToKey(email.trim().toLowerCase());
+            const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
+            await set(ref(database, path), true);
+            showToast('✅ Admin added');
+            loadAdmins();
+        };
+        window.removeAdmin = async function(type, key, email) {
+            if (!confirm('Remove ' + email + '?')) return;
+            const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
+            await remove(ref(database, path));
+            showToast('✅ Removed');
+            loadAdmins();
+        };
+
+        // ============ LOAD ALL DATA ============
         async function loadData() {
-            const trxSnapshot = await get(ref(database, 'transactions'));
-            const trxPending = document.getElementById('trxPending');
-            let pendingCount = 0, pendingHtml = '';
+            // Transactions
+            const tSnap = await get(ref(database, 'transactions'));
+            const tp = document.getElementById('trxPending');
+            let pc = 0, ph = '';
             allTransactionsHistory = [];
-            if (trxSnapshot.exists()) {
-                const transactions = trxSnapshot.val();
-                Object.entries(transactions).reverse().forEach(([id, trx]) => {
-                    const statusColor = trx.status === 'Pending' ? '#ffaa00' : trx.status === 'Approved' ? '#00ff88' : '#ff6b6b';
-                    const date = new Date(trx.date).toLocaleString('en-GB');
-                    if (trx.status === 'Pending') {
-                        pendingCount++;
-                        pendingHtml += `<div class="admin-item"><div class="admin-item-info"><h4>${trx.userName} <span style="color:${statusColor};">● ${trx.status}</span></h4><p>📧 ${trx.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${trx.amount}</strong> | ${trx.method.toUpperCase()}</p><p>📱 From: ${trx.senderNumber} | TrxID: <strong>${trx.trxId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div><div class="admin-actions"><button class="btn-approve" onclick="approveTransaction('${id}', '${trx.userId}', ${trx.amount})">✅ Approve</button><button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button></div></div>`;
-                    } else allTransactionsHistory.push({ id, ...trx });
+            if (tSnap.exists()) {
+                Object.entries(tSnap.val()).reverse().forEach(([id, t]) => {
+                    if (t.status === 'Pending') {
+                        pc++;
+                        ph += `<div class="admin-item"><div class="admin-item-info"><h4>${t.userName} <span style="color:#ffaa00;">● Pending</span></h4><p>📧 ${t.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${t.amount}</strong> | ${(t.method||'').toUpperCase()}</p><p>📱 ${t.senderNumber} | TrxID: <strong>${t.trxId}</strong></p><p style="font-size:12px;color:#888;">${new Date(t.date).toLocaleString('en-GB')}</p></div><div class="admin-actions"><button class="btn-approve" onclick="approveTransaction('${id}','${t.userId}',${t.amount})">✅ Approve</button><button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button></div></div>`;
+                    } else allTransactionsHistory.push({id, ...t});
                 });
             }
-            trxPending.innerHTML = pendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending!</p>';
-            document.getElementById('pendingCount').textContent = pendingCount;
-            document.getElementById('trxPendingBadge').textContent = pendingCount;
-            const now = Date.now();
-            const oneDayMs = 24 * 60 * 60 * 1000;
-            renderTrxHistory(allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= oneDayMs), 1);
+            tp.innerHTML = ph || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending</p>';
+            document.getElementById('pendingCount').textContent = pc;
+            document.getElementById('trxPendingBadge').textContent = pc;
+            const now = Date.now(), day = 24*60*60*1000;
+            renderTrxHistory(allTransactionsHistory.filter(t => (now-new Date(t.date).getTime()) <= day), 1);
 
-            const ordSnapshot = await get(ref(database, 'orders'));
-            let orderCount = 0, ordPendingCount = 0, ordPendingHtml = '';
+            // Orders
+            const oSnap = await get(ref(database, 'orders'));
+            let oc = 0, opc = 0, oph = '';
             allOrdersHistory = [];
-            if (ordSnapshot.exists()) {
-                const orders = ordSnapshot.val();
-                const ordArray = Object.entries(orders).reverse();
-                orderCount = ordArray.length;
-                ordArray.forEach(([id, ord]) => {
-                    const statusColor = ord.status === 'Pending' ? '#ffaa00' : ord.status === 'Complete' ? '#00ff88' : '#ff6b6b';
-                    const date = new Date(ord.orderDate).toLocaleString('en-GB');
-                    if (ord.status === 'Pending') {
-                        ordPendingCount++;
-                        ordPendingHtml += `<div class="admin-item"><div class="admin-item-info"><h4>${ord.userName} <span style="color:${statusColor};">● ${ord.status}</span></h4><p>🎮 ${ord.productName}</p><p>📦 ${ord.packageName} | <strong style="color:#8b00ff;">৳ ${ord.price}</strong></p><p>🆔 Player ID: <strong>${ord.playerId}</strong></p><p style="font-size:12px;color:#888;">${date}</p></div><div class="admin-actions"><button class="btn-approve" onclick="updateOrderStatus('${id}', 'Complete')">✅ Complete</button><button class="btn-reject" onclick="updateOrderStatus('${id}', 'Failed')">❌ Failed</button></div></div>`;
-                    } else allOrdersHistory.push({ id, ...ord });
+            if (oSnap.exists()) {
+                const arr = Object.entries(oSnap.val()).reverse();
+                oc = arr.length;
+                arr.forEach(([id, o]) => {
+                    const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : id.substring(0,10);
+                    if (o.status === 'Pending') {
+                        opc++;
+                        oph += `<div class="admin-item"><div class="admin-item-info"><h4>${oid} - ${o.userName} <span style="color:#ffaa00;">● Pending</span></h4><p>🎮 ${o.productName}</p><p>📦 ${o.packageName} | <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 Player: <strong>${o.playerId}</strong></p><p style="font-size:12px;color:#888;">${new Date(o.orderDate).toLocaleString('en-GB')}</p></div><div class="admin-actions"><button class="btn-approve" onclick="completeOrder('${id}')">✅ Complete</button><button class="btn-reject" onclick="showRejectPopup('${id}')">❌ Reject</button></div></div>`;
+                    } else allOrdersHistory.push({id, ...o});
                 });
             }
-            document.getElementById('ordPending').innerHTML = ordPendingHtml || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending!</p>';
-            document.getElementById('totalOrdersCount').textContent = orderCount;
-            document.getElementById('ordPendingBadge').textContent = ordPendingCount;
-            renderOrdHistory(allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= oneDayMs), 1);
+            document.getElementById('ordPending').innerHTML = oph || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending</p>';
+            document.getElementById('totalOrdersCount').textContent = oc;
+            document.getElementById('ordPendingBadge').textContent = opc;
+            renderOrdHistory(allOrdersHistory.filter(o => (now-new Date(o.orderDate).getTime()) <= day), 1);
 
-            const userSnapshot = await get(ref(database, 'users'));
-            const userList = document.getElementById('usersList');
-            let userCount = 0;
-            userList.innerHTML = '';
-            if (userSnapshot.exists()) {
-                const users = userSnapshot.val();
-                const usrArray = Object.entries(users);
-                userCount = usrArray.length;
-                usrArray.forEach(([uid, user]) => {
-                    userList.innerHTML += `<div class="admin-item clickable-user" onclick="showUserDetails('${uid}')"><div class="admin-item-info"><h4>${user.name} <span style="color:#8b00ff;font-size:12px;">👆 Click to view</span></h4><p>📧 ${user.email}</p><p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p><p>📦 Orders: ${user.orders || 0} | Rank: ${user.rank || 'Bronze'}</p></div><div class="admin-actions" onclick="event.stopPropagation();"><button class="btn-approve" onclick="adminAddMoney('${uid}', '${user.name.replace(/'/g, "\\'")}')">➕ Add</button><button class="btn-reject" onclick="adminDeductMoney('${uid}', '${user.name.replace(/'/g, "\\'")}', ${user.wallet || 0})">➖ Deduct</button></div></div>`;
-                });
-            } else userList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No users yet</p>';
-            document.getElementById('totalUsers').textContent = userCount;
+            // Users
+            const uSnap = await get(ref(database, 'users'));
+            allUsers = uSnap.exists() ? uSnap.val() : {};
+            document.getElementById('totalUsers').textContent = Object.keys(allUsers).length;
+            document.getElementById('bannedCount').textContent = Object.values(allUsers).filter(u => u.banned).length;
+            filterUsers();
             loadProducts();
-        }
-
-        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
-            document.getElementById('pinScreen').style.display = 'none';
-            document.getElementById('adminDashboard').style.display = 'block';
-            loadData();
         }
     </script>
 </body>
