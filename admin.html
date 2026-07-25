@@ -91,6 +91,14 @@
         .admin-mgmt-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(139,0,255,0.2); border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .admin-mgmt-item .admin-info { color: white; font-size: 14px; flex: 1; min-width: 200px; }
         .admin-mgmt-item .admin-info small { color: #a0a0c0; font-size: 11px; display: block; margin-top: 3px; }
+        .banner-popup { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 10001; padding: 20px; }
+        .banner-popup.show { display: flex; }
+        .banner-popup-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; padding: 30px; max-width: 500px; width: 100%; }
+        .banner-popup-box h3 { color: #8b00ff; font-size: 20px; margin-bottom: 20px; font-family: 'Orbitron',sans-serif; text-align: center; }
+        .banner-popup-box label { display: block; color: #a0a0c0; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+        .banner-popup-box input { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins',sans-serif; margin-bottom: 15px; }
+        .banner-popup-box input:focus { outline: none; border-color: #8b00ff; }
+        .banner-popup-box small { color: #888; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 15px; }
         @media (max-width: 768px) { .stats-grid-new { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .user-modal-box { padding: 15px; } .user-stats-grid { grid-template-columns: repeat(2, 1fr); } .filter-btn { padding: 7px 12px; font-size: 11px; } }
     </style>
@@ -150,7 +158,7 @@
                 <button class="tab-btn" onclick="showTab('users', event)">👥 Users</button>
                 <button class="tab-btn" onclick="showTab('banned', event)">🚫 Ban List</button>
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
-                <button class="tab-btn" onclick="showTab('banners', event)">🖼️ Banners</button>
+                <button class="tab-btn" onclick="showTab('banners', event)">🖼️ Banner</button>
                 <button class="tab-btn" onclick="showTab('payment', event)">💵 Payment</button>
                 <button class="tab-btn" onclick="showTab('adminMgmt', event)" id="adminMgmtTab" style="display:none;">👑 Admins</button>
                 <a href="api-settings.html" class="tab-btn" style="text-decoration:none;">⚙️ API</a>
@@ -231,8 +239,8 @@
 
             <div id="bannersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
-                    <h3>🖼️ Home Page Banners</h3>
-                    <button class="add-product-btn" onclick="addNewBanner()">➕ Add New Banner</button>
+                    <h3>🖼️ Home Page Banner</h3>
+                    <button class="add-product-btn" onclick="showBannerPopup(null)">➕ Add New Banner</button>
                     <div id="bannersList"></div>
                 </div>
             </div>
@@ -289,7 +297,7 @@
         <div class="ban-popup-box">
             <div style="font-size:50px;margin-bottom:10px;">🚫</div>
             <h3 id="banPopupTitle">Ban User?</h3>
-            <p id="banPopupText">Are you sure you want to ban this user?</p>
+            <p id="banPopupText">Are you sure?</p>
             <div class="ban-popup-btns">
                 <button class="btn-ban-cancel" onclick="closeBanPopup()">Cancel</button>
                 <button class="btn-ban-confirm" id="banConfirmBtn">Ban User</button>
@@ -310,6 +318,21 @@
         </div>
     </div>
 
+    <div id="bannerPopup" class="banner-popup">
+        <div class="banner-popup-box">
+            <h3 id="bannerPopupTitle">🖼️ Add New Banner</h3>
+            <label>🖼️ Banner Image URL (Required)</label>
+            <input type="text" id="bannerImageInput" placeholder="https://example.com/banner.jpg">
+            <label>🔗 Click Link (Optional)</label>
+            <input type="text" id="bannerLinkInput" placeholder="https://t.me/yourchannel">
+            <small>💡 খালি রাখলে banner এ click করা যাবে না</small>
+            <div class="ban-popup-btns">
+                <button class="btn-ban-cancel" onclick="closeBannerPopup()">Cancel</button>
+                <button class="btn-ban-confirm" style="background:linear-gradient(135deg,#8b00ff,#6a0dad);" id="bannerConfirmBtn">Save Banner</button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast"></div>
         <script type="module">
         import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, set, get, push, update, remove, runTransaction, emailToKey, checkAdminLevel } from './config.js';
@@ -320,6 +343,7 @@
         let allTransactionsHistory = [];
         let allOrdersHistory = [];
         let currentRejectOrderId = null;
+        let currentBannerKey = null;
         let longPressTimer = null;
 
         // ============ LOGIN ============
@@ -482,9 +506,7 @@
                     <button class="btn-approve" onclick="adminAddMoney('${uid}')">➕ Add</button>
                     <button class="btn-reject" onclick="adminDeductMoney('${uid}')">➖ Deduct</button>
                 </div>`;
-            // Click to view
             div.addEventListener('click', () => showUserDetails(uid));
-            // Long press for ban
             const startPress = (e) => {
                 if (e.target.tagName === 'BUTTON') return;
                 longPressTimer = setTimeout(() => {
@@ -617,7 +639,6 @@
             const oSnap = await get(ref(database, 'orders/' + orderId));
             if (oSnap.exists()) {
                 const ord = oSnap.val();
-                // Refund
                 const uRef = ref(database, 'users/' + ord.userId);
                 const uSnap = await get(uRef);
                 if (uSnap.exists()) {
@@ -758,31 +779,64 @@
             });
         }
 
-        // ============ BANNERS ============
+        // ============ BANNER ============
         async function loadBanners() {
             const snap = await get(ref(database, 'banners'));
             const list = document.getElementById('bannersList');
             list.innerHTML = '';
-            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No banners</p>'; return; }
+            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No banner yet</p>'; return; }
             const arr = Object.entries(snap.val()).map(([k,v]) => ({k,...v})).sort((a,b) => (a.order||0)-(b.order||0));
             arr.forEach(b => {
-                list.innerHTML += `<div class="banner-card"><span class="drag-handle">⋮⋮</span><img src="${b.image}" onerror="this.src='https://via.placeholder.com/100x60/8b00ff/fff?text=?'"><div class="banner-info"><strong>Banner</strong><br><small style="color:#888;word-break:break-all;">${b.image.substring(0,50)}...</small></div><div class="banner-actions"><button class="btn-edit" onclick="editBanner('${b.k}','${b.image.replace(/'/g,"\\'")}')">✏️</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deleteBanner('${b.k}')">🗑️</button></div></div>`;
+                const linkDisplay = b.link ? `<br><small style="color:#00ff88;">🔗 ${b.link.substring(0,40)}${b.link.length>40?'...':''}</small>` : '<br><small style="color:#888;">🔗 No click link</small>';
+                list.innerHTML += `<div class="banner-card"><span class="drag-handle">⋮⋮</span><img src="${b.image}" onerror="this.src='https://via.placeholder.com/100x60/8b00ff/fff?text=?'"><div class="banner-info"><strong>Banner</strong><br><small style="color:#888;word-break:break-all;">🖼️ ${b.image.substring(0,40)}...</small>${linkDisplay}</div><div class="banner-actions"><button class="btn-edit" onclick="showBannerPopup('${b.k}')">✏️ Edit</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deleteBanner('${b.k}')">🗑️</button></div></div>`;
             });
         }
-        window.addNewBanner = async function() {
-            const img = prompt('Banner Image URL:'); if (!img || !img.startsWith('http')) return alert('Invalid URL');
-            const snap = await get(ref(database, 'banners'));
-            const cnt = snap.exists() ? Object.keys(snap.val()).length : 0;
-            await push(ref(database, 'banners'), { image: img, order: cnt });
-            showToast('✅ Added'); loadBanners();
+
+        window.showBannerPopup = async function(bannerKey) {
+            currentBannerKey = bannerKey;
+            document.getElementById('bannerImageInput').value = '';
+            document.getElementById('bannerLinkInput').value = '';
+            if (bannerKey) {
+                document.getElementById('bannerPopupTitle').textContent = '✏️ Edit Banner';
+                const snap = await get(ref(database, 'banners/' + bannerKey));
+                if (snap.exists()) {
+                    const b = snap.val();
+                    document.getElementById('bannerImageInput').value = b.image || '';
+                    document.getElementById('bannerLinkInput').value = b.link || '';
+                }
+            } else {
+                document.getElementById('bannerPopupTitle').textContent = '🖼️ Add New Banner';
+            }
+            document.getElementById('bannerPopup').classList.add('show');
         };
-        window.editBanner = async function(k, cur) {
-            const img = prompt('New URL:', cur); if (!img || !img.startsWith('http')) return;
-            await update(ref(database, 'banners/'+k), { image: img });
-            showToast('✅ Updated'); loadBanners();
-        };
+
+        window.closeBannerPopup = function() { document.getElementById('bannerPopup').classList.remove('show'); };
+
+        document.getElementById('bannerConfirmBtn').addEventListener('click', async () => {
+            const img = document.getElementById('bannerImageInput').value.trim();
+            const link = document.getElementById('bannerLinkInput').value.trim();
+            if (!img || !img.startsWith('http')) return alert('❌ Invalid image URL');
+            if (currentBannerKey) {
+                const snap = await get(ref(database, 'banners/' + currentBannerKey));
+                const order = snap.exists() ? (snap.val().order || 0) : 0;
+                const data = { image: img, order: order };
+                if (link) data.link = link;
+                await set(ref(database, 'banners/' + currentBannerKey), data);
+                showToast('✅ Banner updated');
+            } else {
+                const snap = await get(ref(database, 'banners'));
+                const cnt = snap.exists() ? Object.keys(snap.val()).length : 0;
+                const data = { image: img, order: cnt };
+                if (link) data.link = link;
+                await push(ref(database, 'banners'), data);
+                showToast('✅ Banner added');
+            }
+            closeBannerPopup();
+            loadBanners();
+        });
+
         window.deleteBanner = async function(k) {
-            if (!confirm('Delete banner?')) return;
+            if (!confirm('Delete this banner?')) return;
             await remove(ref(database, 'banners/'+k));
             showToast('✅ Deleted'); loadBanners();
         };
@@ -846,7 +900,6 @@
 
         // ============ LOAD ALL DATA ============
         async function loadData() {
-            // Transactions
             const tSnap = await get(ref(database, 'transactions'));
             const tp = document.getElementById('trxPending');
             let pc = 0, ph = '';
@@ -865,7 +918,6 @@
             const now = Date.now(), day = 24*60*60*1000;
             renderTrxHistory(allTransactionsHistory.filter(t => (now-new Date(t.date).getTime()) <= day), 1);
 
-            // Orders
             const oSnap = await get(ref(database, 'orders'));
             let oc = 0, opc = 0, oph = '';
             allOrdersHistory = [];
@@ -885,7 +937,6 @@
             document.getElementById('ordPendingBadge').textContent = opc;
             renderOrdHistory(allOrdersHistory.filter(o => (now-new Date(o.orderDate).getTime()) <= day), 1);
 
-            // Users
             const uSnap = await get(ref(database, 'users'));
             allUsers = uSnap.exists() ? uSnap.val() : {};
             document.getElementById('totalUsers').textContent = Object.keys(allUsers).length;
