@@ -347,3 +347,632 @@
     </div>
 
     <div id="toast" class="toast"></div>
+    <script type="module">
+        import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, set, get, push, update, remove, runTransaction, emailToKey, checkAdminLevel } from './config.js';
+
+        let currentUser = null;
+        let currentAdminLevel = 'none';
+        let allUsers = {};
+        let allTransactionsHistory = [];
+        let allOrdersHistory = [];
+        let currentRejectOrderId = null;
+        let currentBannerKey = null;
+        let longPressTimer = null;
+
+        // ============ LOGIN ============
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+            try {
+                document.getElementById('loginError').style.display = 'none';
+                const result = await signInWithPopup(auth, googleProvider);
+                const level = await checkAdminLevel(result.user.email);
+                if (level === 'none') {
+                    await signOut(auth);
+                    document.getElementById('loginError').textContent = '❌ You are not authorized. Only admins can login.';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
+                }
+            } catch (err) {
+                document.getElementById('loginError').textContent = '❌ ' + err.message;
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('adminDashboard').style.display = 'none';
+                return;
+            }
+            const level = await checkAdminLevel(user.email);
+            if (level === 'none') {
+                await signOut(auth);
+                return;
+            }
+            currentUser = user;
+            currentAdminLevel = level;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminDashboard').style.display = 'block';
+            document.getElementById('adminEmail').textContent = user.email;
+            const badge = document.getElementById('adminRoleBadge');
+            if (level === 'permanent') { badge.textContent = '👑 Permanent Super'; badge.className = 'admin-role-badge permanent'; }
+            else if (level === 'super') { badge.textContent = '👑 Super Admin'; badge.className = 'admin-role-badge super'; }
+            else { badge.textContent = '🔧 Admin'; badge.className = 'admin-role-badge'; }
+            if (level === 'permanent' || level === 'super') {
+                document.getElementById('adminMgmtTab').style.display = 'inline-block';
+            }
+            loadData();
+        });
+
+        window.logoutAdmin = async function() { await signOut(auth); location.reload(); };
+
+        window.showTab = function(tab, event) {
+            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            const tabId = tab === 'adminMgmt' ? 'adminMgmtTab_content' : tab + 'Tab';
+            const el = document.getElementById(tabId);
+            if (el) el.style.display = 'block';
+            if (event && event.target) event.target.classList.add('active');
+            if (tab === 'banners') loadBanners();
+            if (tab === 'payment') loadPaymentNumbers();
+            if (tab === 'adminMgmt') loadAdmins();
+            if (tab === 'banned') loadBanned();
+        };
+
+        window.showSubTab = function(subTab, event) {
+            const parent = event.target.closest('.section-box');
+            parent.querySelectorAll('.sub-tab-content').forEach(el => el.style.display = 'none');
+            parent.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(subTab).style.display = 'block';
+            event.target.classList.add('active');
+        };
+
+        window.showToast = function(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        };
+
+        // ============ FILTERS ============
+        window.filterHistory = function(type, days, event) {
+            const parent = event.target.closest('.sub-tab-content');
+            parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+            const now = Date.now();
+            const ms = days * 24 * 60 * 60 * 1000;
+            if (type === 'trx') {
+                let f = days > 0 ? allTransactionsHistory.filter(t => (now - new Date(t.date).getTime()) <= ms) : allTransactionsHistory;
+                renderTrxHistory(f, days);
+            } else {
+                let f = days > 0 ? allOrdersHistory.filter(o => (now - new Date(o.orderDate).getTime()) <= ms) : allOrdersHistory;
+                renderOrdHistory(f, days);
+            }
+        };
+
+        function labelDays(d) {
+            if (d === 0) return 'Lifetime';
+            if (d === 1) return 'Today';
+            if (d === 365) return '1 Year';
+            return `Last ${d} Days`;
+        }
+
+        function renderTrxHistory(filtered, days) {
+            const list = document.getElementById('trxHistoryList');
+            const summary = document.getElementById('trxHistorySummary');
+            const total = filtered.filter(t => t.status === 'Approved').reduce((s, t) => s + parseInt(t.amount || 0), 0);
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${labelDays(days)}: <strong>${filtered.length}</strong> trx</div><div class="filter-summary-info">💰 Approved: <strong>৳ ${total.toLocaleString()}</strong></div>`;
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No transactions</p>'; return; }
+            let html = '';
+            filtered.forEach(t => {
+                const c = t.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                const d = new Date(t.date).toLocaleString('en-GB');
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${t.userName} <span style="color:${c};">● ${t.status}</span></h4><p>📧 ${t.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${t.amount}</strong> | ${(t.method||'').toUpperCase()}</p><p>📱 ${t.senderNumber} | TrxID: <strong>${t.trxId}</strong></p><p style="font-size:12px;color:#888;">${d}</p></div></div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function renderOrdHistory(filtered, days) {
+            const list = document.getElementById('ordHistoryList');
+            const summary = document.getElementById('ordHistorySummary');
+            const rev = filtered.filter(o => o.status === 'Complete').reduce((s, o) => s + parseInt(o.price || 0), 0);
+            const cc = filtered.filter(o => o.status === 'Complete').length;
+            const fc = filtered.filter(o => o.status === 'Rejected' || o.status === 'Failed').length;
+            summary.innerHTML = `<div class="filter-summary-info">📊 ${labelDays(days)}: <strong>${filtered.length}</strong> (✅${cc} ❌${fc})</div><div class="filter-summary-info">💰 Revenue: <strong>৳ ${rev.toLocaleString()}</strong></div>`;
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:30px;">No orders</p>'; return; }
+            let html = '';
+            filtered.forEach(o => {
+                const c = o.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                const d = new Date(o.orderDate).toLocaleString('en-GB');
+                const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : o.id.substring(0, 10);
+                html += `<div class="admin-item"><div class="admin-item-info"><h4>${oid} - ${o.userName} <span style="color:${c};">● ${o.status}</span></h4><p>🎮 ${o.productName}</p><p>📦 ${o.packageName} | <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 Player: <strong>${o.playerId}</strong></p>${o.rejectReason ? `<p style="color:#ff6b6b;">❌ Reason: ${o.rejectReason}</p>` : ''}<p style="font-size:12px;color:#888;">${d}</p></div></div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        // ============ USER SEARCH ============
+        window.filterUsers = function() {
+            const q = document.getElementById('userSearch').value.toLowerCase().trim();
+            const list = document.getElementById('usersList');
+            list.innerHTML = '';
+            const filtered = Object.entries(allUsers).filter(([uid, u]) => {
+                if (!q) return true;
+                const num = u.numericId || '';
+                return (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q) || uid.toLowerCase().includes(q) || num.includes(q);
+            });
+            if (!filtered.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No users found</p>'; return; }
+            filtered.forEach(([uid, u]) => renderUserItem(uid, u, list));
+        };
+
+        function renderUserItem(uid, user, container) {
+            const isBanned = user.banned === true;
+            const div = document.createElement('div');
+            div.className = 'admin-item clickable-user';
+            div.dataset.uid = uid;
+            div.innerHTML = `
+                <div class="admin-item-info">
+                    <h4>${user.name || 'Anonymous'} ${isBanned ? '<span class="banned-badge">🚫 BANNED</span>' : '<span style="color:#8b00ff;font-size:12px;">👆 Tap | Long press to Ban</span>'}</h4>
+                    <p>📧 ${user.email || 'N/A'}</p>
+                    <p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p>
+                    <p>📦 Orders: ${user.orders || 0} | 🆔 ${user.numericId || uid.substring(0,10)}</p>
+                </div>
+                <div class="admin-actions" onclick="event.stopPropagation();">
+                    <button class="btn-approve" onclick="adminAddMoney('${uid}')">➕ Add</button>
+                    <button class="btn-reject" onclick="adminDeductMoney('${uid}')">➖ Deduct</button>
+                </div>`;
+            div.addEventListener('click', () => showUserDetails(uid));
+            const startPress = (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                longPressTimer = setTimeout(() => {
+                    showBanPopup(uid, user.name || 'User', isBanned);
+                }, 600);
+            };
+            const cancelPress = () => { if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; } };
+            div.addEventListener('mousedown', startPress);
+            div.addEventListener('touchstart', startPress);
+            div.addEventListener('mouseup', cancelPress);
+            div.addEventListener('mouseleave', cancelPress);
+            div.addEventListener('touchend', cancelPress);
+            div.addEventListener('touchmove', cancelPress);
+            container.appendChild(div);
+        }
+
+        // ============ BAN SYSTEM ============
+        function showBanPopup(uid, name, isBanned) {
+            document.getElementById('banPopup').classList.add('show');
+            document.getElementById('banPopupTitle').textContent = isBanned ? 'Unban User?' : 'Ban User?';
+            document.getElementById('banPopupText').textContent = isBanned ? `Unban ${name}?` : `Ban ${name}? They cannot login/order.`;
+            const btn = document.getElementById('banConfirmBtn');
+            btn.textContent = isBanned ? 'Unban User' : 'Ban User';
+            btn.onclick = async () => {
+                if (isBanned) {
+                    await remove(ref(database, 'bannedUsers/' + uid));
+                    await update(ref(database, 'users/' + uid), { banned: false });
+                    showToast('✅ User unbanned');
+                } else {
+                    await set(ref(database, 'bannedUsers/' + uid), true);
+                    await update(ref(database, 'users/' + uid), { banned: true });
+                    showToast('🚫 User banned');
+                }
+                closeBanPopup();
+                loadData();
+            };
+        }
+        window.closeBanPopup = function() { document.getElementById('banPopup').classList.remove('show'); };
+
+        function loadBanned() {
+            const list = document.getElementById('bannedList');
+            list.innerHTML = '';
+            const banned = Object.entries(allUsers).filter(([uid, u]) => u.banned === true);
+            if (!banned.length) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">🎉 No banned users</p>'; return; }
+            banned.forEach(([uid, u]) => {
+                list.innerHTML += `<div class="admin-item"><div class="admin-item-info"><h4>${u.name} <span class="banned-badge">🚫 BANNED</span></h4><p>📧 ${u.email}</p><p>🆔 ${u.numericId || uid.substring(0,10)}</p></div><div class="admin-actions"><button class="btn-approve" onclick="unbanUser('${uid}')">✅ Unban</button></div></div>`;
+            });
+        }
+        window.unbanUser = async function(uid) {
+            await remove(ref(database, 'bannedUsers/' + uid));
+            await update(ref(database, 'users/' + uid), { banned: false });
+            showToast('✅ User unbanned');
+            loadData();
+        };
+
+        // ============ USER DETAILS MODAL ============
+        window.showUserDetails = async function(uid) {
+            document.getElementById('userModal').classList.add('show');
+            document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading...</p>';
+            try {
+                const uSnap = await get(ref(database, 'users/' + uid));
+                if (!uSnap.exists()) { document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ Not found</p>'; return; }
+                const user = uSnap.val();
+                const tSnap = await get(ref(database, 'transactions'));
+                const oSnap = await get(ref(database, 'orders'));
+                const uTrx = [], uOrd = [];
+                if (tSnap.exists()) Object.entries(tSnap.val()).forEach(([id, t]) => { if (t.userId === uid) uTrx.push({id, ...t}); });
+                if (oSnap.exists()) Object.entries(oSnap.val()).forEach(([id, o]) => { if (o.userId === uid) uOrd.push({id, ...o}); });
+                uTrx.sort((a,b) => new Date(b.date) - new Date(a.date));
+                uOrd.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
+                const totDep = uTrx.filter(t => t.status === 'Approved').reduce((s,t) => s + parseInt(t.amount||0), 0);
+                let html = `<div class="user-profile-section"><img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}"><div class="user-profile-info"><h3>${user.name} ${user.banned ? '<span class="banned-badge">🚫 BANNED</span>' : ''}</h3><p>📧 ${user.email}</p><p>🆔 ${user.numericId || uid.substring(0,15)}</p></div></div>
+                <div class="user-stats-grid"><div class="user-stat-item"><div class="stat-value">৳ ${user.wallet||0}</div><div class="stat-label">Wallet</div></div><div class="user-stat-item"><div class="stat-value">৳ ${user.totalSpend||0}</div><div class="stat-label">Spend</div></div><div class="user-stat-item"><div class="stat-value">${uOrd.length}</div><div class="stat-label">Orders</div></div><div class="user-stat-item"><div class="stat-value">৳ ${totDep}</div><div class="stat-label">Deposit</div></div></div>
+                <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:130px;padding:12px;" onclick="adminAddMoney('${uid}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:130px;padding:12px;" onclick="adminDeductMoney('${uid}')">➖ Deduct</button></div>
+                <div class="modal-section"><h4>💳 Transactions <span>${uTrx.length}</span></h4>`;
+                if (!uTrx.length) html += '<p class="empty-msg">No transactions</p>';
+                else uTrx.forEach(t => {
+                    const c = t.status === 'Pending' ? '#ffaa00' : t.status === 'Approved' ? '#00ff88' : '#ff6b6b';
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${(t.method||'').toUpperCase()} - ৳ ${t.amount}</strong><span class="modal-status" style="background:${c}20;color:${c};">● ${t.status}</span></div><p>📱 ${t.senderNumber}</p><p>🔢 ${t.trxId}</p><p style="color:#888;font-size:11px;">${new Date(t.date).toLocaleString('en-GB')}</p></div>`;
+                });
+                html += `</div><div class="modal-section"><h4>📦 Orders <span>${uOrd.length}</span></h4>`;
+                if (!uOrd.length) html += '<p class="empty-msg">No orders</p>';
+                else uOrd.forEach(o => {
+                    const c = o.status === 'Pending' ? '#ffaa00' : o.status === 'Complete' ? '#00ff88' : '#ff6b6b';
+                    const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : o.id.substring(0,10);
+                    html += `<div class="modal-item"><div class="modal-item-header"><strong>${oid} 🎮 ${o.productName}</strong><span class="modal-status" style="background:${c}20;color:${c};">● ${o.status}</span></div><p>📦 ${o.packageName}</p><p>💰 <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 ${o.playerId}</p>${o.rejectReason ? `<p style="color:#ff6b6b;">❌ ${o.rejectReason}</p>` : ''}<p style="color:#888;font-size:11px;">${new Date(o.orderDate).toLocaleString('en-GB')}</p></div>`;
+                });
+                html += '</div>';
+                document.getElementById('userModalContent').innerHTML = html;
+            } catch (err) {
+                document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:red;padding:30px;">❌ ' + err.message + '</p>';
+            }
+        };
+        window.closeUserModal = function() { document.getElementById('userModal').classList.remove('show'); };
+
+        // ============ TRANSACTIONS ============
+        window.approveTransaction = async function(trxId, userId, amount) {
+            if (!confirm('Approve ৳ ' + amount + '?')) return;
+            const uRef = ref(database, 'users/' + userId);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                await update(uRef, { wallet: (snap.val().wallet||0) + parseInt(amount) });
+                await update(ref(database, 'transactions/' + trxId), { status: 'Approved', approvedDate: new Date().toISOString() });
+                showToast('✅ Approved!');
+                loadData();
+            }
+        };
+        window.rejectTransaction = async function(trxId) {
+            if (!confirm('Reject payment?')) return;
+            await update(ref(database, 'transactions/' + trxId), { status: 'Rejected', rejectedDate: new Date().toISOString() });
+            showToast('❌ Rejected');
+            loadData();
+        };
+
+        // ============ ORDER APPROVE/REJECT ============
+        window.completeOrder = async function(orderId) {
+            await update(ref(database, 'orders/' + orderId), { status: 'Complete', updatedDate: new Date().toISOString() });
+            showToast('✅ Order Complete');
+            loadData();
+        };
+        window.showRejectPopup = function(orderId) {
+            currentRejectOrderId = orderId;
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('rejectPopup').classList.add('show');
+        };
+        window.closeRejectPopup = function() { document.getElementById('rejectPopup').classList.remove('show'); };
+        document.getElementById('rejectConfirmBtn').addEventListener('click', async () => {
+            const reason = document.getElementById('rejectReason').value.trim();
+            const orderId = currentRejectOrderId;
+            const oSnap = await get(ref(database, 'orders/' + orderId));
+            if (oSnap.exists()) {
+                const ord = oSnap.val();
+                const uRef = ref(database, 'users/' + ord.userId);
+                const uSnap = await get(uRef);
+                if (uSnap.exists()) {
+                    const u = uSnap.val();
+                    await update(uRef, { 
+                        wallet: (u.wallet||0) + parseInt(ord.price||0),
+                        totalSpend: Math.max(0, (u.totalSpend||0) - parseInt(ord.price||0)),
+                        orders: Math.max(0, (u.orders||1) - 1)
+                    });
+                }
+                await update(ref(database, 'orders/' + orderId), { 
+                    status: 'Rejected', 
+                    rejectReason: reason || 'No reason provided',
+                    updatedDate: new Date().toISOString() 
+                });
+            }
+            closeRejectPopup();
+            showToast('❌ Order Rejected & Refunded');
+            loadData();
+        });
+
+        // ============ ADMIN ADD/DEDUCT MONEY ============
+        window.adminAddMoney = async function(uid) {
+            const user = allUsers[uid];
+            const amt = prompt('Add money to ' + (user?.name||'user') + '\n\nAmount:', '100');
+            if (!amt) return;
+            const a = parseInt(amt);
+            if (isNaN(a) || a < 1) { alert('Invalid'); return; }
+            if (!confirm('Add ৳ ' + a + '?')) return;
+            const uRef = ref(database, 'users/' + uid);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                const u = snap.val();
+                await update(uRef, { wallet: (u.wallet||0) + a });
+                await push(ref(database, 'transactions'), {
+                    userId: uid, userName: u.name, userEmail: u.email, amount: a,
+                    method: 'admin', senderNumber: 'ADMIN', trxId: 'ADMIN-' + Date.now(),
+                    status: 'Approved', date: new Date().toISOString(), approvedDate: new Date().toISOString(),
+                    note: 'Added by ' + currentUser.email
+                });
+                showToast('✅ Added');
+                closeUserModal();
+                loadData();
+            }
+        };
+        window.adminDeductMoney = async function(uid) {
+            const user = allUsers[uid];
+            const amt = prompt('Deduct from ' + (user?.name||'user') + '\nBalance: ৳ ' + (user?.wallet||0), '100');
+            if (!amt) return;
+            const a = parseInt(amt);
+            if (isNaN(a) || a < 1) { alert('Invalid'); return; }
+            if (a > (user?.wallet||0)) { alert('Insufficient'); return; }
+            if (!confirm('Deduct ৳ ' + a + '?')) return;
+            const uRef = ref(database, 'users/' + uid);
+            const snap = await get(uRef);
+            if (snap.exists()) {
+                await update(uRef, { wallet: (snap.val().wallet||0) - a });
+                showToast('✅ Deducted');
+                closeUserModal();
+                loadData();
+            }
+        };
+
+        // ============ PRODUCTS ============
+        window.toggleProductStock = async function(k, s) { await update(ref(database, 'products/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
+        window.togglePackageStock = async function(pk, k, s) { await update(ref(database, 'products/' + pk + '/packages/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
+        window.editPrice = async function(pk, k, cp, n) { const np = prompt('Edit price for "' + n + '"', cp); if (!np) return; const p = parseInt(np); if (isNaN(p)) return alert('Invalid'); await update(ref(database, 'products/' + pk + '/packages/' + k), { price: p }); showToast('✅ Updated'); loadProducts(); };
+        window.editProductImage = async function(k, ci) { const ni = prompt('Image URL:', ci); if (!ni || !ni.startsWith('http')) return; await update(ref(database, 'products/' + k), { image: ni }); showToast('✅ Updated'); loadProducts(); };
+        window.editProductName = async function(k, cn) { const nn = prompt('Product name:', cn); if (!nn || nn === cn) return; await update(ref(database, 'products/' + k), { name: nn }); showToast('✅ Updated'); loadProducts(); };
+        window.editPackageName = async function(pk, k, cn) { const nn = prompt('Package name:', cn); if (!nn || nn === cn) return; await update(ref(database, 'products/' + pk + '/packages/' + k), { name: nn }); showToast('✅ Updated'); loadProducts(); };
+        window.togglePackages = function(k) { const c = document.getElementById('packages-'+k); const a = document.getElementById('arrow-'+k); if (c.style.display === 'none' || !c.style.display) { c.style.display = 'flex'; a.textContent = '▼'; } else { c.style.display = 'none'; a.textContent = '▶'; } };
+        window.addNewProduct = async function() {
+            const k = prompt('Product ID (no space, lowercase):'); if (!k) return;
+            const ck = k.trim().toLowerCase().replace(/\s+/g, '');
+            const chk = await get(ref(database, 'products/' + ck)); if (chk.exists()) return alert('❌ ID exists');
+            const n = prompt('Product name:'); if (!n) return;
+            const i = prompt('Image URL:', 'https://via.placeholder.com/300x240/1a0033/8b00ff?text=Product'); if (!i || !i.startsWith('http')) return alert('❌ Invalid URL');
+            const pn = prompt('First package name:', '100 Diamond'); if (!pn) return;
+            const pp = prompt('Package price:', '100'); if (!pp || isNaN(parseInt(pp))) return alert('❌ Invalid');
+            const ps = await get(ref(database, 'products'));
+            const oc = ps.exists() ? Object.keys(ps.val()).length : 0;
+            await set(ref(database, 'products/' + ck), { name: n, image: i, stock: 'in', order: oc, packages: { p1: { name: pn, price: parseInt(pp), stock: 'in', order: 0 } } });
+            showToast('✅ Added'); loadProducts();
+        };
+        window.addNewPackage = async function(pk) {
+            const n = prompt('Package name:'); if (!n) return;
+            const p = prompt('Price:', '100'); if (!p || isNaN(parseInt(p))) return alert('❌ Invalid');
+            const ps = await get(ref(database, 'products/' + pk));
+            if (!ps.exists()) return;
+            const pkgs = ps.val().packages || {};
+            const cnt = Object.keys(pkgs).length;
+            let fk = 'p' + (cnt+1), c = cnt+1;
+            while (pkgs[fk]) { c++; fk = 'p' + c; }
+            await set(ref(database, 'products/' + pk + '/packages/' + fk), { name: n, price: parseInt(p), stock: 'in', order: cnt });
+            showToast('✅ Added'); loadProducts();
+        };
+        window.deleteProduct = async function(k, n) { if (!confirm('Delete "'+n+'"?')) return; if (!confirm('Confirm delete?')) return; await remove(ref(database, 'products/'+k)); showToast('✅ Deleted'); loadProducts(); };
+        window.deletePackage = async function(pk, k, n) { if (!confirm('Delete "'+n+'"?')) return; await remove(ref(database, 'products/'+pk+'/packages/'+k)); showToast('✅ Deleted'); loadProducts(); };
+
+        async function saveProductOrder() {
+            const cards = document.querySelectorAll('#productsList .product-admin-card');
+            const upd = {};
+            cards.forEach((c, i) => { upd[`products/${c.dataset.productKey}/order`] = i; });
+            await update(ref(database), upd); showToast('✅ Order saved');
+        }
+        async function savePackageOrder(pk) {
+            const rows = document.querySelectorAll(`#packages-${pk} .pkg-row`);
+            const upd = {};
+            rows.forEach((r, i) => { upd[`products/${pk}/packages/${r.dataset.pkgKey}/order`] = i; });
+            await update(ref(database), upd); showToast('✅ Order saved');
+        }
+
+        async function loadProducts() {
+            const snap = await get(ref(database, 'products'));
+            const list = document.getElementById('productsList');
+            list.innerHTML = '';
+            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No products</p>'; return; }
+            const arr = Object.entries(snap.val()).map(([k,v]) => ({k,...v})).sort((a,b) => (a.order||0)-(b.order||0));
+            for (const p of arr) {
+                const isOut = p.stock === 'out';
+                let ph = '';
+                if (p.packages) {
+                    const pa = Object.entries(p.packages).map(([pk,pv]) => ({pk,...pv})).sort((a,b) => (a.order||0)-(b.order||0));
+                    for (const pkg of pa) {
+                        const po = pkg.stock === 'out';
+                        const sn = pkg.name.replace(/`/g,'\\`').replace(/'/g,"\\'");
+                        ph += `<div class="pkg-row ${po?'pkg-out':''}" data-pkg-key="${pkg.pk}"><span class="drag-handle pkg-drag">⋮⋮</span><span class="pkg-info">${pkg.name} - <strong style="color:#8b00ff;">৳ ${pkg.price}</strong></span><div class="pkg-actions"><button class="btn-edit" onclick="editPackageName('${p.k}','${pkg.pk}',\`${sn}\`)">✏️</button><button class="btn-edit" onclick="editPrice('${p.k}','${pkg.pk}',${pkg.price},\`${sn}\`)">💰</button><button class="btn-toggle ${po?'stock-out':'stock-in'}" onclick="togglePackageStock('${p.k}','${pkg.pk}','${pkg.stock}')">${po?'❌':'✅'}</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deletePackage('${p.k}','${pkg.pk}',\`${sn}\`)">🗑️</button></div></div>`;
+                    }
+                }
+                const spn = p.name.replace(/`/g,'\\`').replace(/'/g,"\\'");
+                const si = (p.image||'').replace(/`/g,'\\`').replace(/'/g,"\\'");
+                list.innerHTML += `<div class="product-admin-card ${isOut?'product-out':''}" data-product-key="${p.k}"><div class="product-admin-header"><span class="drag-handle product-drag">⋮⋮</span><div style="display:flex;align-items:center;gap:15px;flex:1;cursor:pointer;" onclick="togglePackages('${p.k}')"><img src="${p.image}" onerror="this.src='https://via.placeholder.com/70/8b00ff/ffffff?text=?'"><div class="product-admin-info"><h4>${p.name} <span id="arrow-${p.k}" style="color:#8b00ff;">▶</span></h4><p>${Object.keys(p.packages||{}).length} Packages</p></div></div><button class="btn-toggle ${isOut?'stock-out':'stock-in'}" onclick="event.stopPropagation();toggleProductStock('${p.k}','${p.stock}')">${isOut?'❌ OFF':'✅ ON'}</button></div><div class="product-edit-actions"><button class="btn-edit-img" onclick="editProductImage('${p.k}',\`${si}\`)">📸 Image</button><button class="btn-edit-img" onclick="editProductName('${p.k}',\`${spn}\`)">✏️ Name</button><button class="btn-edit-img" style="background:linear-gradient(135deg,#00c853,#00e676);" onclick="addNewPackage('${p.k}')">➕ Package</button><button class="btn-edit-img" style="background:linear-gradient(135deg,#ff3d00,#ff0000);" onclick="deleteProduct('${p.k}',\`${spn}\`)">🗑️ Delete</button></div><div class="packages-container" id="packages-${p.k}" style="display:none;">${ph}</div></div>`;
+            }
+            new Sortable(list, { handle: '.product-drag', animation: 200, ghostClass: 'sortable-ghost', onEnd: saveProductOrder });
+            document.querySelectorAll('.packages-container').forEach(c => {
+                const pk = c.id.replace('packages-','');
+                new Sortable(c, { handle: '.pkg-drag', animation: 200, ghostClass: 'sortable-ghost', onEnd: () => savePackageOrder(pk) });
+            });
+        }
+
+        // ============ BANNER ============
+        async function loadBanners() {
+            const snap = await get(ref(database, 'banners'));
+            const list = document.getElementById('bannersList');
+            list.innerHTML = '';
+            if (!snap.exists()) { list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No banner yet</p>'; return; }
+            const arr = Object.entries(snap.val()).map(([k,v]) => ({k,...v})).sort((a,b) => (a.order||0)-(b.order||0));
+            arr.forEach(b => {
+                const linkDisplay = b.link ? `<br><small style="color:#00ff88;">🔗 ${b.link.substring(0,40)}${b.link.length>40?'...':''}</small>` : '<br><small style="color:#888;">🔗 No click link</small>';
+                list.innerHTML += `<div class="banner-card"><span class="drag-handle">⋮⋮</span><img src="${b.image}" onerror="this.src='https://via.placeholder.com/100x60/8b00ff/fff?text=?'"><div class="banner-info"><strong>Banner</strong><br><small style="color:#888;word-break:break-all;">🖼️ ${b.image.substring(0,40)}...</small>${linkDisplay}</div><div class="banner-actions"><button class="btn-edit" onclick="showBannerPopup('${b.k}')">✏️ Edit</button><button class="btn-edit" style="background:rgba(255,50,50,0.2);color:#ff6b6b;" onclick="deleteBanner('${b.k}')">🗑️</button></div></div>`;
+            });
+        }
+
+        window.showBannerPopup = async function(bannerKey) {
+            currentBannerKey = bannerKey;
+            document.getElementById('bannerImageInput').value = '';
+            document.getElementById('bannerLinkInput').value = '';
+            if (bannerKey) {
+                document.getElementById('bannerPopupTitle').textContent = '✏️ Edit Banner';
+                const snap = await get(ref(database, 'banners/' + bannerKey));
+                if (snap.exists()) {
+                    const b = snap.val();
+                    document.getElementById('bannerImageInput').value = b.image || '';
+                    document.getElementById('bannerLinkInput').value = b.link || '';
+                }
+            } else {
+                document.getElementById('bannerPopupTitle').textContent = '🖼️ Add New Banner';
+            }
+            document.getElementById('bannerPopup').classList.add('show');
+        };
+
+        window.closeBannerPopup = function() { document.getElementById('bannerPopup').classList.remove('show'); };
+
+        document.getElementById('bannerConfirmBtn').addEventListener('click', async () => {
+            const img = document.getElementById('bannerImageInput').value.trim();
+            const link = document.getElementById('bannerLinkInput').value.trim();
+            if (!img || !img.startsWith('http')) return alert('❌ Invalid image URL');
+            if (currentBannerKey) {
+                const snap = await get(ref(database, 'banners/' + currentBannerKey));
+                const order = snap.exists() ? (snap.val().order || 0) : 0;
+                const data = { image: img, order: order };
+                if (link) data.link = link;
+                await set(ref(database, 'banners/' + currentBannerKey), data);
+                showToast('✅ Banner updated');
+            } else {
+                const snap = await get(ref(database, 'banners'));
+                const cnt = snap.exists() ? Object.keys(snap.val()).length : 0;
+                const data = { image: img, order: cnt };
+                if (link) data.link = link;
+                await push(ref(database, 'banners'), data);
+                showToast('✅ Banner added');
+            }
+            closeBannerPopup();
+            loadBanners();
+        });
+
+        window.deleteBanner = async function(k) {
+            if (!confirm('Delete this banner?')) return;
+            await remove(ref(database, 'banners/'+k));
+            showToast('✅ Deleted'); loadBanners();
+        };
+
+        // ============ PAYMENT NUMBERS ============
+        async function loadPaymentNumbers() {
+            const snap = await get(ref(database, 'paymentSettings'));
+            if (snap.exists()) {
+                const d = snap.val();
+                document.getElementById('bkashInput').value = d.bkash || '';
+                document.getElementById('nagadInput').value = d.nagad || '';
+            }
+        }
+        window.savePaymentNumbers = async function() {
+            const b = document.getElementById('bkashInput').value.trim();
+            const n = document.getElementById('nagadInput').value.trim();
+            if (!b || !n) return alert('Fill both numbers');
+            await set(ref(database, 'paymentSettings'), { bkash: b, nagad: n });
+            showToast('✅ Payment numbers saved');
+        };
+
+        // ============ ADMIN MANAGEMENT ============
+        async function loadAdmins() {
+            const sSnap = await get(ref(database, 'superAdmins'));
+            const aSnap = await get(ref(database, 'admins'));
+            const permSnap = await get(ref(database, 'permanentSuperAdmin'));
+            const permEmail = permSnap.exists() ? permSnap.val() : '';
+            const sList = document.getElementById('superAdminsList');
+            const aList = document.getElementById('normalAdminsList');
+            sList.innerHTML = `<div class="admin-mgmt-item" style="border-color:#ffd700;"><div class="admin-info"><strong style="color:#ffd700;">👑 ${permEmail}</strong><small>Permanent Super Admin (Cannot be removed)</small></div></div>`;
+            if (sSnap.exists()) {
+                Object.keys(sSnap.val()).forEach(k => {
+                    const email = k.replace(/,/g, '.');
+                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>👑 ${email}</strong><small>Super Admin</small></div><button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button></div>`;
+                });
+            }
+            aList.innerHTML = '';
+            if (aSnap.exists()) {
+                Object.keys(aSnap.val()).forEach(k => {
+                    const email = k.replace(/,/g, '.');
+                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin</small></div><button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button></div>`;
+                });
+            } else aList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No normal admins</p>';
+        }
+        window.addAdmin = async function(type) {
+            const email = prompt((type === 'super' ? 'Super' : 'Normal') + ' Admin Email:'); 
+            if (!email || !email.includes('@')) return alert('Invalid email');
+            const key = emailToKey(email.trim().toLowerCase());
+            const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
+            await set(ref(database, path), true);
+            showToast('✅ Admin added');
+            loadAdmins();
+        };
+        window.removeAdmin = async function(type, key, email) {
+            if (!confirm('Remove ' + email + '?')) return;
+            const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
+            await remove(ref(database, path));
+            showToast('✅ Removed');
+            loadAdmins();
+        };
+
+        // ============ ORDER COUNT FILTER ============
+        window.updateOrderCount = function(days) {
+            const d = parseInt(days);
+            if (d === 0) {
+                document.getElementById('totalOrdersCount').textContent = window._allOrdersTotal || 0;
+            } else {
+                const now = Date.now();
+                const ms = d * 24 * 60 * 60 * 1000;
+                const count = (window._allOrdersDates || []).filter(t => (now - t) <= ms).length;
+                document.getElementById('totalOrdersCount').textContent = count;
+            }
+        };
+
+        // ============ LOAD ALL DATA ============
+        async function loadData() {
+            const tSnap = await get(ref(database, 'transactions'));
+            const tp = document.getElementById('trxPending');
+            let pc = 0, ph = '';
+            allTransactionsHistory = [];
+            if (tSnap.exists()) {
+                Object.entries(tSnap.val()).reverse().forEach(([id, t]) => {
+                    if (t.status === 'Pending') {
+                        pc++;
+                        ph += `<div class="admin-item"><div class="admin-item-info"><h4>${t.userName} <span style="color:#ffaa00;">● Pending</span></h4><p>📧 ${t.userEmail}</p><p>💰 <strong style="color:#8b00ff;">৳ ${t.amount}</strong> | ${(t.method||'').toUpperCase()}</p><p>📱 ${t.senderNumber} | TrxID: <strong>${t.trxId}</strong></p><p style="font-size:12px;color:#888;">${new Date(t.date).toLocaleString('en-GB')}</p></div><div class="admin-actions"><button class="btn-approve" onclick="approveTransaction('${id}','${t.userId}',${t.amount})">✅ Approve</button><button class="btn-reject" onclick="rejectTransaction('${id}')">❌ Reject</button></div></div>`;
+                    } else allTransactionsHistory.push({id, ...t});
+                });
+            }
+            tp.innerHTML = ph || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending</p>';
+            document.getElementById('pendingCount').textContent = pc;
+            document.getElementById('trxPendingBadge').textContent = pc;
+            const now = Date.now(), day = 24*60*60*1000;
+            renderTrxHistory(allTransactionsHistory.filter(t => (now-new Date(t.date).getTime()) <= day), 1);
+
+            const oSnap = await get(ref(database, 'orders'));
+            let oc = 0, opc = 0, oph = '';
+            allOrdersHistory = [];
+            window._allOrdersDates = [];
+            if (oSnap.exists()) {
+                const arr = Object.entries(oSnap.val()).reverse();
+                oc = arr.length;
+                arr.forEach(([id, o]) => {
+                    if (o.orderDate) window._allOrdersDates.push(new Date(o.orderDate).getTime());
+                    const oid = o.orderNumber ? '#' + String(o.orderNumber).padStart(3, '0') : id.substring(0,10);
+                    if (o.status === 'Pending') {
+                        opc++;
+                        oph += `<div class="admin-item"><div class="admin-item-info"><h4>${oid} - ${o.userName} <span style="color:#ffaa00;">● Pending</span></h4><p>🎮 ${o.productName}</p><p>📦 ${o.packageName} | <strong style="color:#8b00ff;">৳ ${o.price}</strong></p><p>🆔 Player: <strong>${o.playerId}</strong></p><p style="font-size:12px;color:#888;">${new Date(o.orderDate).toLocaleString('en-GB')}</p></div><div class="admin-actions"><button class="btn-approve" onclick="completeOrder('${id}')">✅ Complete</button><button class="btn-reject" onclick="showRejectPopup('${id}')">❌ Reject</button></div></div>`;
+                    } else allOrdersHistory.push({id, ...o});
+                });
+            }
+            document.getElementById('ordPending').innerHTML = oph || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending</p>';
+            window._allOrdersTotal = oc;
+            updateOrderCount(document.getElementById('orderFilterSelect').value);
+            document.getElementById('ordPendingBadge').textContent = opc;
+            renderOrdHistory(allOrdersHistory.filter(o => (now-new Date(o.orderDate).getTime()) <= day), 1);
+
+            const uSnap = await get(ref(database, 'users'));
+            allUsers = uSnap.exists() ? uSnap.val() : {};
+            document.getElementById('totalUsers').textContent = Object.keys(allUsers).length;
+            document.getElementById('bannedCount').textContent = Object.values(allUsers).filter(u => u.banned).length;
+            filterUsers();
+            loadProducts();
+        }
+    </script>
+</body>
+</html>
