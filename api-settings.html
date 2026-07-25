@@ -7,236 +7,64 @@
     <link rel="stylesheet" href="admin-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        .api-card {
-            background: rgba(20, 20, 40, 0.85);
-            border: 1px solid rgba(139, 0, 255, 0.3);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            transition: 0.3s;
-        }
-        .api-card:hover {
-            border-color: #8b00ff;
-            box-shadow: 0 10px 30px rgba(139, 0, 255, 0.2);
-        }
-        .api-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(139, 0, 255, 0.2);
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .api-card-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
-            color: white;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #444;
-            transition: .4s;
-            border-radius: 30px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 22px;
-            width: 22px;
-            left: 4px;
-            bottom: 4px;
-            background: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background: linear-gradient(135deg, #8b00ff, #6a0dad);
-        }
-        input:checked + .slider:before {
-            transform: translateX(30px);
-        }
-        .form-group {
-            margin-bottom: 18px;
-        }
-        .form-group label {
-            display: block;
-            color: #a0a0c0;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(139, 0, 255, 0.3);
-            border-radius: 10px;
-            color: white;
-            font-size: 14px;
-            font-family: 'Poppins', sans-serif;
-            transition: 0.3s;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #8b00ff;
-            box-shadow: 0 0 15px rgba(139, 0, 255, 0.3);
-        }
-        .form-group input::placeholder {
-            color: #666;
-        }
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn-save-api {
-            flex: 1;
-            min-width: 140px;
-            background: linear-gradient(135deg, #8b00ff, #6a0dad);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .btn-save-api:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 20px rgba(139, 0, 255, 0.5);
-        }
-        .btn-test-api {
-            flex: 1;
-            min-width: 140px;
-            background: linear-gradient(135deg, #00c853, #00e676);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: 0.3s;
-        }
-        .btn-test-api:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 20px rgba(0, 200, 83, 0.5);
-        }
-        .status-msg {
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 13px;
-            font-weight: 600;
-            display: none;
-        }
-        .status-success {
-            background: rgba(0, 200, 83, 0.15);
-            color: #00ff88;
-            border: 1px solid rgba(0, 200, 83, 0.4);
-        }
-        .status-error {
-            background: rgba(255, 50, 50, 0.15);
-            color: #ff6b6b;
-            border: 1px solid rgba(255, 50, 50, 0.4);
-        }
-        .info-box {
-            background: rgba(139, 0, 255, 0.1);
-            border-left: 3px solid #8b00ff;
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #d0d0e0;
-        }
-        .back-btn {
-            background: rgba(139, 0, 255, 0.15);
-            color: white;
-            border: 1px solid #8b00ff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .back-btn:hover {
-            background: rgba(139, 0, 255, 0.3);
-            transform: scale(1.05);
-        }
-        .page-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .page-title h1 {
-            font-family: 'Orbitron', sans-serif;
-            color: #8b00ff;
-            font-size: 28px;
-            margin-bottom: 8px;
-        }
-        .page-title p {
-            color: #a0a0c0;
-            font-size: 14px;
-        }
+        .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #000, #1a0033, #000); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+        .login-box { background: rgba(20, 20, 40, 0.95); border: 2px solid #8b00ff; border-radius: 25px; padding: 40px 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 50px rgba(139, 0, 255, 0.5); }
+        .login-box h2 { font-family: 'Orbitron', sans-serif; color: white; font-size: 26px; margin: 15px 0 8px; }
+        .login-box > p { color: #a0a0c0; font-size: 14px; margin-bottom: 25px; }
+        .btn-google-admin { width: 100%; padding: 14px; background: white; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; }
+        .btn-google-admin:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(139, 0, 255, 0.4); }
+        .btn-google-admin img { width: 22px; height: 22px; }
+        .login-error { background: rgba(255, 50, 50, 0.15); border: 1px solid rgba(255, 50, 50, 0.4); color: #ff6b6b; padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; }
+        .api-card { background: rgba(20, 20, 40, 0.85); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 20px; padding: 25px; margin-bottom: 25px; transition: 0.3s; }
+        .api-card:hover { border-color: #8b00ff; box-shadow: 0 10px 30px rgba(139, 0, 255, 0.2); }
+        .api-card-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid rgba(139, 0, 255, 0.2); margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .api-card-title { font-family: 'Orbitron', sans-serif; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; }
+        .toggle-switch { position: relative; width: 60px; height: 30px; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #444; transition: .4s; border-radius: 30px; }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: linear-gradient(135deg, #8b00ff, #6a0dad); }
+        input:checked + .slider:before { transform: translateX(30px); }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; color: #a0a0c0; margin-bottom: 8px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 15px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(139, 0, 255, 0.3); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins', sans-serif; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #8b00ff; box-shadow: 0 0 15px rgba(139, 0, 255, 0.3); }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn-save-api { flex: 1; min-width: 140px; background: linear-gradient(135deg, #8b00ff, #6a0dad); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .btn-save-api:hover { transform: scale(1.02); }
+        .btn-test-api { flex: 1; min-width: 140px; background: linear-gradient(135deg, #00c853, #00e676); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 14px; }
+        .btn-test-api:hover { transform: scale(1.02); }
+        .status-msg { padding: 12px 15px; border-radius: 10px; margin-top: 15px; font-size: 13px; font-weight: 600; display: none; }
+        .status-success { background: rgba(0, 200, 83, 0.15); color: #00ff88; border: 1px solid rgba(0, 200, 83, 0.4); }
+        .status-error { background: rgba(255, 50, 50, 0.15); color: #ff6b6b; border: 1px solid rgba(255, 50, 50, 0.4); }
+        .info-box { background: rgba(139, 0, 255, 0.1); border-left: 3px solid #8b00ff; padding: 12px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #d0d0e0; }
+        .back-btn { background: rgba(139, 0, 255, 0.15); color: white; border: 1px solid #8b00ff; padding: 10px 20px; border-radius: 20px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+        .back-btn:hover { background: rgba(139, 0, 255, 0.3); transform: scale(1.05); }
+        .page-title { text-align: center; margin-bottom: 30px; }
+        .page-title h1 { font-family: 'Orbitron', sans-serif; color: #8b00ff; font-size: 28px; margin-bottom: 8px; }
+        .page-title p { color: #a0a0c0; font-size: 14px; }
     </style>
 </head>
 <body class="home-body">
 
-    <!-- PIN Lock -->
-    <div id="pinScreen" class="pin-screen">
-        <div class="pin-container">
-            <div class="pin-logo">🔐</div>
+    <div id="loginScreen" class="login-screen">
+        <div class="login-box">
+            <div style="font-size: 60px;">⚙️</div>
             <h2>API Settings</h2>
-            <p>Enter Your PIN</p>
-            <div class="pin-display" id="pinDisplay"></div>
-            <div id="pinError" class="pin-error" style="display:none;">❌ Wrong PIN!</div>
-            <div class="pin-keypad">
-                <button onclick="addDigit('1')">1</button>
-                <button onclick="addDigit('2')">2</button>
-                <button onclick="addDigit('3')">3</button>
-                <button onclick="addDigit('4')">4</button>
-                <button onclick="addDigit('5')">5</button>
-                <button onclick="addDigit('6')">6</button>
-                <button onclick="addDigit('7')">7</button>
-                <button onclick="addDigit('8')">8</button>
-                <button onclick="addDigit('9')">9</button>
-                <button onclick="clearPin()" class="pin-clear">⌫</button>
-                <button onclick="addDigit('0')">0</button>
-                <button onclick="checkPin()" class="pin-submit">✓</button>
-            </div>
+            <p>Sign in with your admin Google account</p>
+            <button id="googleLoginBtn" class="btn-google-admin">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Sign in with Google
+            </button>
+            <div id="loginError" class="login-error"></div>
         </div>
     </div>
 
-    <!-- Main Content -->
     <div id="apiContent" style="display:none;">
         <nav class="home-navbar">
             <div class="home-logo">OXI <span>ADMIN</span></div>
             <div class="home-nav-right">
-                <a href="admin.html" class="back-btn">← Back to Admin</a>
+                <a href="admin.html" class="back-btn">← Back</a>
                 <button class="btn-logout-admin" onclick="logoutAdmin()">Logout</button>
             </div>
         </nav>
@@ -247,7 +75,6 @@
                 <p>Configure your API integrations for UID Check and Auto Top-Up</p>
             </div>
 
-            <!-- UID Check API -->
             <div class="api-card">
                 <div class="api-card-header">
                     <div class="api-card-title">🔍 UID to Name Check API</div>
@@ -256,11 +83,7 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-
-                <div class="info-box">
-                    💡 এই API দিয়ে user UID লিখলে Player এর নাম automatic দেখাবে
-                </div>
-
+                <div class="info-box">💡 এই API দিয়ে user UID লিখলে Player এর নাম automatic দেখাবে</div>
                 <div class="form-group">
                     <label>API Provider</label>
                     <select id="uidProvider">
@@ -271,17 +94,14 @@
                         <option value="custom">Custom API</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>API URL / Endpoint</label>
                     <input type="text" id="uidUrl" placeholder="https://api.example.com/check-uid">
                 </div>
-
                 <div class="form-group">
                     <label>API Key</label>
                     <input type="text" id="uidKey" placeholder="Your API Key here...">
                 </div>
-
                 <div class="form-group">
                     <label>Request Method</label>
                     <select id="uidMethod">
@@ -289,7 +109,6 @@
                         <option value="POST">POST</option>
                     </select>
                 </div>
-
                 <div class="btn-row">
                     <button class="btn-save-api" onclick="saveUidApi()">💾 Save Settings</button>
                     <button class="btn-test-api" onclick="testUidApi()">🧪 Test API</button>
@@ -297,7 +116,6 @@
                 <div class="status-msg" id="uidStatus"></div>
             </div>
 
-            <!-- Auto Top-Up API -->
             <div class="api-card">
                 <div class="api-card-header">
                     <div class="api-card-title">⚡ Auto Top-Up API</div>
@@ -306,11 +124,7 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-
-                <div class="info-box">
-                    💡 এই API on করলে Payment success হলে Diamond automatic delivery হবে
-                </div>
-
+                <div class="info-box">💡 এই API on করলে Payment success হলে Diamond automatic delivery হবে</div>
                 <div class="form-group">
                     <label>API Provider</label>
                     <select id="topupProvider">
@@ -322,27 +136,22 @@
                         <option value="custom">Custom API</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>API URL / Endpoint</label>
                     <input type="text" id="topupUrl" placeholder="https://api.example.com/topup">
                 </div>
-
                 <div class="form-group">
                     <label>API Key</label>
                     <input type="text" id="topupKey" placeholder="Your API Key here...">
                 </div>
-
                 <div class="form-group">
                     <label>API Secret (Optional)</label>
                     <input type="text" id="topupSecret" placeholder="API Secret if required">
                 </div>
-
                 <div class="form-group">
                     <label>Callback URL (Optional)</label>
                     <input type="text" id="topupCallback" placeholder="https://yoursite.com/callback">
                 </div>
-
                 <div class="btn-row">
                     <button class="btn-save-api" onclick="saveTopupApi()">💾 Save Settings</button>
                     <button class="btn-test-api" onclick="testTopupApi()">🧪 Test Connection</button>
@@ -355,71 +164,45 @@
     <div id="toast" class="toast"></div>
 
     <script type="module">
-        import { database, ref, get, set, ADMIN_PIN } from './config.js';
+        import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, get, set, checkAdminLevel } from './config.js';
 
-        let currentPin = '';
-        let wrongAttempts = parseInt(localStorage.getItem('wrongAttempts') || '0');
-        let lockUntil = parseInt(localStorage.getItem('lockUntil') || '0');
-
-        function checkLock() {
-            if (Date.now() < lockUntil) {
-                const minutes = Math.ceil((lockUntil - Date.now()) / 60000);
-                document.getElementById('pinDisplay').textContent = '🔒 LOCKED';
-                document.getElementById('pinError').style.display = 'block';
-                document.getElementById('pinError').textContent = '🔒 Locked! Wait ' + minutes + ' minutes';
-                document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
-                return true;
-            }
-            return false;
-        }
-        checkLock();
-
-        window.addDigit = function(digit) {
-            if (currentPin.length < 15) { currentPin += digit; updatePinDisplay(); }
-        };
-        window.clearPin = function() {
-            currentPin = currentPin.slice(0, -1); updatePinDisplay();
-        };
-        function updatePinDisplay() {
-            document.getElementById('pinDisplay').textContent = '•'.repeat(currentPin.length);
-            document.getElementById('pinError').style.display = 'none';
-        }
-        window.checkPin = function() {
-            if (checkLock()) return;
-            if (currentPin === ADMIN_PIN) {
-                localStorage.removeItem('wrongAttempts');
-                document.getElementById('pinScreen').style.display = 'none';
-                document.getElementById('apiContent').style.display = 'block';
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                loadSettings();
-            } else {
-                wrongAttempts++;
-                localStorage.setItem('wrongAttempts', wrongAttempts);
-                if (wrongAttempts >= 3) {
-                    lockUntil = Date.now() + (5 * 60 * 1000);
-                    localStorage.setItem('lockUntil', lockUntil);
-                    localStorage.setItem('wrongAttempts', '0');
-                    document.getElementById('pinError').textContent = '🔒 Locked for 5 minutes!';
-                    document.querySelectorAll('.pin-keypad button').forEach(btn => btn.disabled = true);
-                } else {
-                    document.getElementById('pinError').textContent = '❌ Wrong PIN! (' + (3 - wrongAttempts) + ' attempts left)';
+        document.getElementById('googleLoginBtn').addEventListener('click', async () => {
+            try {
+                document.getElementById('loginError').style.display = 'none';
+                const result = await signInWithPopup(auth, googleProvider);
+                const level = await checkAdminLevel(result.user.email);
+                if (level === 'none') {
+                    await signOut(auth);
+                    document.getElementById('loginError').textContent = '❌ You are not authorized.';
+                    document.getElementById('loginError').style.display = 'block';
+                    return;
                 }
-                document.getElementById('pinError').style.display = 'block';
-                currentPin = '';
-                updatePinDisplay();
+            } catch (err) {
+                document.getElementById('loginError').textContent = '❌ ' + err.message;
+                document.getElementById('loginError').style.display = 'block';
             }
-        };
+        });
 
-        window.logoutAdmin = function() {
-            sessionStorage.removeItem('adminLoggedIn');
-            location.reload();
-        };
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('apiContent').style.display = 'none';
+                return;
+            }
+            const level = await checkAdminLevel(user.email);
+            if (level === 'none') { await signOut(auth); return; }
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('apiContent').style.display = 'block';
+            loadSettings();
+        });
+
+        window.logoutAdmin = async function() { await signOut(auth); location.reload(); };
 
         window.showToast = function(msg) {
-            const toast = document.getElementById('toast');
-            toast.textContent = msg;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
         };
 
         function showStatus(id, msg, type) {
@@ -451,9 +234,7 @@
                         document.getElementById('topupCallback').value = data.topup.callback || '';
                     }
                 }
-            } catch (err) {
-                console.error('Load error:', err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         window.saveUidApi = async function() {
@@ -467,10 +248,8 @@
             try {
                 await set(ref(database, 'apiSettings/uid'), settings);
                 showStatus('uidStatus', '✅ UID API Settings saved!', 'success');
-                showToast('✅ Saved successfully!');
-            } catch (err) {
-                showStatus('uidStatus', '❌ Error: ' + err.message, 'error');
-            }
+                showToast('✅ Saved!');
+            } catch (err) { showStatus('uidStatus', '❌ ' + err.message, 'error'); }
         };
 
         window.saveTopupApi = async function() {
@@ -485,90 +264,47 @@
             try {
                 await set(ref(database, 'apiSettings/topup'), settings);
                 showStatus('topupStatus', '✅ Top-Up API Settings saved!', 'success');
-                showToast('✅ Saved successfully!');
-            } catch (err) {
-                showStatus('topupStatus', '❌ Error: ' + err.message, 'error');
-            }
+                showToast('✅ Saved!');
+            } catch (err) { showStatus('topupStatus', '❌ ' + err.message, 'error'); }
         };
 
         window.testUidApi = async function() {
             const url = document.getElementById('uidUrl').value;
             const key = document.getElementById('uidKey').value;
             const provider = document.getElementById('uidProvider').value;
-            
-            if (!url || !key) {
-                showStatus('uidStatus', '⚠️ Please fill URL and Key first', 'error');
-                return;
-            }
-            showStatus('uidStatus', '⏳ Testing API...', 'success');
-            
+            if (!url || !key) return showStatus('uidStatus', '⚠️ Fill URL and Key', 'error');
+            showStatus('uidStatus', '⏳ Testing...', 'success');
             try {
                 const testUrl = url + (url.includes('?') ? '&' : '?') + 'uid=2493952050';
-                
-                // Set correct header based on provider
                 let headers = { 'Content-Type': 'application/json' };
-                if (provider === 'gameskinbo') {
-                    headers['x-api-key'] = key;
-                } else {
-                    headers['Authorization'] = 'Bearer ' + key;
-                }
-                
-                const res = await fetch(testUrl, { headers: headers });
+                if (provider === 'gameskinbo') headers['x-api-key'] = key;
+                else headers['Authorization'] = 'Bearer ' + key;
+                const res = await fetch(testUrl, { headers });
                 const data = await res.json();
-                console.log('Test Response:', data);
-                
+                console.log('Response:', data);
                 if (res.ok) {
-                    const playerName = data.nickname || data.name || data.username ||
-                                       (data.data && (data.data.nickname || data.data.name)) ||
-                                       (data.basicInfo && data.basicInfo.nickname);
-                    if (playerName) {
-                        showStatus('uidStatus', '✅ API Working! Found: ' + playerName, 'success');
-                    } else {
-                        showStatus('uidStatus', '✅ API responded but check console for data format', 'success');
-                    }
-                } else {
-                    showStatus('uidStatus', '❌ API error: ' + res.status + ' - ' + (data.message || 'Check API key'), 'error');
-                }
-            } catch (err) {
-                showStatus('uidStatus', '❌ Failed: ' + err.message, 'error');
-            }
+                    const name = data.nickname || data.name || (data.AccountInfo && data.AccountInfo.AccountName) || (data.data && data.data.nickname);
+                    if (name) showStatus('uidStatus', '✅ Working! Found: ' + name, 'success');
+                    else showStatus('uidStatus', '✅ API responded - check console', 'success');
+                } else showStatus('uidStatus', '❌ Error: ' + res.status, 'error');
+            } catch (err) { showStatus('uidStatus', '❌ ' + err.message, 'error'); }
         };
 
         window.testTopupApi = async function() {
             const url = document.getElementById('topupUrl').value;
             const key = document.getElementById('topupKey').value;
             const provider = document.getElementById('topupProvider').value;
-            
-            if (!url || !key) {
-                showStatus('topupStatus', '⚠️ Please fill URL and Key first', 'error');
-                return;
-            }
-            showStatus('topupStatus', '⏳ Testing connection...', 'success');
-            
+            if (!url || !key) return showStatus('topupStatus', '⚠️ Fill URL and Key', 'error');
+            showStatus('topupStatus', '⏳ Testing...', 'success');
             try {
                 let headers = { 'Content-Type': 'application/json' };
-                if (provider === 'gameskinbo') {
-                    headers['x-api-key'] = key;
-                } else {
-                    headers['Authorization'] = 'Bearer ' + key;
-                }
-                
-                const res = await fetch(url, { headers: headers });
-                if (res.ok) {
-                    showStatus('topupStatus', '✅ Connection successful!', 'success');
-                } else {
-                    showStatus('topupStatus', '❌ Error: ' + res.status, 'error');
-                }
-            } catch (err) {
-                showStatus('topupStatus', '❌ Failed: ' + err.message, 'error');
-            }
+                if (provider === 'gameskinbo') headers['x-api-key'] = key;
+                else headers['Authorization'] = 'Bearer ' + key;
+                const res = await fetch(url, { headers });
+                if (res.ok) showStatus('topupStatus', '✅ Connection successful!', 'success');
+                else showStatus('topupStatus', '❌ Error: ' + res.status, 'error');
+            } catch (err) { showStatus('topupStatus', '❌ ' + err.message, 'error'); }
         };
-
-        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
-            document.getElementById('pinScreen').style.display = 'none';
-            document.getElementById('apiContent').style.display = 'block';
-            loadSettings();
-        }
     </script>
 </body>
 </html>
