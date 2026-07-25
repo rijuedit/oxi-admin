@@ -51,7 +51,7 @@
         <div class="login-box">
             <div style="font-size: 60px;">⚙️</div>
             <h2>API Settings</h2>
-            <p>Sign in with your admin Google account</p>
+            <p>Only Super Admin can access</p>
             <button id="googleLoginBtn" class="btn-google-admin">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
                 Sign in with Google
@@ -171,9 +171,9 @@
                 document.getElementById('loginError').style.display = 'none';
                 const result = await signInWithPopup(auth, googleProvider);
                 const level = await checkAdminLevel(result.user.email);
-                if (level === 'none') {
+                if (level !== 'permanent' && level !== 'super') {
                     await signOut(auth);
-                    document.getElementById('loginError').textContent = '❌ You are not authorized.';
+                    document.getElementById('loginError').textContent = '❌ Only Super Admin can access API Settings';
                     document.getElementById('loginError').style.display = 'block';
                     return;
                 }
@@ -190,7 +190,12 @@
                 return;
             }
             const level = await checkAdminLevel(user.email);
-            if (level === 'none') { await signOut(auth); return; }
+            if (level !== 'permanent' && level !== 'super') {
+                await signOut(auth);
+                document.getElementById('loginError').textContent = '❌ Only Super Admin can access API Settings';
+                document.getElementById('loginError').style.display = 'block';
+                return;
+            }
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('apiContent').style.display = 'block';
             loadSettings();
