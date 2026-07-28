@@ -102,8 +102,37 @@
         .banner-popup-box input { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins',sans-serif; margin-bottom: 15px; }
         .banner-popup-box input:focus { outline: none; border-color: #8b00ff; }
         .banner-popup-box small { color: #888; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 15px; }
-        @media (max-width: 768px) { .stats-grid-new { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .user-modal-box { padding: 15px; } .user-stats-grid { grid-template-columns: repeat(2, 1fr); } .filter-btn { padding: 7px 12px; font-size: 11px; } }
+        
+        /* ===== MOBILE FIX ===== */
+        @media (max-width: 768px) {
+            .home-navbar { padding: 10px 12px !important; flex-wrap: nowrap !important; gap: 6px !important; }
+            .home-logo { font-size: 16px !important; }
+            .home-nav-right { gap: 5px !important; flex-wrap: nowrap !important; align-items: center !important; }
+            .admin-role-badge { padding: 4px 8px !important; font-size: 10px !important; margin-right: 0 !important; white-space: nowrap !important; }
+            #adminEmail { display: none !important; }
+            .btn-logout-admin { padding: 6px 12px !important; font-size: 11px !important; white-space: nowrap !important; }
+            .dash-container { padding: 12px !important; margin: 10px auto !important; }
+            .stats-grid-new { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+            .stat-card-new { padding: 15px 10px !important; }
+            .stat-card-new h4 { font-size: 11px !important; margin-bottom: 6px !important; }
+            .stat-card-new p { font-size: 24px !important; }
+            .stat-icon { font-size: 32px !important; margin-bottom: 8px !important; }
+            .stat-select { font-size: 11px !important; padding: 5px !important; margin-top: 6px !important; }
+            .admin-tabs { gap: 6px !important; }
+            .tab-btn { padding: 8px 12px !important; font-size: 12px !important; }
+            .section-box { padding: 15px !important; }
+            .section-box h3 { font-size: 15px !important; margin-bottom: 15px !important; }
+            .user-modal-box { padding: 15px; }
+            .user-stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .filter-btn { padding: 7px 12px; font-size: 11px; }
+        }
+        @media (max-width: 400px) {
+            .home-logo { font-size: 14px !important; }
+            .admin-role-badge { padding: 3px 6px !important; font-size: 9px !important; }
+            .btn-logout-admin { padding: 5px 10px !important; font-size: 10px !important; }
+            .stat-card-new p { font-size: 20px !important; }
+            .stat-icon { font-size: 28px !important; }
+        }
     </style>
 </head>
 <body class="home-body">
@@ -364,7 +393,6 @@
         let _originalOrdPending = '';
         let _originalOrdHistory = '';
 
-        // Fix all user IDs
         window.fixAllUserIds = async function() {
             if (!confirm('সব user এর ID number এ convert করবেন?\nএটা একবার করলেই হবে।')) return;
             const snap = await get(ref(database, 'users'));
@@ -386,7 +414,6 @@
             loadData();
         };
 
-        // ============ LOGIN ============
         document.getElementById('googleLoginBtn').addEventListener('click', async () => {
             try {
                 document.getElementById('loginError').style.display = 'none';
@@ -411,10 +438,7 @@
                 return;
             }
             const level = await checkAdminLevel(user.email);
-            if (level === 'none') {
-                await signOut(auth);
-                return;
-            }
+            if (level === 'none') { await signOut(auth); return; }
             currentUser = user;
             currentAdminLevel = level;
             document.getElementById('loginScreen').style.display = 'none';
@@ -460,7 +484,6 @@
             setTimeout(() => t.classList.remove('show'), 2500);
         };
 
-        // ============ FILTERS ============
         window.filterHistory = function(type, days, event) {
             const parent = event.target.closest('.sub-tab-content');
             parent.querySelectorAll('.filter-btn').forEach(el => el.classList.remove('active'));
@@ -516,7 +539,6 @@
             list.innerHTML = html;
         }
 
-        // ============ ORDER SEARCH ============
         window.filterOrders = function() {
             const q = document.getElementById('orderSearch').value.toLowerCase().trim();
             if (!q) {
@@ -545,7 +567,6 @@
             }
         };
 
-        // ============ BAN SEARCH ============
         window.filterBanned = function() {
             const q = document.getElementById('banSearch').value.toLowerCase().trim();
             const list = document.getElementById('bannedList');
@@ -565,7 +586,6 @@
             });
         };
 
-        // ============ USER SEARCH ============
         window.filterUsers = function() {
             const q = document.getElementById('userSearch').value.toLowerCase().trim();
             const list = document.getElementById('usersList');
@@ -612,7 +632,6 @@
             container.appendChild(div);
         }
 
-        // ============ BAN SYSTEM ============
         function showBanPopup(uid, name, isBanned) {
             document.getElementById('banPopup').classList.add('show');
             document.getElementById('banPopupTitle').textContent = isBanned ? 'Unban User?' : 'Ban User?';
@@ -635,9 +654,7 @@
         }
         window.closeBanPopup = function() { document.getElementById('banPopup').classList.remove('show'); };
 
-        function loadBanned() {
-            filterBanned();
-        }
+        function loadBanned() { filterBanned(); }
         window.unbanUser = async function(uid) {
             await remove(ref(database, 'bannedUsers/' + uid));
             await update(ref(database, 'users/' + uid), { banned: false });
@@ -645,7 +662,6 @@
             loadData();
         };
 
-        // ============ USER DETAILS MODAL ============
         window.showUserDetails = async function(uid) {
             document.getElementById('userModal').classList.add('show');
             document.getElementById('userModalContent').innerHTML = '<p style="text-align:center;color:#888;padding:30px;">⏳ Loading...</p>';
@@ -685,7 +701,6 @@
         };
         window.closeUserModal = function() { document.getElementById('userModal').classList.remove('show'); };
 
-        // ============ TRANSACTIONS ============
         window.approveTransaction = async function(trxId, userId, amount) {
             if (!confirm('Approve ৳ ' + amount + '?')) return;
             const uRef = ref(database, 'users/' + userId);
@@ -704,7 +719,6 @@
             loadData();
         };
 
-        // ============ ORDER APPROVE/REJECT ============
         window.completeOrder = async function(orderId) {
             await update(ref(database, 'orders/' + orderId), { status: 'Complete', updatedDate: new Date().toISOString() });
             showToast('✅ Order Complete');
@@ -743,7 +757,6 @@
             loadData();
         });
 
-        // ============ ADMIN ADD/DEDUCT MONEY ============
         window.adminAddMoney = async function(uid) {
             const user = allUsers[uid];
             const amt = prompt('Add money to ' + (user?.name||'user') + '\n\nAmount:', '100');
@@ -785,7 +798,6 @@
             }
         };
 
-        // ============ PRODUCTS ============
         window.toggleProductStock = async function(k, s) { await update(ref(database, 'products/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
         window.togglePackageStock = async function(pk, k, s) { await update(ref(database, 'products/' + pk + '/packages/' + k), { stock: s === 'in' ? 'out' : 'in' }); showToast('✅ Updated'); loadProducts(); };
         window.editPrice = async function(pk, k, cp, n) { const np = prompt('Edit price for "' + n + '"', cp); if (!np) return; const p = parseInt(np); if (isNaN(p)) return alert('Invalid'); await update(ref(database, 'products/' + pk + '/packages/' + k), { price: p }); showToast('✅ Updated'); loadProducts(); };
@@ -862,7 +874,6 @@
             });
         }
 
-        // ============ BANNER ============
         async function loadBanners() {
             const snap = await get(ref(database, 'banners'));
             const list = document.getElementById('bannersList');
@@ -924,7 +935,6 @@
             showToast('✅ Deleted'); loadBanners();
         };
 
-        // ============ PAYMENT NUMBERS ============
         async function loadPaymentNumbers() {
             const snap = await get(ref(database, 'paymentSettings'));
             if (snap.exists()) {
@@ -941,7 +951,6 @@
             showToast('✅ Payment numbers saved');
         };
 
-        // ============ ADMIN MANAGEMENT ============
         async function loadAdmins() {
             const sSnap = await get(ref(database, 'superAdmins'));
             const aSnap = await get(ref(database, 'admins'));
@@ -981,7 +990,6 @@
             loadAdmins();
         };
 
-        // ============ ORDER COUNT FILTER ============
         window.updateOrderCount = function(days) {
             const d = parseInt(days);
             if (d === 0) {
@@ -994,7 +1002,6 @@
             }
         };
 
-        // ============ LOAD ALL DATA ============
         async function loadData() {
             const tSnap = await get(ref(database, 'transactions'));
             const tp = document.getElementById('trxPending');
