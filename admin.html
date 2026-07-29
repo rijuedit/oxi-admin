@@ -18,7 +18,6 @@
         .login-error { background: rgba(255, 50, 50, 0.15); border: 1px solid rgba(255, 50, 50, 0.4); color: #ff6b6b; padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; }
         .admin-role-badge { background: linear-gradient(135deg, #ff4500, #ff0000); padding: 6px 14px; border-radius: 15px; font-weight: 700; color: white; font-size: 12px; margin-right: 10px; }
         .admin-role-badge.super { background: linear-gradient(135deg, #ffaa00, #ff6600); }
-        .admin-role-badge.permanent { background: linear-gradient(135deg, #ffd700, #ff8c00); }
         .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
         .user-modal-overlay.show { display: flex; }
         .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; }
@@ -102,8 +101,6 @@
         .banner-popup-box input { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins',sans-serif; margin-bottom: 15px; }
         .banner-popup-box input:focus { outline: none; border-color: #8b00ff; }
         .banner-popup-box small { color: #888; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 15px; }
-        
-        /* ===== MOBILE FIX ===== */
         @media (max-width: 768px) {
             .home-navbar { padding: 10px 12px !important; flex-wrap: nowrap !important; gap: 6px !important; }
             .home-logo { font-size: 16px !important; }
@@ -201,9 +198,9 @@
                 <button class="tab-btn" onclick="showTab('banned', event)">🚫 Ban List</button>
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
                 <button class="tab-btn" onclick="showTab('banners', event)">🖼️ Banner</button>
-                <button class="tab-btn" onclick="showTab('payment', event)">💵 Payment</button>
+                <button class="tab-btn" onclick="showTab('payment', event)" id="paymentTabBtn" style="display:none;">💵 Payment</button>
                 <button class="tab-btn" onclick="showTab('adminMgmt', event)" id="adminMgmtTab" style="display:none;">👑 Admins</button>
-                <a href="api-settings.html" class="tab-btn" style="text-decoration:none;">⚙️ API</a>
+                <a href="api-settings.html" class="tab-btn" id="apiTabBtn" style="text-decoration:none;display:none;">⚙️ API</a>
             </div>
 
             <div id="transactionsTab" class="tab-content">
@@ -260,7 +257,7 @@
             <div id="usersTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>👥 All Users <span style="font-size:12px;color:#a0a0c0;font-weight:400;">(Click to view, Long press to Ban)</span></h3>
-                    <button class="add-product-btn" style="background:linear-gradient(135deg,#4a90e2,#1e5799);margin-bottom:10px;" onclick="fixAllUserIds()">🔧 Fix All User IDs (Convert to Numbers)</button>
+                    <button class="add-product-btn" style="background:linear-gradient(135deg,#4a90e2,#1e5799);margin-bottom:10px;" onclick="fixAllUserIds()" id="fixIdsBtn">🔧 Fix All User IDs</button>
                     <input type="text" id="userSearch" class="search-box" placeholder="🔍 Search by Name, Email or User ID..." oninput="filterUsers()">
                     <div id="usersList"></div>
                 </div>
@@ -312,8 +309,8 @@
                 <div class="section-box">
                     <h3>👑 Admin Management</h3>
                     <div style="background:rgba(139,0,255,0.1);border-left:3px solid #8b00ff;padding:12px 15px;border-radius:8px;margin-bottom:20px;color:#d0d0e0;font-size:13px;">
-                        💡 Super Admin: সব কাজ + Admin manage করতে পারবে<br>
-                        💡 Admin: শুধু order/payment/product manage করতে পারবে
+                        💡 Super Admin: সব কাজ + Wallet manage + Admin manage<br>
+                        💡 Normal Admin: শুধু order/payment/product/ban manage
                     </div>
                     <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
                         <button class="add-product-btn" style="flex:1;min-width:200px;" onclick="addAdmin('super')">➕ Add Super Admin</button>
@@ -379,7 +376,7 @@
     </div>
 
     <div id="toast" class="toast"></div>
-    <script type="module">
+<script type="module">
         import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, set, get, push, update, remove, runTransaction, emailToKey, checkAdminLevel } from './config.js';
 
         let currentUser = null;
@@ -394,7 +391,7 @@
         let _originalOrdHistory = '';
 
         window.fixAllUserIds = async function() {
-            if (!confirm('সব user এর ID number এ convert করবেন?\nএটা একবার করলেই হবে।')) return;
+            if (!confirm('সব user এর ID number এ convert করবেন?')) return;
             const snap = await get(ref(database, 'users'));
             if (!snap.exists()) return alert('No users');
             const users = snap.val();
@@ -445,11 +442,15 @@
             document.getElementById('adminDashboard').style.display = 'block';
             document.getElementById('adminEmail').textContent = user.email;
             const badge = document.getElementById('adminRoleBadge');
-            if (level === 'permanent') { badge.textContent = '👑 Permanent Super'; badge.className = 'admin-role-badge permanent'; }
-            else if (level === 'super') { badge.textContent = '👑 Super Admin'; badge.className = 'admin-role-badge super'; }
+            if (level === 'super') { badge.textContent = '👑 Super Admin'; badge.className = 'admin-role-badge super'; }
             else { badge.textContent = '🔧 Admin'; badge.className = 'admin-role-badge'; }
-            if (level === 'permanent' || level === 'super') {
+            if (level === 'super') {
                 document.getElementById('adminMgmtTab').style.display = 'inline-block';
+                document.getElementById('paymentTabBtn').style.display = 'inline-block';
+                document.getElementById('apiTabBtn').style.display = 'inline-block';
+                document.getElementById('fixIdsBtn').style.display = 'block';
+            } else {
+                document.getElementById('fixIdsBtn').style.display = 'none';
             }
             loadData();
         });
@@ -562,7 +563,7 @@
                 if (match) found++;
             });
             if (found === 0) {
-                pDiv.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No order found with ID: ' + q + '</p>';
+                pDiv.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No order found</p>';
                 hDiv.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No order found</p>';
             }
         };
@@ -604,6 +605,10 @@
             const div = document.createElement('div');
             div.className = 'admin-item clickable-user';
             div.dataset.uid = uid;
+            const actionsHtml = currentAdminLevel === 'super' ? `<div class="admin-actions" onclick="event.stopPropagation();">
+                <button class="btn-approve" onclick="adminAddMoney('${uid}')">➕ Add</button>
+                <button class="btn-reject" onclick="adminDeductMoney('${uid}')">➖ Deduct</button>
+            </div>` : '';
             div.innerHTML = `
                 <div class="admin-item-info">
                     <h4>${user.name || 'Anonymous'} ${isBanned ? '<span class="banned-badge">🚫 BANNED</span>' : '<span style="color:#8b00ff;font-size:12px;">👆 Tap | Long press to Ban</span>'}</h4>
@@ -611,10 +616,7 @@
                     <p>💰 Wallet: <strong style="color:#8b00ff;">৳ ${user.wallet || 0}</strong> | Spend: <strong>৳ ${user.totalSpend || 0}</strong></p>
                     <p>📦 Orders: ${user.orders || 0} | 🆔 ${user.numericId || uid.substring(0,10)}</p>
                 </div>
-                <div class="admin-actions" onclick="event.stopPropagation();">
-                    <button class="btn-approve" onclick="adminAddMoney('${uid}')">➕ Add</button>
-                    <button class="btn-reject" onclick="adminDeductMoney('${uid}')">➖ Deduct</button>
-                </div>`;
+                ${actionsHtml}`;
             div.addEventListener('click', () => showUserDetails(uid));
             const startPress = (e) => {
                 if (e.target.tagName === 'BUTTON') return;
@@ -677,9 +679,10 @@
                 uTrx.sort((a,b) => new Date(b.date) - new Date(a.date));
                 uOrd.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
                 const totDep = uTrx.filter(t => t.status === 'Approved').reduce((s,t) => s + parseInt(t.amount||0), 0);
+                const superButtons = currentAdminLevel === 'super' ? `<div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:130px;padding:12px;" onclick="adminAddMoney('${uid}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:130px;padding:12px;" onclick="adminDeductMoney('${uid}')">➖ Deduct</button></div>` : '';
                 let html = `<div class="user-profile-section"><img src="${user.photo || 'https://via.placeholder.com/70/8b00ff/ffffff?text=U'}"><div class="user-profile-info"><h3>${user.name} ${user.banned ? '<span class="banned-badge">🚫 BANNED</span>' : ''}</h3><p>📧 ${user.email}</p><p>🆔 ${user.numericId || uid.substring(0,15)}</p></div></div>
                 <div class="user-stats-grid"><div class="user-stat-item"><div class="stat-value">৳ ${user.wallet||0}</div><div class="stat-label">Wallet</div></div><div class="user-stat-item"><div class="stat-value">৳ ${user.totalSpend||0}</div><div class="stat-label">Spend</div></div><div class="user-stat-item"><div class="stat-value">${uOrd.length}</div><div class="stat-label">Orders</div></div><div class="user-stat-item"><div class="stat-value">৳ ${totDep}</div><div class="stat-label">Deposit</div></div></div>
-                <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;"><button class="btn-approve" style="flex:1;min-width:130px;padding:12px;" onclick="adminAddMoney('${uid}')">➕ Add Money</button><button class="btn-reject" style="flex:1;min-width:130px;padding:12px;" onclick="adminDeductMoney('${uid}')">➖ Deduct</button></div>
+                ${superButtons}
                 <div class="modal-section"><h4>💳 Transactions <span>${uTrx.length}</span></h4>`;
                 if (!uTrx.length) html += '<p class="empty-msg">No transactions</p>';
                 else uTrx.forEach(t => {
@@ -758,6 +761,7 @@
         });
 
         window.adminAddMoney = async function(uid) {
+            if (currentAdminLevel !== 'super') return alert('❌ Only Super Admin can do this');
             const user = allUsers[uid];
             const amt = prompt('Add money to ' + (user?.name||'user') + '\n\nAmount:', '100');
             if (!amt) return;
@@ -781,6 +785,7 @@
             }
         };
         window.adminDeductMoney = async function(uid) {
+            if (currentAdminLevel !== 'super') return alert('❌ Only Super Admin can do this');
             const user = allUsers[uid];
             const amt = prompt('Deduct from ' + (user?.name||'user') + '\nBalance: ৳ ' + (user?.wallet||0), '100');
             if (!amt) return;
@@ -954,17 +959,15 @@
         async function loadAdmins() {
             const sSnap = await get(ref(database, 'superAdmins'));
             const aSnap = await get(ref(database, 'admins'));
-            const permSnap = await get(ref(database, 'permanentSuperAdmin'));
-            const permEmail = permSnap.exists() ? permSnap.val() : '';
             const sList = document.getElementById('superAdminsList');
             const aList = document.getElementById('normalAdminsList');
-            sList.innerHTML = `<div class="admin-mgmt-item" style="border-color:#ffd700;"><div class="admin-info"><strong style="color:#ffd700;">👑 ${permEmail}</strong><small>Permanent Super Admin (Cannot be removed)</small></div></div>`;
+            sList.innerHTML = '';
             if (sSnap.exists()) {
                 Object.keys(sSnap.val()).forEach(k => {
                     const email = k.replace(/,/g, '.');
-                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>👑 ${email}</strong><small>Super Admin</small></div><button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button></div>`;
+                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong style="color:#ffd700;">👑 ${email}</strong><small>Super Admin</small></div><button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button></div>`;
                 });
-            }
+            } else sList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No super admins</p>';
             aList.innerHTML = '';
             if (aSnap.exists()) {
                 Object.keys(aSnap.val()).forEach(k => {
