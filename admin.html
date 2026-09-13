@@ -101,6 +101,21 @@
         .banner-popup-box input { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.4); border: 1px solid rgba(139,0,255,0.3); border-radius: 10px; color: white; font-size: 14px; font-family: 'Poppins',sans-serif; margin-bottom: 15px; }
         .banner-popup-box input:focus { outline: none; border-color: #8b00ff; }
         .banner-popup-box small { color: #888; font-size: 11px; display: block; margin-top: -10px; margin-bottom: 15px; }
+        
+        /* New Main Tab Notification Badge */
+        .main-tab-badge { 
+            background: #ff0000; 
+            color: white; 
+            font-size: 10px; 
+            font-weight: 700; 
+            padding: 2px 6px; 
+            border-radius: 12px; 
+            margin-left: 6px; 
+            box-shadow: 0 0 5px rgba(255,0,0,0.5); 
+            display: none; 
+            vertical-align: middle;
+        }
+
         @media (max-width: 768px) {
             .home-navbar { padding: 10px 12px !important; flex-wrap: nowrap !important; gap: 6px !important; }
             .home-logo { font-size: 16px !important; }
@@ -192,8 +207,8 @@
             </div>
 
             <div class="admin-tabs">
-                <button class="tab-btn active" onclick="showTab('transactions', event)">💳 Add Money</button>
-                <button class="tab-btn" onclick="showTab('orders', event)">📦 Orders</button>
+                <button class="tab-btn active" onclick="showTab('transactions', event)">💳 Add Money <span id="mainTrxBadge" class="main-tab-badge">0</span></button>
+                <button class="tab-btn" onclick="showTab('orders', event)">📦 Orders <span id="mainOrdBadge" class="main-tab-badge">0</span></button>
                 <button class="tab-btn" onclick="showTab('users', event)">👥 Users</button>
                 <button class="tab-btn" onclick="showTab('banned', event)">🚫 Ban List</button>
                 <button class="tab-btn" onclick="showTab('products', event)">🎮 Products</button>
@@ -1038,6 +1053,16 @@
             tp.innerHTML = ph || '<p style="text-align:center;color:#888;padding:20px;">🎉 No pending</p>';
             document.getElementById('pendingCount').textContent = pc;
             document.getElementById('trxPendingBadge').textContent = pc;
+            
+            // Update Main Tab Badge for Add Money
+            const mtb = document.getElementById('mainTrxBadge');
+            if(pc > 0) { 
+                mtb.textContent = pc; 
+                mtb.style.display = 'inline-block'; 
+            } else { 
+                mtb.style.display = 'none'; 
+            }
+
             const now = Date.now(), day = 24*60*60*1000;
             renderTrxHistory(allTransactionsHistory.filter(t => (now-new Date(t.date).getTime()) <= day), 1);
 
@@ -1063,6 +1088,16 @@
             window._allOrdersTotal = oc;
             updateOrderCount(document.getElementById('orderFilterSelect').value);
             document.getElementById('ordPendingBadge').textContent = opc;
+
+            // Update Main Tab Badge for Orders
+            const mob = document.getElementById('mainOrdBadge');
+            if(opc > 0) { 
+                mob.textContent = opc; 
+                mob.style.display = 'inline-block'; 
+            } else { 
+                mob.style.display = 'none'; 
+            }
+
             renderOrdHistory(allOrdersHistory.filter(o => (now-new Date(o.orderDate).getTime()) <= day), 1);
 
             const uSnap = await get(ref(database, 'users'));
