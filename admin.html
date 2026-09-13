@@ -961,21 +961,33 @@
             const aSnap = await get(ref(database, 'admins'));
             const sList = document.getElementById('superAdminsList');
             const aList = document.getElementById('normalAdminsList');
+            const myEmail = (currentUser?.email || '').toLowerCase();
+            
             sList.innerHTML = '';
             if (sSnap.exists()) {
                 Object.keys(sSnap.val()).forEach(k => {
                     const email = k.replace(/,/g, '.');
-                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong style="color:#ffd700;">👑 ${email}</strong><small>Super Admin</small></div><button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button></div>`;
+                    const isMe = email.toLowerCase() === myEmail;
+                    const btnHtml = isMe 
+                        ? `<span style="color:#888;font-size:12px;padding:8px 12px;">🔒 You</span>` 
+                        : `<button class="btn-reject" onclick="removeAdmin('super','${k}','${email}')">🗑️ Remove</button>`;
+                    sList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong style="color:#ffd700;">👑 ${email}</strong><small>Super Admin${isMe ? ' (You)' : ''}</small></div>${btnHtml}</div>`;
                 });
             } else sList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No super admins</p>';
+            
             aList.innerHTML = '';
             if (aSnap.exists()) {
                 Object.keys(aSnap.val()).forEach(k => {
                     const email = k.replace(/,/g, '.');
-                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin</small></div><button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button></div>`;
+                    const isMe = email.toLowerCase() === myEmail;
+                    const btnHtml = isMe 
+                        ? `<span style="color:#888;font-size:12px;padding:8px 12px;">🔒 You</span>` 
+                        : `<button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button>`;
+                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin${isMe ? ' (You)' : ''}</small></div>${btnHtml}</div>`;
                 });
             } else aList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No normal admins</p>';
         }
+
         window.addAdmin = async function(type) {
             const email = prompt((type === 'super' ? 'Super' : 'Normal') + ' Admin Email:'); 
             if (!email || !email.includes('@')) return alert('Invalid email');
@@ -985,7 +997,12 @@
             showToast('✅ Admin added');
             loadAdmins();
         };
+
         window.removeAdmin = async function(type, key, email) {
+            const myEmail = (currentUser?.email || '').toLowerCase();
+            if (email.toLowerCase() === myEmail) {
+                return alert('❌ আপনি নিজেকে রিমুভ করতে পারবেন না!');
+            }
             if (!confirm('Remove ' + email + '?')) return;
             const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
             await remove(ref(database, path));
