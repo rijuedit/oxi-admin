@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - OXI TOP UP</title>
-    <link rel="stylesheet" href="admin-style.css?v=10">
+    <link rel="stylesheet" href="admin-style.css?v=12">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <style>
@@ -74,16 +74,19 @@
         .clickable-user:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(139,0,255,0.3); border-color: #8b00ff !important; }
         .banned-badge { background: rgba(255,50,50,0.2); color: #ff6b6b; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; border: 1px solid rgba(255,50,50,0.4); margin-left: 8px; }
 
-        /* MODALS & POPUPS (CRITICAL HIDDEN FIX) */
+        /* LOGIN SCREEN FIX (SLEEK & SLIM) */
         .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #000, #1a0033, #000); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-        .login-box { background: rgba(20, 20, 40, 0.95); border: 2px solid #8b00ff; border-radius: 25px; padding: 40px 30px; max-width: 400px; width: 100%; text-align: center; box-shadow: 0 0 50px rgba(139, 0, 255, 0.5); }
-        .login-box h2 { font-family: 'Orbitron', sans-serif; color: white; font-size: 26px; margin: 15px 0 8px; }
-        .login-box > p { color: #a0a0c0; font-size: 14px; margin-bottom: 25px; }
-        .btn-google-admin { width: 100%; padding: 14px; background: white; color: #333; border: none; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; transition: 0.3s; }
-        .login-error { background: rgba(255, 50, 50, 0.15); border: 1px solid rgba(255, 50, 50, 0.4); color: #ff6b6b; padding: 12px; border-radius: 10px; margin-top: 15px; font-size: 13px; display: none; }
+        .login-box { background: rgba(20, 20, 40, 0.95); border: 2px solid #8b00ff; border-radius: 20px; padding: 30px 25px; max-width: 360px; width: 100%; text-align: center; box-shadow: 0 0 35px rgba(139, 0, 255, 0.4); }
+        .login-box h2 { font-family: 'Orbitron', sans-serif; color: white; font-size: 22px; margin: 12px 0 6px; }
+        .login-box > p { color: #a0a0c0; font-size: 13px; margin-bottom: 20px; }
+        .btn-google-admin { width: 100%; padding: 12px; background: white; color: #333; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-google-admin:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(139, 0, 255, 0.4); }
+        .btn-google-admin img { width: 20px; height: 20px; flex-shrink: 0; object-fit: contain; }
+        .login-error { background: rgba(255, 50, 50, 0.15); border: 1px solid rgba(255, 50, 50, 0.4); color: #ff6b6b; padding: 10px; border-radius: 8px; margin-top: 15px; font-size: 12px; display: none; }
         .admin-role-badge { background: linear-gradient(135deg, #ff4500, #ff0000); padding: 6px 14px; border-radius: 15px; font-weight: 700; color: white; font-size: 12px; margin-right: 10px; }
         .admin-role-badge.super { background: linear-gradient(135deg, #ffaa00, #ff6600); }
 
+        /* MODALS & POPUPS */
         .user-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: none; align-items: flex-start; justify-content: center; z-index: 10000; padding: 20px; overflow-y: auto; }
         .user-modal-overlay.show { display: flex; }
         .user-modal-box { background: linear-gradient(135deg, #1a0033, #0a0a0a); border: 2px solid #8b00ff; border-radius: 20px; max-width: 800px; width: 100%; margin: 20px auto; padding: 25px; max-height: 90vh; overflow-y: auto; }
@@ -170,7 +173,7 @@
 
     <div id="loginScreen" class="login-screen">
         <div class="login-box">
-            <div style="font-size: 60px;">🔐</div>
+            <div style="font-size: 50px; margin-bottom: 5px;">🔐</div>
             <h2>Admin Panel</h2>
             <p>Sign in with your admin Google account</p>
             <button id="googleLoginBtn" class="btn-google-admin">
@@ -321,7 +324,6 @@
                 </div>
             </div>
 
-            <!-- PAYMENT TAB WITH TOGGLE SWITCHES -->
             <div id="paymentTab" class="tab-content" style="display:none;">
                 <div class="section-box">
                     <h3>💵 Payment Numbers & Status</h3>
