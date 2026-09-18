@@ -72,9 +72,10 @@
         <div class="dash-container">
             <div class="page-title">
                 <h1>⚙️ API Settings</h1>
-                <p>Configure your API integrations for UID Check and Auto Top-Up</p>
+                <p>Configure your API integrations for UID Check, Auto Top-Up and Auto Add Money</p>
             </div>
 
+            <!-- 1. UID Check API -->
             <div class="api-card">
                 <div class="api-card-header">
                     <div class="api-card-title">🔍 UID to Name Check API</div>
@@ -116,6 +117,7 @@
                 <div class="status-msg" id="uidStatus"></div>
             </div>
 
+            <!-- 2. Auto Top-Up API -->
             <div class="api-card">
                 <div class="api-card-header">
                     <div class="api-card-title">⚡ Auto Top-Up API</div>
@@ -158,6 +160,42 @@
                 </div>
                 <div class="status-msg" id="topupStatus"></div>
             </div>
+
+            <!-- 3. Auto Add Money Gateway API -->
+            <div class="api-card">
+                <div class="api-card-header">
+                    <div class="api-card-title">💳 Auto Add Money Gateway API</div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="paymentEnabled">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="info-box">💡 এই API অন করলে Paymently / UddoktaPay দিয়ে User অটোমেটিক Wallet এ টাকা এড করতে পারবে</div>
+                <div class="form-group">
+                    <label>API Provider</label>
+                    <select id="paymentProvider">
+                        <option value="">-- Select Provider --</option>
+                        <option value="paymently">Paymently API</option>
+                        <option value="uddoktapay">UddoktaPay API</option>
+                        <option value="shurjopay">Shurjopay API</option>
+                        <option value="custom">Custom Gateway</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>API Base URL / Endpoint</label>
+                    <input type="text" id="paymentUrl" placeholder="https://yourdomain.paymently.io/api/v1">
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" id="paymentKey" placeholder="Your Gateway API Key here...">
+                </div>
+                <div class="btn-row">
+                    <button class="btn-save-api" onclick="savePaymentApi()">💾 Save Settings</button>
+                    <button class="btn-test-api" onclick="testPaymentApi()">🧪 Test Connection</button>
+                </div>
+                <div class="status-msg" id="paymentStatus"></div>
+            </div>
+
         </div>
     </div>
 
@@ -238,6 +276,12 @@
                         document.getElementById('topupSecret').value = data.topup.secret || '';
                         document.getElementById('topupCallback').value = data.topup.callback || '';
                     }
+                    if (data.payment) {
+                        document.getElementById('paymentEnabled').checked = data.payment.enabled || false;
+                        document.getElementById('paymentProvider').value = data.payment.provider || '';
+                        document.getElementById('paymentUrl').value = data.payment.url || '';
+                        document.getElementById('paymentKey').value = data.payment.key || '';
+                    }
                 }
             } catch (err) { console.error(err); }
         }
@@ -271,6 +315,20 @@
                 showStatus('topupStatus', '✅ Top-Up API Settings saved!', 'success');
                 showToast('✅ Saved!');
             } catch (err) { showStatus('topupStatus', '❌ ' + err.message, 'error'); }
+        };
+
+        window.savePaymentApi = async function() {
+            const settings = {
+                enabled: document.getElementById('paymentEnabled').checked,
+                provider: document.getElementById('paymentProvider').value,
+                url: document.getElementById('paymentUrl').value,
+                key: document.getElementById('paymentKey').value
+            };
+            try {
+                await set(ref(database, 'apiSettings/payment'), settings);
+                showStatus('paymentStatus', '✅ Payment Gateway API Settings saved!', 'success');
+                showToast('✅ Saved!');
+            } catch (err) { showStatus('paymentStatus', '❌ ' + err.message, 'error'); }
         };
 
         window.testUidApi = async function() {
@@ -309,6 +367,26 @@
                 if (res.ok) showStatus('topupStatus', '✅ Connection successful!', 'success');
                 else showStatus('topupStatus', '❌ Error: ' + res.status, 'error');
             } catch (err) { showStatus('topupStatus', '❌ ' + err.message, 'error'); }
+        };
+
+        window.testPaymentApi = async function() {
+            const url = document.getElementById('paymentUrl').value;
+            const key = document.getElementById('paymentKey').value;
+            if (!url || !key) return showStatus('paymentStatus', '⚠️ Fill URL and Key', 'error');
+            showStatus('paymentStatus', '⏳ Testing Connection...', 'success');
+            try {
+                let headers = { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'RT-PAYMENTLY-API-KEY': key
+                };
+                const res = await fetch(url, { headers });
+                if (res.ok || res.status === 400 || res.status === 401 || res.status === 405) {
+                    showStatus('paymentStatus', '✅ Server Connection Successful!', 'success');
+                } else {
+                    showStatus('paymentStatus', '❌ Response Status: ' + res.status, 'error');
+                }
+            } catch (err) { showStatus('paymentStatus', '❌ ' + err.message, 'error'); }
         };
     </script>
 </body>
