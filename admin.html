@@ -388,6 +388,46 @@
         </div>
     </div>
 
+    <!-- Permissions Modal -->
+    <div id="permissionsModal" class="user-modal-overlay" onclick="if(event.target === this) closePermissionsModal()">
+        <div class="user-modal-box" style="max-width: 450px;">
+            <div class="user-modal-header">
+                <h2>⚙️ Permissions</h2>
+                <button class="user-modal-close" onclick="closePermissionsModal()">✕</button>
+            </div>
+            <p style="color:#a0a0c0; margin-bottom: 20px; font-size: 13px;">Setting access for: <br><strong id="permAdminEmail" style="color:#8b00ff; font-size: 15px;"></strong></p>
+            
+            <div style="background:rgba(0,0,0,0.3); border-radius:12px; padding:15px; border:1px solid rgba(139,0,255,0.2); margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">💳 Add Money (Transactions)</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_addMoney"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">📦 Orders Management</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_orders"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">👥 Users List</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_users"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">🚫 Ban List Control</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_banned"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">🎮 Products Management</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_products"><span class="slider"></span></label>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                    <span style="color:white; font-size:14px; font-weight:600;">🖼️ Home Page Banners</span>
+                    <label class="toggle-switch"><input type="checkbox" id="perm_banners"><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <button class="add-product-btn" style="background:linear-gradient(135deg,#00c853,#00e676);" onclick="savePermissions()">💾 Save Permissions</button>
+        </div>
+    </div>
+
     <div id="banPopup" class="ban-popup">
         <div class="ban-popup-box">
             <div style="font-size:50px;margin-bottom:10px;">🚫</div>
@@ -440,6 +480,7 @@
         let allOrdersHistory = [];
         let currentRejectOrderId = null;
         let currentBannerKey = null;
+        let currentPermAdminKey = null; // New state for permissions
         let longPressTimer = null;
         let _originalOrdPending = '';
         let _originalOrdHistory = '';
@@ -1020,6 +1061,53 @@
             showToast('✅ Payment settings saved');
         };
 
+        /* ======= NEW PERMISSIONS LOGIC ======= */
+        window.openPermissionsModal = async function(key, email) {
+            currentPermAdminKey = key;
+            document.getElementById('permAdminEmail').textContent = email;
+            
+            // Set default true
+            ['perm_addMoney', 'perm_orders', 'perm_users', 'perm_banned', 'perm_products', 'perm_banners'].forEach(id => {
+                document.getElementById(id).checked = true;
+            });
+
+            // Fetch from Firebase
+            const snap = await get(ref(database, 'admins/' + key));
+            if (snap.exists() && typeof snap.val() === 'object' && snap.val().permissions) {
+                const perms = snap.val().permissions;
+                document.getElementById('perm_addMoney').checked = perms.addMoney !== false;
+                document.getElementById('perm_orders').checked = perms.orders !== false;
+                document.getElementById('perm_users').checked = perms.users !== false;
+                document.getElementById('perm_banned').checked = perms.banned !== false;
+                document.getElementById('perm_products').checked = perms.products !== false;
+                document.getElementById('perm_banners').checked = perms.banners !== false;
+            }
+            document.getElementById('permissionsModal').classList.add('show');
+        };
+
+        window.closePermissionsModal = function() {
+            document.getElementById('permissionsModal').classList.remove('show');
+            currentPermAdminKey = null;
+        };
+
+        window.savePermissions = async function() {
+            if (!currentPermAdminKey) return;
+            const perms = {
+                addMoney: document.getElementById('perm_addMoney').checked,
+                orders: document.getElementById('perm_orders').checked,
+                users: document.getElementById('perm_users').checked,
+                banned: document.getElementById('perm_banned').checked,
+                products: document.getElementById('perm_products').checked,
+                banners: document.getElementById('perm_banners').checked
+            };
+
+            await update(ref(database, 'admins/' + currentPermAdminKey), { permissions: perms });
+            showToast('✅ Permissions Saved!');
+            closePermissionsModal();
+            loadAdmins();
+        };
+        /* ==================================== */
+
         async function loadAdmins() {
             const sSnap = await get(ref(database, 'superAdmins'));
             const aSnap = await get(ref(database, 'admins'));
@@ -1041,13 +1129,22 @@
             
             aList.innerHTML = '';
             if (aSnap.exists()) {
-                Object.keys(aSnap.val()).forEach(k => {
+                const adminsData = aSnap.val();
+                Object.keys(adminsData).forEach(k => {
                     const email = k.replace(/,/g, '.');
                     const isMe = email.toLowerCase() === myEmail;
-                    const btnHtml = isMe 
-                        ? `<span style="color:#888;font-size:12px;padding:8px 12px;">🔒 You</span>` 
-                        : `<button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button>`;
-                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin${isMe ? ' (You)' : ''}</small></div>${btnHtml}</div>`;
+                    
+                    let actionBtns = '';
+                    if (isMe) {
+                        actionBtns = `<span style="color:#888;font-size:12px;padding:8px 12px;">🔒 You</span>`;
+                    } else {
+                        actionBtns = `
+                            <button class="btn-edit" style="background:rgba(139,0,255,0.2);color:#a78bfa;border:1px solid rgba(139,0,255,0.4);" onclick="openPermissionsModal('${k}','${email}')">⚙️ Permissions</button>
+                            <button class="btn-reject" onclick="removeAdmin('admin','${k}','${email}')">🗑️ Remove</button>
+                        `;
+                    }
+
+                    aList.innerHTML += `<div class="admin-mgmt-item"><div class="admin-info"><strong>🔧 ${email}</strong><small>Normal Admin${isMe ? ' (You)' : ''}</small></div><div style="display:flex;gap:8px;">${actionBtns}</div></div>`;
                 });
             } else aList.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No normal admins</p>';
         }
@@ -1057,7 +1154,16 @@
             if (!email || !email.includes('@')) return alert('Invalid email');
             const key = emailToKey(email.trim().toLowerCase());
             const path = type === 'super' ? 'superAdmins/' + key : 'admins/' + key;
-            await set(ref(database, path), true);
+            
+            if (type === 'super') {
+                await set(ref(database, path), true);
+            } else {
+                // Set normal admin with default full permissions
+                await set(ref(database, path), {
+                    permissions: { addMoney: true, orders: true, users: true, banned: true, products: true, banners: true }
+                });
+            }
+            
             showToast('✅ Admin added');
             loadAdmins();
         };
