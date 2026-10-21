@@ -1,566 +1,94 @@
 
-<!DOCTYPE html>
-<html lang="bn">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Settings - OXI TOP UP</title>
-<link rel="stylesheet" href="admin-style.css">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
 <style>
-.api-card{background:rgba(20,20,40,.9);border:1px solid #673ab7;border-radius:18px;padding:22px;margin:20px 0;color:white}
-.api-card-header{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #49306b;padding-bottom:15px;margin-bottom:18px}
-.api-card-title{font-family:Orbitron,sans-serif;font-size:17px}
-.form-group{margin:15px 0}
-.form-group label{display:block;color:#c9b9e8;margin-bottom:7px;font-size:13px}
-.form-group input,.form-group select{box-sizing:border-box;width:100%;padding:12px;background:#171321;color:white;border:1px solid #63428b;border-radius:9px;font-size:14px}
-.form-group select option{background:#171321;color:white}
-.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
-.btn-save-api,.btn-test-api{flex:1;padding:12px;border:0;border-radius:9px;color:white;font-weight:bold;cursor:pointer}
-.btn-save-api{background:linear-gradient(135deg,#8b00ff,#5100a8)}
-.btn-test-api{background:#087f45}
-.status-msg{display:none;margin-top:14px;padding:12px;border-radius:8px;overflow-wrap:anywhere}
-.status-success{display:block;background:#123c2a;color:#7dffb1}
-.status-error{display:block;background:#481d28;color:#ffb3b3}
-.info-box{background:#211532;padding:12px;border-left:3px solid #9c4dff;border-radius:6px;margin:12px 0;color:#ddd;font-size:13px}
-.toggle-switch{position:relative;display:inline-block;width:48px;height:26px;flex-shrink:0}
-.toggle-switch input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;background:#555;border-radius:25px;cursor:pointer}
-.slider:before{content:"";position:absolute;height:18px;width:18px;left:4px;bottom:4px;background:white;border-radius:50%;transition:.2s}
-.toggle-switch input:checked+.slider{background:#8b00ff}
-.toggle-switch input:checked+.slider:before{transform:translateX(22px)}
-.login-screen{position:fixed;inset:0;z-index:9999;background:#10081d;display:flex;align-items:center;justify-content:center;padding:20px}
-.login-box{width:100%;max-width:380px;background:#211532;padding:30px;border:1px solid #8b00ff;border-radius:18px;text-align:center;color:white}
-.btn-google-admin{width:100%;padding:13px;border:0;border-radius:8px;cursor:pointer;font-weight:bold}
-.login-error{display:none;color:#ff8888;margin-top:12px}
-.page-title{text-align:center;margin:25px 0}
-.page-title h1{color:#b66cff}
-.back-btn{color:white;text-decoration:none;padding:10px}
-.api-help{color:#c6b7dc;font-size:12px;margin-top:7px}
+/* Eye toggle for secret fields */
+.secret-field-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.secret-field-wrap input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding-right: 48px !important;
+}
+
+.secret-eye-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: 1px solid #673ab7;
+  border-radius: 8px;
+  background: #211532;
+  color: #c084fc;
+  cursor: pointer;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.secret-eye-btn:hover {
+  background: #3b2060;
+}
 </style>
-</head>
 
-<body class="home-body">
+<script>
+(function () {
+  function addEyeToggle(input) {
+    if (!input || input.dataset.eyeAdded === "true") return;
 
-<div id="loginScreen" class="login-screen">
-  <div class="login-box">
-    <h2>⚙️ API Settings</h2>
-    <p>Only Super Admin can access</p>
-    <button id="googleLoginBtn" class="btn-google-admin">
-      Sign in with Google
-    </button>
-    <div id="loginError" class="login-error"></div>
-  </div>
-</div>
+    input.dataset.eyeAdded = "true";
 
-<div id="apiContent" style="display:none">
-  <nav class="home-navbar">
-    <div class="home-logo">OXI <span>ADMIN</span></div>
-    <div class="home-nav-right">
-      <a href="index.html" class="back-btn">← Back</a>
-      <button class="btn-logout-admin" onclick="logoutAdmin()">Logout</button>
-    </div>
-  </nav>
+    const wrap = document.createElement("div");
+    wrap.className = "secret-field-wrap";
 
-  <main class="dash-container">
-    <div class="page-title">
-      <h1>⚙️ API Settings</h1>
-      <p>Manage your API integrations and Telegram bots</p>
-    </div>
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
 
-    <!-- UID CHECK API -->
-    <section class="api-card">
-      <div class="api-card-header">
-        <div class="api-card-title">🔍 UID to Name Check API</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="uidEnabled">
-          <span class="slider"></span>
-        </label>
-      </div>
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secret-eye-btn";
+    button.textContent = "👁";
+    button.title = "Show/Hide";
+    button.setAttribute("aria-label", "Show or hide value");
 
-      <div class="form-group">
-        <label>API Provider</label>
-        <select id="uidProvider">
-          <option value="">Select Provider</option>
-          <option value="gameskinbo">Gameskinbo</option>
-          <option value="yokcash">Yokcash</option>
-          <option value="moogold">Moogold</option>
-          <option value="custom">Custom API</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>API URL</label>
-        <input id="uidUrl" placeholder="https://api.example.com/check-uid">
-      </div>
-      <div class="form-group">
-        <label>API Key</label>
-        <input id="uidKey" type="password" placeholder="API Key">
-      </div>
-      <div class="form-group">
-        <label>Request Method</label>
-        <select id="uidMethod">
-          <option value="GET">GET</option>
-          <option value="POST">POST</option>
-        </select>
-      </div>
-      <div class="btn-row">
-        <button class="btn-save-api" onclick="saveUidApi()">💾 Save Settings</button>
-        <button class="btn-test-api" onclick="testUidApi()">🧪 Test API</button>
-      </div>
-      <div id="uidStatus" class="status-msg"></div>
-    </section>
-
-    <!-- AUTO TOPUP API -->
-    <section class="api-card">
-      <div class="api-card-header">
-        <div class="api-card-title">⚡ Auto Top-Up API</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="topupEnabled">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>API Provider</label>
-        <select id="topupProvider">
-          <option value="">Select Provider</option>
-          <option value="gameskinbo">Gameskinbo</option>
-          <option value="yokcash">Yokcash</option>
-          <option value="moogold">Moogold</option>
-          <option value="hopestore">Hopestore</option>
-          <option value="custom">Custom API</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>API URL</label>
-        <input id="topupUrl" placeholder="https://api.example.com/topup">
-      </div>
-      <div class="form-group">
-        <label>API Key</label>
-        <input id="topupKey" type="password" placeholder="API Key">
-      </div>
-      <div class="form-group">
-        <label>API Secret</label>
-        <input id="topupSecret" type="password" placeholder="Optional API Secret">
-      </div>
-      <div class="form-group">
-        <label>Callback URL</label>
-        <input id="topupCallback" placeholder="Optional Callback URL">
-      </div>
-      <div class="btn-row">
-        <button class="btn-save-api" onclick="saveTopupApi()">💾 Save Settings</button>
-        <button class="btn-test-api" onclick="testTopupApi()">🧪 Test API</button>
-      </div>
-      <div id="topupStatus" class="status-msg"></div>
-    </section>
-
-    <!-- PAYMENT GATEWAY -->
-    <section class="api-card">
-      <div class="api-card-header">
-        <div class="api-card-title">💳 Add Money Gateway API</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="paymentEnabled">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="form-group">
-        <label>API Provider</label>
-        <select id="paymentProvider">
-          <option value="">Select Provider</option>
-          <option value="paymently">Paymently</option>
-          <option value="uddoktapay">UddoktaPay</option>
-          <option value="shurjopay">Shurjopay</option>
-          <option value="custom">Custom Gateway</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>API URL</label>
-        <input id="paymentUrl" placeholder="Gateway API URL">
-      </div>
-      <div class="form-group">
-        <label>API Key</label>
-        <input id="paymentKey" type="password" placeholder="Gateway API Key">
-      </div>
-      <div class="btn-row">
-        <button class="btn-save-api" onclick="savePaymentApi()">💾 Save Settings</button>
-        <button class="btn-test-api" onclick="testPaymentApi()">🧪 Test Connection</button>
-      </div>
-      <div id="paymentStatus" class="status-msg"></div>
-    </section>
-
-    <!-- PRODUCT / ORDER TELEGRAM BOT -->
-    <section class="api-card">
-      <div class="api-card-header">
-        <div class="api-card-title">🤖 Product / Order Bot</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="telegramOrderEnabled">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="info-box">
-        নতুন Product Order-এর নোটিফিকেশন পাঠানোর Bot।
-      </div>
-
-      <div class="form-group">
-        <label>Telegram Bot Token</label>
-        <input id="telegramOrderToken" type="password"
-          autocomplete="new-password" placeholder="Order Bot Token">
-      </div>
-      <div class="form-group">
-        <label>Telegram Group ID</label>
-        <input id="telegramOrderChatId" placeholder="-1001234567890">
-      </div>
-      <div class="api-help">Bot Token ও Group ID Telegram থেকে সংগ্রহ করতে হবে।</div>
-
-      <div class="btn-row">
-        <button class="btn-save-api" onclick="saveTelegramOrderBot()">💾 Save Order Bot</button>
-      </div>
-      <div id="telegramOrderStatus" class="status-msg"></div>
-    </section>
-
-    <!-- ADD MONEY TELEGRAM BOT -->
-    <section class="api-card">
-      <div class="api-card-header">
-        <div class="api-card-title">💰 Add Money Bot</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="telegramMoneyEnabled">
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="info-box">
-        Add Money Request-এর নোটিফিকেশন পাঠানোর Bot।
-      </div>
-
-      <div class="form-group">
-        <label>Telegram Bot Token</label>
-        <input id="telegramMoneyToken" type="password"
-          autocomplete="new-password" placeholder="Add Money Bot Token">
-      </div>
-      <div class="form-group">
-        <label>Telegram Group ID</label>
-        <input id="telegramMoneyChatId" placeholder="-1001234567890">
-      </div>
-      <div class="api-help">Bot Token ও Group ID Telegram থেকে সংগ্রহ করতে হবে।</div>
-
-      <div class="btn-row">
-        <button class="btn-save-api" onclick="saveTelegramMoneyBot()">💾 Save Add Money Bot</button>
-      </div>
-      <div id="telegramMoneyStatus" class="status-msg"></div>
-    </section>
-
-  </main>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script type="module">
-import {
-  auth, database, googleProvider, signInWithPopup, signOut,
-  onAuthStateChanged, ref, get, set, checkAdminLevel
-} from './config.js';
-
-const $ = id => document.getElementById(id);
-
-function showStatus(id, message, type) {
-  const el = $(id);
-  el.textContent = message;
-  el.className = 'status-msg status-' + type;
-  el.style.display = 'block';
-}
-
-function toast(message) {
-  const el = $('toast');
-  if (!el) return;
-  el.textContent = message;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-$('googleLoginBtn').addEventListener('click', async () => {
-  try {
-    $('loginError').style.display = 'none';
-    const result = await signInWithPopup(auth, googleProvider);
-    const level = await checkAdminLevel(result.user.email);
-
-    if (level !== 'permanent' && level !== 'super') {
-      await signOut(auth);
-      $('loginError').textContent = 'শুধু Super Admin এই পেজ ব্যবহার করতে পারবেন।';
-      $('loginError').style.display = 'block';
-    }
-  } catch (error) {
-    $('loginError').textContent = error.message;
-    $('loginError').style.display = 'block';
-  }
-});
-
-onAuthStateChanged(auth, async user => {
-  if (!user) {
-    $('loginScreen').style.display = 'flex';
-    $('apiContent').style.display = 'none';
-    return;
-  }
-
-  try {
-    const level = await checkAdminLevel(user.email);
-    if (level !== 'permanent' && level !== 'super') {
-      await signOut(auth);
-      $('loginError').textContent = 'শুধু Super Admin এই পেজ ব্যবহার করতে পারবেন।';
-      $('loginError').style.display = 'block';
-      return;
-    }
-
-    $('loginScreen').style.display = 'none';
-    $('apiContent').style.display = 'block';
-    await loadSettings();
-  } catch (error) {
-    console.error(error);
-    toast('Settings load করা যায়নি। Firebase Rules পরীক্ষা করুন।');
-  }
-});
-
-window.logoutAdmin = async () => {
-  await signOut(auth);
-};
-
-async function loadSettings() {
-  try {
-    const snap = await get(ref(database, 'apiSettings'));
-    const data = snap.exists() ? snap.val() : {};
-
-    if (data.uid) {
-      $('uidEnabled').checked = !!data.uid.enabled;
-      $('uidProvider').value = data.uid.provider || '';
-      $('uidUrl').value = data.uid.url || '';
-      $('uidKey').value = data.uid.key || '';
-      $('uidMethod').value = data.uid.method || 'GET';
-    }
-
-    if (data.topup) {
-      $('topupEnabled').checked = !!data.topup.enabled;
-      $('topupProvider').value = data.topup.provider || '';
-      $('topupUrl').value = data.topup.url || '';
-      $('topupKey').value = data.topup.key || '';
-      $('topupSecret').value = data.topup.secret || '';
-      $('topupCallback').value = data.topup.callback || '';
-    }
-
-    if (data.payment) {
-      $('paymentEnabled').checked = !!data.payment.enabled;
-      $('paymentProvider').value = data.payment.provider || '';
-      $('paymentUrl').value = data.payment.url || '';
-      $('paymentKey').value = data.payment.key || '';
-    }
-
-    const telegramSnap = await get(ref(database, 'telegramBotSettings'));
-    const telegram = telegramSnap.exists() ? telegramSnap.val() : {};
-    const order = telegram.order || {};
-    const money = telegram.addMoney || {};
-
-    $('telegramOrderEnabled').checked = !!order.enabled;
-    $('telegramOrderToken').value = order.botToken || '';
-    $('telegramOrderChatId').value = order.chatId || '';
-
-    $('telegramMoneyEnabled').checked = !!money.enabled;
-    $('telegramMoneyToken').value = money.botToken || '';
-    $('telegramMoneyChatId').value = money.chatId || '';
-  } catch (error) {
-    console.error(error);
-    toast('Settings load failed. Firebase Rules পরীক্ষা করুন।');
-  }
-}
-
-async function saveTelegramBot(path, enabledId, tokenId, chatIdId, statusId) {
-  const enabled = $(enabledId).checked;
-  const botToken = $(tokenId).value.trim();
-  const chatId = $(chatIdId).value.trim();
-
-  if (enabled && (!botToken || !chatId)) {
-    showStatus(statusId, 'Bot চালু করতে Token ও Group ID দুটোই দিতে হবে।', 'error');
-    return;
-  }
-
-  if (botToken && !/^\d{5,}:[A-Za-z0-9_-]{20,}$/.test(botToken)) {
-    showStatus(statusId, 'Bot Token-এর ফরম্যাট সঠিক নয়।', 'error');
-    return;
-  }
-
-  if (chatId && !/^-?\d+$/.test(chatId)) {
-    showStatus(statusId, 'Group ID-তে শুধু সংখ্যা ব্যবহার করুন।', 'error');
-    return;
-  }
-
-  try {
-    await set(ref(database, 'telegramBotSettings/' + path), {
-      enabled,
-      botToken,
-      chatId
+    button.addEventListener("click", function () {
+      const showing = input.type === "text";
+      input.type = showing ? "password" : "text";
+      button.textContent = showing ? "👁" : "🙈";
+      button.title = showing ? "Show" : "Hide";
     });
-    showStatus(statusId, 'Settings সফলভাবে Save হয়েছে।', 'success');
-    toast('Telegram Bot Settings saved!');
-  } catch (error) {
-    console.error(error);
-    showStatus(statusId, 'Save failed: ' + error.message, 'error');
-  }
-}
 
-window.saveTelegramOrderBot = () =>
-  saveTelegramBot(
-    'order', 'telegramOrderEnabled', 'telegramOrderToken',
-    'telegramOrderChatId', 'telegramOrderStatus'
-  );
-
-window.saveTelegramMoneyBot = () =>
-  saveTelegramBot(
-    'addMoney', 'telegramMoneyEnabled', 'telegramMoneyToken',
-    'telegramMoneyChatId', 'telegramMoneyStatus'
-  );
-
-window.saveUidApi = async () => {
-  const settings = {
-    enabled: $('uidEnabled').checked,
-    provider: $('uidProvider').value,
-    url: $('uidUrl').value.trim(),
-    key: $('uidKey').value.trim(),
-    method: $('uidMethod').value
-  };
-
-  try {
-    await set(ref(database, 'apiSettings/uid'), settings);
-    showStatus('uidStatus', 'UID API Settings saved!', 'success');
-  } catch (error) {
-    showStatus('uidStatus', error.message, 'error');
-  }
-};
-
-window.saveTopupApi = async () => {
-  const settings = {
-    enabled: $('topupEnabled').checked,
-    provider: $('topupProvider').value,
-    url: $('topupUrl').value.trim(),
-    key: $('topupKey').value.trim(),
-    secret: $('topupSecret').value.trim(),
-    callback: $('topupCallback').value.trim()
-  };
-
-  try {
-    await set(ref(database, 'apiSettings/topup'), settings);
-    showStatus('topupStatus', 'Top-Up API Settings saved!', 'success');
-  } catch (error) {
-    showStatus('topupStatus', error.message, 'error');
-  }
-};
-
-window.savePaymentApi = async () => {
-  const settings = {
-    enabled: $('paymentEnabled').checked,
-    provider: $('paymentProvider').value,
-    url: $('paymentUrl').value.trim(),
-    key: $('paymentKey').value.trim()
-  };
-
-  try {
-    await set(ref(database, 'apiSettings/payment'), settings);
-    showStatus('paymentStatus', 'Payment API Settings saved!', 'success');
-  } catch (error) {
-    showStatus('paymentStatus', error.message, 'error');
-  }
-};
-
-window.testUidApi = async () => {
-  const url = $('uidUrl').value.trim();
-  const key = $('uidKey').value.trim();
-  const provider = $('uidProvider').value;
-
-  if (!url || !key) {
-    showStatus('uidStatus', 'URL ও API Key দিন।', 'error');
-    return;
+    wrap.appendChild(button);
   }
 
-  showStatus('uidStatus', 'Testing...', 'success');
+  function setupEyeButtons() {
+    // API keys and secrets
+    document.querySelectorAll(
+      '#uidKey, #topupKey, #topupSecret, #paymentKey,' +
+      '#telegramOrderToken, #telegramMoneyToken'
+    ).forEach(addEyeToggle);
 
-  try {
-    const testUrl = url + (url.includes('?') ? '&' : '?') + 'uid=2493952050';
-    const headers = {'Content-Type': 'application/json'};
-
-    if (provider === 'gameskinbo') headers['x-api-key'] = key;
-    else headers['Authorization'] = 'Bearer ' + key;
-
-    const response = await fetch(testUrl, {headers});
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-
-    const data = await response.json();
-    const name = data.nickname || data.name ||
-      (data.AccountInfo && data.AccountInfo.AccountName) ||
-      (data.data && data.data.nickname);
-
-    showStatus(
-      'uidStatus',
-      name ? 'API Working! Player: ' + name : 'API response received.',
-      'success'
-    );
-  } catch (error) {
-    showStatus('uidStatus', 'API test failed: ' + error.message, 'error');
-  }
-};
-
-window.testTopupApi = async () => {
-  const url = $('topupUrl').value.trim();
-  const key = $('topupKey').value.trim();
-  const provider = $('topupProvider').value;
-
-  if (!url || !key) {
-    showStatus('topupStatus', 'URL ও API Key দিন।', 'error');
-    return;
-  }
-
-  try {
-    const headers = {'Content-Type': 'application/json'};
-    if (provider === 'gameskinbo') headers['x-api-key'] = key;
-    else headers['Authorization'] = 'Bearer ' + key;
-
-    const response = await fetch(url, {headers});
-    showStatus(
-      'topupStatus',
-      response.ok ? 'Connection successful!' : 'Response: ' + response.status,
-      response.ok ? 'success' : 'error'
-    );
-  } catch (error) {
-    showStatus('topupStatus', error.message, 'error');
-  }
-};
-
-window.testPaymentApi = async () => {
-  const url = $('paymentUrl').value.trim();
-  const key = $('paymentKey').value.trim();
-
-  if (!url || !key) {
-    showStatus('paymentStatus', 'URL ও API Key দিন।', 'error');
-    return;
-  }
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'RT-PAYMENTLY-API-KEY': key
+    // Telegram Group IDs: hide by default and remove example text
+    ['telegramOrderChatId', 'telegramMoneyChatId'].forEach(function (id) {
+      const input = document.getElementById(id);
+      if (input) {
+        input.type = 'password';
+        input.removeAttribute('placeholder');
+        addEyeToggle(input);
       }
     });
-
-    const ok = response.ok || [400,401,405].includes(response.status);
-    showStatus(
-      'paymentStatus',
-      ok ? 'Server responded.' : 'Response: ' + response.status,
-      ok ? 'success' : 'error'
-    );
-  } catch (error) {
-    showStatus('paymentStatus', error.message, 'error');
   }
-};
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEyeButtons);
+  } else {
+    setupEyeButtons();
+  }
+})();
 </script>
 </body>
-</html>
