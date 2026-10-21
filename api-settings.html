@@ -43,6 +43,12 @@
         .page-title { text-align: center; margin-bottom: 30px; }
         .page-title h1 { font-family: 'Orbitron', sans-serif; color: #8b00ff; font-size: 28px; margin-bottom: 8px; }
         .page-title p { color: #a0a0c0; font-size: 14px; }
+
+        /* ======== Secret Eye Toggle CSS ======== */
+        .secret-field-wrap { position: relative; width: 100%; }
+        .secret-field-wrap input { width: 100% !important; box-sizing: border-box !important; padding-right: 48px !important; }
+        .secret-eye-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; border: 1px solid #8b00ff; border-radius: 8px; background: #211532; color: #c084fc; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; z-index: 2; transition: 0.2s; }
+        .secret-eye-btn:hover { background: #3b2060; }
     </style>
 </head>
 <body class="home-body">
@@ -101,7 +107,7 @@
                 </div>
                 <div class="form-group">
                     <label>API Key</label>
-                    <input type="text" id="uidKey" placeholder="Your API Key here...">
+                    <input type="password" id="uidKey" placeholder="Your API Key here...">
                 </div>
                 <div class="form-group">
                     <label>Request Method</label>
@@ -144,11 +150,11 @@
                 </div>
                 <div class="form-group">
                     <label>API Key</label>
-                    <input type="text" id="topupKey" placeholder="Your API Key here...">
+                    <input type="password" id="topupKey" placeholder="Your API Key here...">
                 </div>
                 <div class="form-group">
                     <label>API Secret (Optional)</label>
-                    <input type="text" id="topupSecret" placeholder="API Secret if required">
+                    <input type="password" id="topupSecret" placeholder="API Secret if required">
                 </div>
                 <div class="form-group">
                     <label>Callback URL (Optional)</label>
@@ -187,7 +193,7 @@
                 </div>
                 <div class="form-group">
                     <label>API Key</label>
-                    <input type="text" id="paymentKey" placeholder="Your Gateway API Key here...">
+                    <input type="password" id="paymentKey" placeholder="Your Gateway API Key here...">
                 </div>
                 <div class="btn-row">
                     <button class="btn-save-api" onclick="savePaymentApi()">💾 Save Settings</button>
@@ -242,6 +248,37 @@
     <script type="module">
         import { auth, database, googleProvider, signInWithPopup, signOut, onAuthStateChanged, ref, get, set, checkAdminLevel } from './config.js';
 
+        // ======== Secret Eye Toggle Function ======== 
+        function addEyeToggle(input) {
+            if (!input || input.dataset.eyeAdded === "true") return;
+            input.dataset.eyeAdded = "true";
+            
+            const wrap = document.createElement("div");
+            wrap.className = "secret-field-wrap";
+            input.parentNode.insertBefore(wrap, input);
+            wrap.appendChild(input);
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "secret-eye-btn";
+            button.textContent = "👁";
+            button.title = "Show/Hide";
+
+            button.addEventListener("click", function () {
+                const showing = input.type === "text";
+                input.type = showing ? "password" : "text";
+                button.textContent = showing ? "👁" : "🙈";
+                button.title = showing ? "Show" : "Hide";
+            });
+            wrap.appendChild(button);
+        }
+
+        function setupEyeButtons() {
+            document.querySelectorAll(
+                '#uidKey, #topupKey, #topupSecret, #paymentKey, #telegramOrderToken, #telegramOrderChatId, #telegramMoneyToken, #telegramMoneyChatId'
+            ).forEach(addEyeToggle);
+        }
+
         document.getElementById('googleLoginBtn').addEventListener('click', async () => {
             try {
                 document.getElementById('loginError').style.display = 'none';
@@ -274,6 +311,8 @@
             }
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('apiContent').style.display = 'block';
+            
+            setupEyeButtons(); // চোখের আইকন অ্যাক্টিভেশন
             loadSettings();
         });
 
