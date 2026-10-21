@@ -1,3 +1,4 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getDatabase, ref, set, get, push, onValue, update, remove, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -18,21 +19,50 @@ const database = getDatabase(app);
 const googleProvider = new GoogleAuthProvider();
 
 function emailToKey(email) {
-    return email.replace(/\./g, ',');
+    return email.trim().toLowerCase().replace(/\./g, ',');
 }
 
 async function checkAdminLevel(email) {
     if (!email) return 'none';
+
     try {
         const key = emailToKey(email);
-        
-        const superAdminSnap = await get(ref(database, 'superAdmins/' + key));
-        if (superAdminSnap.exists() && superAdminSnap.val() === true) return 'super';
-        
-        const adminSnap = await get(ref(database, 'admins/' + key));
-        if (adminSnap.exists() && adminSnap.val() === true) return 'admin';
-        
+
+        // প্রথমে Super Admin যাচাই
+        const superAdminSnap = await get(
+            ref(database, 'superAdmins/' + key)
+        );
+
+        if (
+            superAdminSnap.exists() &&
+            superAdminSnap.val() === true
+        ) {
+            return 'super';
+        }
+
+        // এরপর Normal Admin যাচাই
+        const adminSnap = await get(
+            ref(database, 'admins/' + key)
+        );
+
+        if (adminSnap.exists()) {
+            const adminData = adminSnap.val();
+
+            // true অথবা permissions-সহ object গ্রহণ করবে
+            if (
+                adminData === true ||
+                (
+                    adminData !== null &&
+                    typeof adminData === 'object' &&
+                    !Array.isArray(adminData)
+                )
+            ) {
+                return 'admin';
+            }
+        }
+
         return 'none';
+
     } catch (err) {
         console.error('Admin check error:', err);
         return 'none';
@@ -48,9 +78,23 @@ async function checkIfBanned(uid) {
     }
 }
 
-export { 
-    app, auth, database, googleProvider, 
-    signInWithPopup, signOut, onAuthStateChanged, 
-    ref, set, get, push, onValue, update, remove, runTransaction,
-    emailToKey, checkAdminLevel, checkIfBanned
+export {
+    app,
+    auth,
+    database,
+    googleProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+    ref,
+    set,
+    get,
+    push,
+    onValue,
+    update,
+    remove,
+    runTransaction,
+    emailToKey,
+    checkAdminLevel,
+    checkIfBanned
 };
